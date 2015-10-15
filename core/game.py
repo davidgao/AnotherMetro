@@ -18,6 +18,12 @@ class Game(object):
 		self.max_sites = 40
 		self.sites = []
 		self.site_spawn_timer = None
+		self.unique_sites = 0
+		self.max_unique_sites = 5
+		# Before all unique sites spawn
+		self.site_rate1 = [0.4, 0.7, 0.8, 1.0]
+		# After all unique sites spawn
+		self.site_rate2 = [0.5, 0.875, 1.0, 1.0]
 		# Map
 		if m is None:
 			x = 600
@@ -75,13 +81,28 @@ class Game(object):
 		print("ROI = (%d, %d, %d, %d)" % self.roi)
 	
 	def spawn_site_wrapper(self):
-		self.spawn_site()
+		u = self.unique_sites
+		if u == self.max_unique_sites:
+			rate = self.site_rate2
+		else:
+			rate = self.site_rate1
+		tmp = r.random()
+		tier = 0;
+		while tmp > rate[tier]:
+			tier += 1;
+		if tier > 2:
+			_type = 3 + u
+		else:
+			_type = tier
+		spawned = self.spawn_site(_type)
+		if spawned and tier > 2:
+			self.unique_sites += 1
 		if len(self.sites) == self.max_sites:
 			self.site_spawn_stop()
 		else:
 			self.site_spawn_start()
 	
-	def spawn_site(self):
+	def spawn_site(self, _type):
 		def valid():
 			for s in self.sites:
 				x0, y0 = s
@@ -102,24 +123,20 @@ class Game(object):
 			if valid():
 				self.sites.append((x, y))
 				self.lock.release()
-				print("Spawn site : (%d %d)" % (x, y))
-				return
+				print("Spawn site type %d : (%d %d)" % (_type, x, y))
+				return True
 		self.lock.release()
 		print("Spawn site failed")
+		return False
 
 print("Hello, locomotive!")
 r.seed()
 g = Game()
 
-g.spawn_site()
-g.spawn_site()
-g.spawn_site()
+g.spawn_site(0)
+g.spawn_site(1)
+g.spawn_site(2)
 
 g.grow_start()
 g.site_spawn_start()
-
-t.sleep(65)
-g.grow_stop()
-g.site_spawn_stop()
-
 
