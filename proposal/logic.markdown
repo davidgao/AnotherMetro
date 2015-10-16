@@ -32,3 +32,38 @@ ClickHandler:
 
 - Misc
 
+
+Data structure:
+
+- Hyperparams
+- Map grid
+    + Wet or not
+- Station list
+    + Coords
+    + Type
+    + Passenger list
+    + Line list (refs)
+- Line list
+    + Station deque (refs)
+    + Locomotive (refs)
+- Locomotive list
+    + Passenger list (refs)
+    + (TODO: fill)
+- Passenger list
+    + Target: Station type
+
+
+Backend
+
+Renderer: queries backend each frame
+
+
+
+Division of labour:
+
+- davidgao: backend & tuning
+- BarclayII: running & debugging & draw stations
+- QipengGuo: draw lines & touch handling
+- KaiqiangSong: draw stations
+- FS: draw lines & touch handling
+- MasterChivu: draw stations
