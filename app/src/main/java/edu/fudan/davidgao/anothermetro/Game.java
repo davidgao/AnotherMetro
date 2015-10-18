@@ -23,36 +23,49 @@ public class Game {
     }
 
     public void start() throws GameException {
-        if (state == GameState.NEW) {
-            state = GameState.PAUSED;
-            initGrowth();
-        } else throw new GameException("Bad game state.");
+        synchronized (this) {
+            if (state == GameState.NEW) {
+                state = GameState.PAUSED;
+                initGrowth();
+            } else throw new GameException("Bad game state.");
+        }
     }
 
     public void run() throws GameException {
-        if (state == GameState.PAUSED) {
-            state = GameState.RUNNING;
-            tickTimer.schedule(tickTask, tickInterval, tickInterval);
-        } else throw new GameException("Bad game state.");
+        synchronized (this) {
+            if (state == GameState.PAUSED) {
+                state = GameState.RUNNING;
+            } else throw new GameException("Bad game state.");
+        }
+        tickTimer.schedule(tickTask, tickInterval, tickInterval);
     }
 
     public void pause() throws GameException {
-        if (state == GameState.RUNNING) {
-            state = GameState.PAUSED;
-            tickTimer.cancel();
-        } else throw new GameException("Bad game state.");
+        synchronized (this) {
+            if (state == GameState.RUNNING) {
+                state = GameState.PAUSED;
+            } else throw new GameException("Bad game state.");
+        }
+        tickTimer.cancel();
     }
 
     public void kill() throws GameException {
-        if (state == GameState.NEW || state == GameState.PAUSED || state == GameState.RUNNING) {
-            state = GameState.ZOMBIE;
-        } else throw new GameException("Bad game state.");
+        synchronized (this) {
+            if (state == GameState.RUNNING) {
+                pause();
+            }
+            if (state == GameState.NEW || state == GameState.PAUSED) {
+                state = GameState.ZOMBIE;
+            } else throw new GameException("Bad game state.");
+        }
     }
 
     public void destroy() throws GameException {
-        if (state == GameState.ZOMBIE) {
-            Game.instance = null;
-        } else throw new GameException("Bad game state.");
+        synchronized (this) {
+            if (state == GameState.ZOMBIE) {
+                Game.instance = null;
+            } else throw new GameException("Bad game state.");
+        }
     }
 
     /* General information */
@@ -87,8 +100,10 @@ public class Game {
         }
     };
     private void tick() {
-        tickCounter += 1;
-        tryGrow();
+        synchronized (this) {
+            tickCounter += 1;
+            tryGrow();
+        }
     }
 
     /* Growth */

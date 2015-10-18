@@ -58,6 +58,7 @@ public class GameTest {
     @Test
     public void create() throws Exception {
         assertNotNull(game);
+        assertEquals(game.getState(), GameState.NEW);
     }
 
     @Test(expected=GameException.class)
@@ -69,11 +70,26 @@ public class GameTest {
     @Test
     public void start() throws Exception {
         game.start();
+        assertEquals(game.getState(), GameState.PAUSED);
     }
 
     @Test(expected=GameException.class)
     public void badStart() throws Exception {
         game.start();
         game.start();
+    }
+
+    @Test
+    public void run() throws Exception {
+        game.start();
+        game.run();
+        assertEquals(game.getState(), GameState.RUNNING);
+        Thread.sleep(game.getTickInterval() + 100, 0);
+        assertTrue(game.getTickCounter() > 0);
+    }
+
+    @Test(expected=GameException.class)
+    public void badRun() throws Exception {
+        game.run();
     }
 }
