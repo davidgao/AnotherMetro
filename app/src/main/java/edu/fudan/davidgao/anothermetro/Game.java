@@ -5,8 +5,10 @@ package edu.fudan.davidgao.anothermetro;
  */
 
 import java.util.Arrays;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 public class Game {
     private static Game instance = null;
@@ -111,15 +113,16 @@ public class Game {
     }
 
     /* Private */
+    private Random rand = new Random();
     private GameState state = GameState.NEW;
     private Game(MapDatum[][] map) {
         this.map = map;
         sizeX = map.length;
         sizeY = map[0].length;
-        roiX1 = roiX1Base = (int)((float)sizeX * 0.4);
-        roiX2 = roiX2Base = (int)((float)sizeX * 0.6);
-        roiY1 = roiY1Base = (int)((float)sizeY * 0.4);
-        roiY2 = roiY2Base = (int)((float)sizeY * 0.6);
+        roiX1 = roiX1Base = (int)((double)sizeX * 0.4);
+        roiX2 = roiX2Base = (int)((double)sizeX * 0.6);
+        roiY1 = roiY1Base = (int)((double)sizeY * 0.4);
+        roiY2 = roiY2Base = (int)((double)sizeY * 0.6);
     }
 
     /* Game Ticks */
@@ -136,11 +139,12 @@ public class Game {
         synchronized (this) {
             tickCounter += 1;
             if (tickCounter >= nextGrowth && growth < maxGrowth) grow();
+            if (tickCounter >= nextSiteSpawn && sites.size() < maxSites) grow();
         }
     }
 
     /* Growth and map */
-    private long growthInterval = 10; /* in ticks */
+    private long growthInterval = 30; /* in ticks */
     private long nextGrowth;
     private int maxGrowth = 20; /* stages */
     private int growth = 0;
@@ -154,11 +158,70 @@ public class Game {
     private void grow() {
         /* NOTE: Caller should always sync */
         nextGrowth += growthInterval;
-        final float rate = (float)growth / (float)maxGrowth;
-        final float delta = 1 - rate;
-        roiX1 = (int)((float)roiX1Base * delta);
-        roiX2 = (int)((float)sizeX * rate + (float)roiX2Base * delta);
-        roiY1 = (int)((float)roiY1Base * delta);
-        roiY2 = (int)((float)sizeY * rate + (float)roiY2Base * delta);
+        final double rate = (double)growth / (double)maxGrowth;
+        final double delta = 1 - rate;
+        roiX1 = (int)((double)roiX1Base * delta);
+        roiX2 = (int)((double)sizeX * rate + (double)roiX2Base * delta);
+        roiY1 = (int)((double)roiY1Base * delta);
+        roiY2 = (int)((double)sizeY * rate + (double)roiY2Base * delta);
+    }
+
+    /* Sites */
+    private long siteSpawnInterval = 10; /* in ticks */
+    private long nextSiteSpawn;
+    private int maxSites = 40;
+    private int siteSpawnTries = 100;
+    private int uniqueSites = 0;
+    private int maxUniqueSites = 5;
+    private double siteDist = 10.0;
+    private double siteRate1[] = {0.4, 0.7, 0.8, 1.0};
+    private double siteRate2[] = {0.5, 0.875, 1.0, 1.0};
+    private Vector<Site> sites = new Vector<Site>();
+    private void initSiteSpawn() {
+        nextSiteSpawn = siteSpawnInterval;
+        spawnSite(0);
+        spawnSite(1);
+        spawnSite(2);
+    }
+    private boolean siteValid(int x, int y) {
+        for (int i = 0; i < sites.size(); i += 1) {
+            if (sites.elementAt(i).dist(x, y) < siteDist) {
+                return false;
+            }
+        }
+        return true;
+    }
+    private void spawnSite() {
+        double[] rate;
+        if (uniqueSites == maxUniqueSites) {
+            rate = siteRate2;
+        } else {
+            rate = siteRate1;
+        }
+        double r = rand.nextDouble();
+        int tier = 0, type;
+        while (r < rate[tier]) {
+            tier += 1;
+        }
+        if (tier > 2) {
+            type = 3 + uniqueSites;
+        } else {
+            type = tier;
+        }
+        boolean spawned = spawnSite(type);
+        if (spawned && tier > 2) {
+            uniqueSites += 1;
+        }
+    }
+    private boolean spawnSite(int type) {
+        for (int i = 0; i < siteSpawnTries; i += 1){
+            final int x = rand.nextInt(roiX2 - roiX1) + roiX1;
+            final int y = rand.nextInt(roiY2 - roiY1) + roiY1;
+            if (siteValid(x, y)) {
+                sites.add(new Site(x, y, type));
+                return true;
+            }
+        }
+        return false;
     }
 }
