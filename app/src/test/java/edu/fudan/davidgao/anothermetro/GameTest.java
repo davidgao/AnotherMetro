@@ -15,8 +15,15 @@ public class GameTest {
     }
 
     @Test
-    public void create() throws Exception {
-        Game game1 = Game.create();
-        assertNotNull(game1);
+    public void getInstance() throws Exception {
+        Game game = Game.getInstance();
+        assertNull(game);
+        Game.create();
+        game = Game.getInstance();
+        assertNotNull(game);
+        game.kill();
+        game.destroy();
+        game = Game.getInstance();
+        assertNull(game);
     }
 }

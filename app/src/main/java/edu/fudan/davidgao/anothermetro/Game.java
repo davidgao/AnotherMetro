@@ -15,55 +15,60 @@ public class Game {
     }
 
     /* Life cycle control */
-    public static Game create() {
+    public static Game create() throws GameException {
         if (instance == null){
             instance = new Game();
             return instance;
-        } else return null;//FIXME
+        } else throw new GameException("Bad game state.");
     }
 
-    public void start() {
+    public void start() throws GameException {
         if (state == GameState.NEW) {
             state = GameState.PAUSED;
-        }
+            initGrowth();
+        } else throw new GameException("Bad game state.");
     }
 
-    public void run() {
+    public void run() throws GameException {
         if (state == GameState.PAUSED) {
             state = GameState.RUNNING;
             tickTimer.schedule(tickTask, tickInterval, tickInterval);
-        }
+        } else throw new GameException("Bad game state.");
     }
 
-    public void pause() {
+    public void pause() throws GameException {
         if (state == GameState.RUNNING) {
             state = GameState.PAUSED;
             tickTimer.cancel();
-        }
+        } else throw new GameException("Bad game state.");
     }
 
-    public void destroy() {
-        if (state == GameState.PAUSED) {
+    public void kill() throws GameException {
+        if (state == GameState.NEW || state == GameState.PAUSED || state == GameState.RUNNING) {
+            state = GameState.ZOMBIE;
+        } else throw new GameException("Bad game state.");
+    }
+
+    public void destroy() throws GameException {
+        if (state == GameState.ZOMBIE) {
             Game.instance = null;
-        }
+        } else throw new GameException("Bad game state.");
     }
 
     /* General information */
     public GameState getState() {
         return state;
     }
-
     public long getTickCounter() {
         return tickCounter;
     }
-
-    /* Argument */
-    public void setTickInterval(long interval) {
-        tickInterval = interval;
-    }
-
     public long getTickInterval() {
         return tickInterval;
+    }
+    public void setTickInterval(long interval) {
+        if (state == GameState.NEW) {
+            tickInterval = interval;
+        }
     }
 
     /* Private */
@@ -83,10 +88,18 @@ public class Game {
     };
     private void tick() {
         tickCounter += 1;
+        tryGrow();
     }
 
     /* Growth */
-    //private int growInterval = 10; /* in ticks */
-    //private int maxGrowth = 20; /* stages */
-    //private int growth = 0;
+    private long growthInterval = 10; /* in ticks */
+    private long nextGrowth;
+    private int maxGrowth = 20; /* stages */
+    private int growth = 0;
+    private void initGrowth() {
+        nextGrowth = growthInterval;
+    }
+    private void tryGrow() {
+
+    }
 }
