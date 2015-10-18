@@ -4,6 +4,7 @@ package edu.fudan.davidgao.anothermetro;
  * A game of AnotherMetro
  */
 
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -94,15 +95,19 @@ public class Game {
         }
     }
     public int[] getSize() {
-        int[] tmp = {sizeX, sizeY};
+        final int[] tmp = {sizeX, sizeY};
         return tmp;
     }
     public int[] getRoi() {
-        int[] tmp = {roiX1, roiX2, roiY1, roiY2};
+        final int[] tmp = {roiX1, roiX2, roiY1, roiY2};
         return tmp;
     }
-    public MapDatum getMapDatum(int x, int y) {
-        return map[x][y];
+    public MapDatum[][] getMap() {
+        MapDatum[][] tmp = new MapDatum[map.length][];
+        for (int i = 0; i < map.length; i += 1) {
+            tmp[i] = Arrays.copyOf(map[i], map[i].length);
+        }
+        return tmp;
     }
 
     /* Private */
@@ -149,8 +154,8 @@ public class Game {
     private void grow() {
         /* NOTE: Caller should always sync */
         nextGrowth += growthInterval;
-        float rate = (float)growth / (float)maxGrowth;
-        float delta = 1 - rate;
+        final float rate = (float)growth / (float)maxGrowth;
+        final float delta = 1 - rate;
         roiX1 = (int)((float)roiX1Base * delta);
         roiX2 = (int)((float)sizeX * rate + (float)roiX2Base * delta);
         roiY1 = (int)((float)roiY1Base * delta);
