@@ -19,30 +19,33 @@ public class Game {
         if (instance == null){
             instance = new Game();
             return instance;
-        } else return null;
+        } else return null;//FIXME
     }
 
-    public int start() {
+    public void start() {
         if (state == GameState.NEW) {
             state = GameState.PAUSED;
-            return 0;
-        } else return 1;
+        }
     }
 
-    public int run() {
+    public void run() {
         if (state == GameState.PAUSED) {
             state = GameState.RUNNING;
             tickTimer.schedule(tickTask, tickInterval, tickInterval);
-            return 0;
-        } else return 1;
+        }
     }
 
-    public int pause() {
+    public void pause() {
         if (state == GameState.RUNNING) {
             state = GameState.PAUSED;
             tickTimer.cancel();
-            return 0;
-        } else return 1;
+        }
+    }
+
+    public void destroy() {
+        if (state == GameState.PAUSED) {
+            Game.instance = null;
+        }
     }
 
     /* General information */

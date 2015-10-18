@@ -4,16 +4,19 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class GameTest {
-    private Game game;
-
     @Test(expected=AssertionError.class)
     public void badAssertion() throws Exception {
         assertTrue(false);
     }
 
     @Test
-    public void getWithNoInstance() throws Exception {
-        game = Game.getInstance();
-        assertNull(game);
+    public void goodAssertion() throws Exception {
+        assertTrue(true);
+    }
+
+    @Test
+    public void create() throws Exception {
+        Game game1 = Game.create();
+        assertNotNull(game1);
     }
 }
