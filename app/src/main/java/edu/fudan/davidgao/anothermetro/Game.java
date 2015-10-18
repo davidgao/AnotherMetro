@@ -7,8 +7,6 @@ package edu.fudan.davidgao.anothermetro;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import edu.fudan.davidgao.anothermetro.GameState;
-
 public class Game {
     private static Game instance = null;
 
