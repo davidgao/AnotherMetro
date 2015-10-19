@@ -61,7 +61,7 @@ public class GameTest {
         assertEquals(game.getState(), GameState.NEW);
     }
 
-    @Test(expected=GameException.class)
+    @Test(expected = GameException.class)
     public void badCreate() throws Exception {
         Game.create();
     }
@@ -75,9 +75,12 @@ public class GameTest {
         assertNotNull(game);
     }
 
-    @Test(expected=GameException.class)
+    @Test(expected = GameException.class)
     public void badCreateWithMap() throws Exception {
-        Game.create(new MapDatum[20][20]);
+        Game.create(new MapDatum[20][40]);
+        int[] ret = Game.getInstance().getSize();
+        assertEquals(ret[0], 20);
+        assertEquals(ret[1], 40);
     }
 
     @Test
@@ -86,7 +89,7 @@ public class GameTest {
         assertEquals(game.getState(), GameState.PAUSED);
     }
 
-    @Test(expected=GameException.class)
+    @Test(expected = GameException.class)
     public void badStart() throws Exception {
         game.start();
         game.start();
@@ -101,7 +104,7 @@ public class GameTest {
         assertTrue(game.getTickCounter() > 0);
     }
 
-    @Test(expected=GameException.class)
+    @Test(expected = GameException.class)
     public void badRun() throws Exception {
         game.run();
     }
@@ -117,8 +120,49 @@ public class GameTest {
         assertEquals(game.getTickCounter(), counter);
     }
 
-    @Test(expected=GameException.class)
+    @Test(expected = GameException.class)
     public void badPause() throws Exception {
         game.pause();
+    }
+
+    @Test
+    public void killNew() throws Exception {
+        game.kill();
+    }
+
+    @Test
+    public void killRunning() throws Exception {
+        game.start();
+        game.run();
+        game.kill();
+    }
+
+    @Test(expected = GameException.class)
+    public void badKill() throws Exception {
+        game.kill();
+        game.kill();
+    }
+
+    @Test
+    public void destroy() throws Exception {
+        game.kill();
+        game.destroy();
+    }
+
+    @Test(expected = GameException.class)
+    public void badDestroy() throws Exception {
+        game.destroy();
+    }
+
+    @Test
+    public void setTickInterval() throws Exception {
+        game.setTickInterval(20);
+        assertEquals(game.getTickInterval(), 20);
+    }
+
+    @Test(expected = GameException.class)
+    public void badSetTickInterval() throws Exception{
+        game.start();
+        game.setTickInterval(20);
     }
 }
