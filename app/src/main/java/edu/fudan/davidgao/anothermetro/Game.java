@@ -40,6 +40,7 @@ public class Game {
             if (state == GameState.NEW) {
                 state = GameState.PAUSED;
                 initGrowth();
+                initSiteSpawn();
             } else throw new GameException("Bad game state.");
         }
     }
@@ -91,10 +92,10 @@ public class Game {
     public long getTickInterval() {
         return tickInterval;
     }
-    public void setTickInterval(long interval) {
+    public void setTickInterval(long interval) throws GameException {
         if (state == GameState.NEW) {
             tickInterval = interval;
-        }
+        } else throw new GameException("Game already started");
     }
     public int[] getSize() {
         final int[] tmp = {sizeX, sizeY};
@@ -110,6 +111,14 @@ public class Game {
             tmp[i] = Arrays.copyOf(map[i], map[i].length);
         }
         return tmp;
+    }
+    public long getGrowthInterval() {
+        return growthInterval;
+    }
+    public void setGrowthInterval(long interval) throws GameException {
+        if (state == GameState.NEW) {
+            growthInterval = interval;
+        } else throw new GameException("Game already started");
     }
 
     /* Private */
@@ -158,6 +167,7 @@ public class Game {
     private void grow() {
         /* NOTE: Caller should always sync */
         nextGrowth += growthInterval;
+        growth += 1;
         final double rate = (double)growth / (double)maxGrowth;
         final double delta = 1 - rate;
         roiX1 = (int)((double)roiX1Base * delta);
@@ -192,6 +202,7 @@ public class Game {
         return true;
     }
     private void spawnSite() {
+        /* NOTE: Caller should always sync */
         double[] rate;
         if (uniqueSites == maxUniqueSites) {
             rate = siteRate2;
@@ -214,6 +225,7 @@ public class Game {
         }
     }
     private boolean spawnSite(int type) {
+        /* NOTE: Caller should always sync */
         for (int i = 0; i < siteSpawnTries; i += 1){
             final int x = rand.nextInt(roiX2 - roiX1) + roiX1;
             final int y = rand.nextInt(roiY2 - roiY1) + roiY1;
