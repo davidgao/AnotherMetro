@@ -112,6 +112,11 @@ public class Game {
         }
         return tmp;
     }
+    public Site[] getSites() {
+        Site[] tmp = new Site[sites.size()];
+        sites.copyInto(tmp);
+        return tmp;
+    }
     public long getGrowthInterval() {
         return growthInterval;
     }
@@ -186,7 +191,7 @@ public class Game {
     private double siteDist = 10.0;
     private double siteRate1[] = {0.4, 0.7, 0.8, 1.0};
     private double siteRate2[] = {0.5, 0.875, 1.0, 1.0};
-    private Vector<Site> sites = new Vector<Site>();
+    private Vector<ActiveSite> sites = new Vector<>();
     private void initSiteSpawn() {
         nextSiteSpawn = siteSpawnInterval;
         spawnSite(0);
@@ -230,7 +235,7 @@ public class Game {
             final int x = rand.nextInt(roiX2 - roiX1) + roiX1;
             final int y = rand.nextInt(roiY2 - roiY1) + roiY1;
             if (siteValid(x, y)) {
-                sites.add(new Site(x, y, type));
+                sites.add(new ActiveSite(x, y, type));
                 return true;
             }
         }

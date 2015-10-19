@@ -64,7 +64,20 @@ public class GameTest {
     @Test(expected=GameException.class)
     public void badCreate() throws Exception {
         Game.create();
-        Game.create();
+    }
+
+    @Test
+    public void createWithMap() throws Exception {
+        Game game = Game.getInstance();
+        game.kill();
+        game.destroy();
+        game = Game.create(new MapDatum[20][20]);
+        assertNotNull(game);
+    }
+
+    @Test(expected=GameException.class)
+    public void badCreateWithMap() throws Exception {
+        Game.create(new MapDatum[20][20]);
     }
 
     @Test
@@ -81,22 +94,31 @@ public class GameTest {
 
     @Test
     public void run() throws Exception {
-        int[] roiBase = game.getRoi();
-        game.setGrowthInterval(1);
         game.start();
         game.run();
         assertEquals(game.getState(), GameState.RUNNING);
         Thread.sleep(game.getTickInterval() + 100, 0);
         assertTrue(game.getTickCounter() > 0);
-        int[] roi = game.getRoi();
-        assertTrue(roi[0] < roiBase[0]);
-        assertTrue(roi[1] > roiBase[1]);
-        assertTrue(roi[2] < roiBase[2]);
-        assertTrue(roi[3] > roiBase[3]);
     }
 
     @Test(expected=GameException.class)
     public void badRun() throws Exception {
         game.run();
+    }
+
+    @Test
+    public void pause() throws Exception {
+        game.start();
+        game.run();
+        game.pause();
+        assertEquals(game.getState(), GameState.PAUSED);
+        long counter = game.getTickCounter();
+        Thread.sleep(game.getTickInterval() + 100, 0);
+        assertEquals(game.getTickCounter(), counter);
+    }
+
+    @Test(expected=GameException.class)
+    public void badPause() throws Exception {
+        game.pause();
     }
 }

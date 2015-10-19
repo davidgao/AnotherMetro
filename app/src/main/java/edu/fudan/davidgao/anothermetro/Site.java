@@ -9,8 +9,8 @@ public class Site {
     public final int x, y, type;
 
     public double dist(int x, int y) {
-        final int deltax = this.x - x;
-        final int deltay = this.y - y;
-        return Math.sqrt((double)((deltax * deltax)+(deltay * deltay)));
+        final int deltaX = this.x - x;
+        final int deltaY = this.y - y;
+        return Math.sqrt((double)((deltaX * deltaX)+(deltaY * deltaY)));
     }
 }
