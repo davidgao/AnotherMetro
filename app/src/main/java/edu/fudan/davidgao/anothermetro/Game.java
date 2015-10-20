@@ -106,10 +106,8 @@ public class Game {
             tickInterval = interval;
         } else throw new GameException("Game already started");
     }
-    public Site[] getSites() {
-        Site[] tmp = new Site[sites.size()];
-        sites.copyInto(tmp);
-        return tmp;
+    public ArrayList<Site> getSites() {
+        return sites;
     }
     public long getGrowthInterval() {
         return growthInterval;
@@ -186,7 +184,7 @@ public class Game {
     private double siteDist = 10.0;
     private double siteRate1[] = {0.4, 0.7, 0.8, 1.0};
     private double siteRate2[] = {0.5, 0.875, 1.0, 1.0};
-    private Vector<Site> sites = new Vector<>();
+    private ArrayList<Site> sites = new ArrayList<>();
     private void initSiteSpawn() {
         nextSiteSpawn = siteSpawnInterval;
         spawnSite(0);
@@ -195,7 +193,7 @@ public class Game {
     }
     private boolean siteValid(int x, int y) {
         for (int i = 0; i < sites.size(); i += 1) {
-            if (sites.elementAt(i).dist(x, y) < siteDist) {
+            if (sites.get(i).dist(x, y) < siteDist) {
                 return false;
             }
         }
