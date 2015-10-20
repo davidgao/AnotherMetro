@@ -4,6 +4,7 @@ package edu.fudan.davidgao.anothermetro;
  * A game of AnotherMetro
  */
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Timer;
@@ -232,5 +233,13 @@ public class Game {
             }
         }
         return false;
+    }
+
+    /* Line operation */
+    private ArrayList<Line> lines = new ArrayList<>();
+    private int maxLines = 3;
+    public Line newLine(Site s1, Site s2) throws GameException{
+        if (lines.size() >= maxLines) throw new GameException("Can't add more lines.");
+        lines.add(new Line(s1, s2));
     }
 }
