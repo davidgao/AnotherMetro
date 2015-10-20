@@ -89,9 +89,8 @@ public class Game {
     public MapDatum[][] getMap() {
         return map;
     }
-    public int[] getRoi() { /* Game grid coordinate */
-        final int[] tmp = {roiX1, roiX2, roiY1, roiY2};
-        return tmp;
+    public Rectangle getRoi() { /* Game grid coordinate */
+        return roi;
     }
 
 
@@ -128,10 +127,11 @@ public class Game {
         this.map = map;
         sizeX = map.length;
         sizeY = map[0].length;
-        roiX1 = roiX1Base = (int)((double)sizeX * 0.4);
-        roiX2 = roiX2Base = (int)((double)sizeX * 0.6);
-        roiY1 = roiY1Base = (int)((double)sizeY * 0.4);
-        roiY2 = roiY2Base = (int)((double)sizeY * 0.6);
+        int x1 = (int)((double)sizeX * 0.4);
+        int x2 = (int)((double)sizeX * 0.6);
+        int y1 = (int)((double)sizeY * 0.4);
+        int y2 = (int)((double)sizeY * 0.6);
+        roi = roiBase = new Rectangle(x1, x2, y1, y2);
     }
 
     /* Game Ticks */
@@ -159,8 +159,7 @@ public class Game {
     private int growth = 0;
     private MapDatum[][] map;
     private int sizeX, sizeY;
-    private int roiX1, roiX2, roiY1, roiY2;
-    private int roiX1Base, roiX2Base, roiY1Base, roiY2Base;
+    private Rectangle roi, roiBase;
     private void initGrowth() {
         nextGrowth = growthInterval;
     }
@@ -170,10 +169,11 @@ public class Game {
         growth += 1;
         final double rate = (double)growth / (double)maxGrowth;
         final double delta = 1 - rate;
-        roiX1 = (int)((double)roiX1Base * delta);
-        roiX2 = (int)((double)sizeX * rate + (double)roiX2Base * delta);
-        roiY1 = (int)((double)roiY1Base * delta);
-        roiY2 = (int)((double)sizeY * rate + (double)roiY2Base * delta);
+        int x1 = (int)((double)roiBase.x1 * delta);
+        int x2 = (int)((double)sizeX * rate + (double)roiBase.x2 * delta);
+        int y1 = (int)((double)roiBase.y1 * delta);
+        int y2 = (int)((double)sizeY * rate + (double)roiBase.y2 * delta);
+        roi = new Rectangle(x1, x2, y1, y2);
     }
 
     /* Sites */
@@ -227,8 +227,8 @@ public class Game {
     private boolean spawnSite(int type) {
         /* NOTE: Caller should always sync */
         for (int i = 0; i < siteSpawnTries; i += 1){
-            final int x = rand.nextInt(roiX2 - roiX1) + roiX1;
-            final int y = rand.nextInt(roiY2 - roiY1) + roiY1;
+            final int x = rand.nextInt(roi.x2 - roi.x1) + roi.x1;
+            final int y = rand.nextInt(roi.y2 - roi.y1) + roi.y1;
             if (siteValid(x, y)) {
                 sites.add(new Site(x, y, type));
                 return true;
