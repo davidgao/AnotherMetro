@@ -187,9 +187,9 @@ public class Game {
     private ArrayList<Site> sites = new ArrayList<>();
     private void initSiteSpawn() {
         nextSiteSpawn = siteSpawnInterval;
-        spawnSite(0);
-        spawnSite(1);
-        spawnSite(2);
+        spawnSite(SiteType.fromInt(0));
+        spawnSite(SiteType.fromInt(1));
+        spawnSite(SiteType.fromInt(2));
     }
     private boolean siteValid(int x, int y) {
         for (int i = 0; i < sites.size(); i += 1) {
@@ -217,12 +217,12 @@ public class Game {
         } else {
             type = tier;
         }
-        boolean spawned = spawnSite(type);
+        boolean spawned = spawnSite(SiteType.fromInt(type));
         if (spawned && tier > 2) {
             uniqueSites += 1;
         }
     }
-    private boolean spawnSite(int type) {
+    private boolean spawnSite(SiteType type) {
         /* NOTE: Caller should always sync */
         for (int i = 0; i < siteSpawnTries; i += 1){
             final int x = rand.nextInt(roi.x2 - roi.x1) + roi.x1;

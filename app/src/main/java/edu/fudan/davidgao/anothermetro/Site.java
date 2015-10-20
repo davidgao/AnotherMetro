@@ -1,12 +1,13 @@
 package edu.fudan.davidgao.anothermetro;
 
 public class Site {
-    public Site(int x, int y, int type) {
+    public Site(int x, int y, SiteType type) {
         this.x = x;
         this.y = y;
         this.type = type;
     }
-    public final int x, y, type;
+    public final int x, y;
+    public final SiteType type;
 
     public double dist(int x, int y) {
         final int deltaX = this.x - x;
