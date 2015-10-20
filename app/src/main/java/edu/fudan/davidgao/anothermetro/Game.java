@@ -97,20 +97,12 @@ public class Game {
             tickInterval = interval;
         } else throw new GameException("Game already started");
     }
-    public int[] getSize() {
-        final int[] tmp = {sizeX, sizeY};
-        return tmp;
-    }
     public int[] getRoi() {
         final int[] tmp = {roiX1, roiX2, roiY1, roiY2};
         return tmp;
     }
     public MapDatum[][] getMap() {
-        MapDatum[][] tmp = new MapDatum[map.length][];
-        for (int i = 0; i < map.length; i += 1) {
-            tmp[i] = Arrays.copyOf(map[i], map[i].length);
-        }
-        return tmp;
+        return map;
     }
     public Site[] getSites() {
         Site[] tmp = new Site[sites.size()];

@@ -78,9 +78,9 @@ public class GameTest {
     @Test(expected = GameException.class)
     public void badCreateWithMap() throws Exception {
         Game.create(new MapDatum[20][40]);
-        int[] ret = Game.getInstance().getSize();
-        assertEquals(ret[0], 20);
-        assertEquals(ret[1], 40);
+        MapDatum[][] map = Game.getInstance().getMap();
+        assertEquals(map.length, 20);
+        assertEquals(map[0].length, 40);
     }
 
     @Test
