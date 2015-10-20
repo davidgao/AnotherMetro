@@ -238,6 +238,9 @@ public class Game {
     /* Line operation */
     private ArrayList<Line> lines = new ArrayList<>();
     private int maxLines = 3;
+    public ArrayList<Line> getLines() {
+        return lines;
+    }
     public Line newLine(Site s1, Site s2) throws GameException{
         if (lines.size() >= maxLines) throw new GameException("Can't add more lines.");
         lines.add(new Line(s1, s2));
