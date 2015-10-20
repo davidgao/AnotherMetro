@@ -146,7 +146,7 @@ public class Game {
         synchronized (this) {
             tickCounter += 1;
             if (tickCounter >= nextGrowth && growth < maxGrowth) grow();
-            if (tickCounter >= nextSiteSpawn && sites.size() < maxSites) grow();
+            if (tickCounter >= nextSiteSpawn && sites.size() < maxSites) spawnSite();
         }
     }
 
@@ -185,6 +185,11 @@ public class Game {
     private double siteRate1[] = {0.4, 0.7, 0.8, 1.0};
     private double siteRate2[] = {0.5, 0.875, 1.0, 1.0};
     private ArrayList<Site> sites = new ArrayList<>();
+    public void setSiteSpawnInterval(int interval) throws GameException {
+        if (state == GameState.NEW) {
+            siteSpawnInterval = interval;
+        } else throw new GameException("Game is not new.");
+    }
     private void initSiteSpawn() {
         nextSiteSpawn = siteSpawnInterval;
         spawnSite(SiteType.fromInt(0));
@@ -209,7 +214,7 @@ public class Game {
         }
         double r = rand.nextDouble();
         int tier = 0, type;
-        while (r < rate[tier]) {
+        while (r >= rate[tier]) {
             tier += 1;
         }
         if (tier > 2) {

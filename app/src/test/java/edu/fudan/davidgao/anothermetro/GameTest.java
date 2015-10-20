@@ -3,6 +3,9 @@ package edu.fudan.davidgao.anothermetro;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+
 import static org.junit.Assert.*;
 
 public class GameTest {
@@ -161,8 +164,27 @@ public class GameTest {
     }
 
     @Test(expected = GameException.class)
-    public void badSetTickInterval() throws Exception{
+    public void badSetTickInterval() throws Exception {
         game.start();
         game.setTickInterval(20);
+    }
+
+    @Test
+    public void initSiteSpawn() throws Exception {
+        game.start();
+        ArrayList<Site> sites = game.getSites();
+        assertEquals(sites.size(), 3);
+    }
+
+    @Test
+    public void spawnSite() throws Exception {
+        game.setTickInterval(10);
+        game.setSiteSpawnInterval(10);
+        game.start();
+        game.run();
+        Thread.sleep(1000, 0);
+        game.pause();
+        ArrayList<Site> sites = game.getSites();
+        assertTrue(sites.size() > 3);
     }
 }
