@@ -171,7 +171,7 @@ public class Game {
         int x2 = (int)((double)sizeX * rate + (double)roiBase.x2 * delta);
         int y1 = (int)((double)roiBase.y1 * delta);
         int y2 = (int)((double)sizeY * rate + (double)roiBase.y2 * delta);
-        roi = new Rectangle(x1, x2, y1, y2);
+        roi = new Rectangle<>(x1, x2, y1, y2);
     }
 
     /* Sites */
@@ -228,7 +228,7 @@ public class Game {
             final int x = rand.nextInt(roi.x2 - roi.x1) + roi.x1;
             final int y = rand.nextInt(roi.y2 - roi.y1) + roi.y1;
             if (siteValid(x, y)) {
-                sites.add(new Site(x, y, type));
+                sites.add(new Site(new Point<>(x, y), type));
                 return true;
             }
         }
