@@ -89,7 +89,7 @@ public class Game {
     public MapDatum[][] getMap() {
         return map;
     }
-    public Rectangle getRoi() { /* Game grid coordinate */
+    public Rectangle<Integer> getRoi() { /* Game grid coordinate */
         return roi;
     }
 
@@ -129,7 +129,7 @@ public class Game {
         int x2 = (int)((double)sizeX * 0.6);
         int y1 = (int)((double)sizeY * 0.4);
         int y2 = (int)((double)sizeY * 0.6);
-        roi = roiBase = new Rectangle(x1, x2, y1, y2);
+        roi = roiBase = new Rectangle<>(x1, x2, y1, y2);
     }
 
     /* Game Ticks */
@@ -157,7 +157,7 @@ public class Game {
     private int growth = 0;
     private MapDatum[][] map;
     private int sizeX, sizeY;
-    private Rectangle roi, roiBase;
+    private Rectangle<Integer> roi, roiBase;
     private void initGrowth() {
         nextGrowth = growthInterval;
     }

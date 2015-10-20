@@ -1,9 +1,9 @@
 package edu.fudan.davidgao.anothermetro;
 
-public class Rectangle {
-    public final int x1, x2, y1, y2;
+public class Rectangle<T> {
+    public final T x1, x2, y1, y2;
 
-    public Rectangle(int x1, int x2, int y1, int y2) {
+    public Rectangle(T x1, T x2, T y1, T y2) {
         this.x1 = x1;
         this.x2 = x2;
         this.y1 = y1;
