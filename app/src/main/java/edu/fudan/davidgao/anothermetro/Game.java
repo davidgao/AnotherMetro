@@ -5,7 +5,6 @@ package edu.fudan.davidgao.anothermetro;
  */
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,7 +23,7 @@ public class Game {
             if (instance == null) {
                 instance = new Game(new MapDatum[480][640]);
                 return instance;
-            } else throw new GameException("Bad game state.");
+            } else throw new GameException("Cannot create game: Game already exists.");
         }
     }
     public static Game create(MapDatum[][] map) throws GameException {
@@ -32,7 +31,7 @@ public class Game {
             if (instance == null) {
                 instance = new Game(map);
                 return instance;
-            } else throw new GameException("Bad game state.");
+            } else throw new GameException("Cannot create game: Game already exists.");
         }
     }
 
@@ -42,7 +41,7 @@ public class Game {
                 state = GameState.PAUSED;
                 initGrowth();
                 initSiteSpawn();
-            } else throw new GameException("Bad game state.");
+            } else throw new GameException("Cannot start game: Game is not new.");
         }
     }
 
@@ -50,7 +49,7 @@ public class Game {
         synchronized (this) {
             if (state == GameState.PAUSED) {
                 state = GameState.RUNNING;
-            } else throw new GameException("Bad game state.");
+            } else throw new GameException("Cannot run game: Game is not paused.");
         }
         tickTimer.schedule(tickTask, tickInterval, tickInterval);
     }
@@ -59,7 +58,7 @@ public class Game {
         synchronized (this) {
             if (state == GameState.RUNNING) {
                 state = GameState.PAUSED;
-            } else throw new GameException("Bad game state.");
+            } else throw new GameException("Cannot pause game: Game is not running.");
         }
         tickTimer.cancel();
     }
@@ -71,7 +70,7 @@ public class Game {
             }
             if (state == GameState.NEW || state == GameState.PAUSED) {
                 state = GameState.ZOMBIE;
-            } else throw new GameException("Bad game state.");
+            } else throw new GameException("Cannot kill game: Game is already a zombie.");
         }
     }
 
@@ -79,14 +78,24 @@ public class Game {
         synchronized (this) {
             if (state == GameState.ZOMBIE) {
                 Game.instance = null;
-            } else throw new GameException("Bad game state.");
+            } else throw new GameException("Cannot destroy game: Game is not a zombie.");
         }
     }
 
-    /* Getting and setting */
+    /* General */
     public GameState getState() {
         return state;
     }
+    public MapDatum[][] getMap() {
+        return map;
+    }
+    public int[] getRoi() { /* Game grid coordinate */
+        final int[] tmp = {roiX1, roiX2, roiY1, roiY2};
+        return tmp;
+    }
+
+
+    /* Getting and setting */
     public long getTickCounter() {
         return tickCounter;
     }
@@ -97,13 +106,6 @@ public class Game {
         if (state == GameState.NEW) {
             tickInterval = interval;
         } else throw new GameException("Game already started");
-    }
-    public int[] getRoi() {
-        final int[] tmp = {roiX1, roiX2, roiY1, roiY2};
-        return tmp;
-    }
-    public MapDatum[][] getMap() {
-        return map;
     }
     public Site[] getSites() {
         Site[] tmp = new Site[sites.size()];
@@ -184,7 +186,7 @@ public class Game {
     private double siteDist = 10.0;
     private double siteRate1[] = {0.4, 0.7, 0.8, 1.0};
     private double siteRate2[] = {0.5, 0.875, 1.0, 1.0};
-    private Vector<ActiveSite> sites = new Vector<>();
+    private Vector<Site> sites = new Vector<>();
     private void initSiteSpawn() {
         nextSiteSpawn = siteSpawnInterval;
         spawnSite(0);
@@ -228,7 +230,7 @@ public class Game {
             final int x = rand.nextInt(roiX2 - roiX1) + roiX1;
             final int y = rand.nextInt(roiY2 - roiY1) + roiY1;
             if (siteValid(x, y)) {
-                sites.add(new ActiveSite(x, y, type));
+                sites.add(new Site(x, y, type));
                 return true;
             }
         }
@@ -243,6 +245,8 @@ public class Game {
     }
     public Line newLine(Site s1, Site s2) throws GameException{
         if (lines.size() >= maxLines) throw new GameException("Can't add more lines.");
-        lines.add(new Line(s1, s2));
+        Line tmp = new Line(s1, s2);
+        lines.add(tmp);
+        return tmp;
     }
 }
