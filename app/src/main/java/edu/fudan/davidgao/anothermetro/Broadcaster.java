@@ -2,7 +2,7 @@ package edu.fudan.davidgao.anothermetro;
 
 import java.util.ArrayList;
 
-public class Broadcaster implements Runnable {
+class Broadcaster implements Runnable {
     public Broadcaster() {
         listeners = new ArrayList<>();
     }

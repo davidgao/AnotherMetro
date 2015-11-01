@@ -2,7 +2,7 @@ package edu.fudan.davidgao.anothermetro;
 
 import java.util.TimerTask;
 
-public class RunnableTimerTask extends TimerTask {
+class RunnableTimerTask extends TimerTask {
     @Override
     public void run (){
         runnable.run();

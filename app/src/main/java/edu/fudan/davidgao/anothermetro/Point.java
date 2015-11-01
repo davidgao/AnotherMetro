@@ -1,6 +1,7 @@
 package edu.fudan.davidgao.anothermetro;
 
-public class Point<T> {
+/* T should be immutable */
+class Point<T> {
     public T x, y;
 
     public Point(T x, T y) {
