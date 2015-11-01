@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Vector;
 
 public class Game {
     private static Game instance = null;
@@ -17,11 +16,18 @@ public class Game {
         return instance;
     }
 
+    private Game(MapDatum[][] map, Rectangle<Integer> roiBase) {
+        this.map = map;
+        sizeX = map.length;
+        sizeY = map[0].length;
+        roi = this.roiBase = roiBase;
+    }
+
     /* Life cycle control */
     public static Game create() throws GameException {
         synchronized (Game.class) {
             if (instance == null) {
-                instance = new Game(new MapDatum[480][640]);
+                instance = new Game(new MapDatum[480][640], null);
                 return instance;
             } else throw new GameException("Cannot create game: Game already exists.");
         }
@@ -29,7 +35,7 @@ public class Game {
     public static Game create(MapDatum[][] map) throws GameException {
         synchronized (Game.class) {
             if (instance == null) {
-                instance = new Game(map);
+                instance = new Game(map, null);
                 return instance;
             } else throw new GameException("Cannot create game: Game already exists.");
         }
@@ -121,16 +127,6 @@ public class Game {
     /* Private */
     private Random rand = new Random();
     private GameState state = GameState.NEW;
-    private Game(MapDatum[][] map) {
-        this.map = map;
-        sizeX = map.length;
-        sizeY = map[0].length;
-        int x1 = (int)((double)sizeX * 0.4);
-        int x2 = (int)((double)sizeX * 0.6);
-        int y1 = (int)((double)sizeY * 0.4);
-        int y2 = (int)((double)sizeY * 0.6);
-        roi = roiBase = new Rectangle<>(x1, x2, y1, y2);
-    }
 
     /* Game Ticks */
     private long tickInterval = 1000; /* in ms */
