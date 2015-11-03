@@ -17,17 +17,34 @@ public class Game {
     }
 
     private Game(MapDatum[][] map, Rectangle<Integer> roiBase) {
-        this.map = map;
-        sizeX = map.length;
-        sizeY = map[0].length;
+        /* The only constructor is private. Assume valid map. */
+        /* Read size and copy map */
+        size = new Point<>(map.length, map[0].length);
+        this.map = new MapDatum[size.x][size.y];
+        for (int i = 0; i < size.x; i += 1) {
+            this.map[i] = map[i].clone();
+        }
+        /* Create an ROI if we don't have any */
+        if (roiBase == null) {
+            roiBase = new Rectangle<>(0, 0, 0, 0);
+        }
+        /* Copy ROI twice */
         roi = this.roiBase = roiBase;
     }
 
-    /* Life cycle control */
+    /* Creating a game */
     public static Game create() throws GameException {
+        /* This is a default game */
+        /* Create a all-land map */
+        MapDatum[][] map = new MapDatum[400][300];
+        for (MapDatum[] mapLine: map) {
+            for (int i = 0; i < mapLine.length; i+= 1) {
+                mapLine[i] = MapDatum.LAND;
+            }
+        }
         synchronized (Game.class) {
             if (instance == null) {
-                instance = new Game(new MapDatum[480][640], null);
+                instance = new Game(map, null);
                 return instance;
             } else throw new GameException("Cannot create game: Game already exists.");
         }
@@ -152,7 +169,7 @@ public class Game {
     private int maxGrowth = 20; /* stages */
     private int growth = 0;
     private MapDatum[][] map;
-    private int sizeX, sizeY;
+    private Point<Integer> size;
     private Rectangle<Integer> roi, roiBase;
     private void initGrowth() {
         nextGrowth = growthInterval;
@@ -164,9 +181,9 @@ public class Game {
         final double rate = (double)growth / (double)maxGrowth;
         final double delta = 1 - rate;
         int x1 = (int)((double)roiBase.x1 * delta);
-        int x2 = (int)((double)sizeX * rate + (double)roiBase.x2 * delta);
+        int x2 = (int)((double)size.x * rate + (double)roiBase.x2 * delta);
         int y1 = (int)((double)roiBase.y1 * delta);
-        int y2 = (int)((double)sizeY * rate + (double)roiBase.y2 * delta);
+        int y2 = (int)((double)size.y * rate + (double)roiBase.y2 * delta);
         roi = new Rectangle<>(x1, x2, y1, y2);
     }
 
