@@ -11,22 +11,11 @@ import static org.junit.Assert.*;
 public class GameTest {
     private Game game;
 
-    /* Self test */
-    @Test(expected=AssertionError.class)
-    public void badAssertion() throws Exception {
-        assertTrue(false);
-    }
-
-    @Test
-    public void goodAssertion() throws Exception {
-        assertTrue(true);
-    }
-
     /* Tools */
     @Before
     public void buildup() {
         try{
-            game = Game.create();
+            game = Game.create(-1, -1);
         } catch (GameException exception) {
             // Nothing
         }
@@ -66,7 +55,7 @@ public class GameTest {
 
     @Test(expected = GameException.class)
     public void badCreate() throws Exception {
-        Game.create();
+        Game.create(-1, -1);
     }
 
     @Test
@@ -74,13 +63,13 @@ public class GameTest {
         Game game = Game.getInstance();
         game.kill();
         game.destroy();
-        game = Game.create(new MapDatum[20][20]);
+        game = Game.create(new MapDatum[20][20], -1, -1);
         assertNotNull(game);
     }
 
     @Test(expected = GameException.class)
     public void badCreateWithMap() throws Exception {
-        Game.create(new MapDatum[20][40]);
+        Game.create(new MapDatum[20][40], -1, -1);
         MapDatum[][] map = Game.getInstance().getMap();
         assertEquals(map.length, 20);
         assertEquals(map[0].length, 40);

@@ -16,7 +16,7 @@ public class Game {
         return instance;
     }
 
-    private Game(MapDatum[][] map, Rectangle<Integer> roiBase) {
+    private Game(MapDatum[][] map, int maxGrowth, int baseGrowth) throws GameException {
         /* The only constructor is private. Assume valid map. */
         /* Read size and copy map */
         size = new Point<>(map.length, map[0].length);
@@ -24,16 +24,18 @@ public class Game {
         for (int i = 0; i < size.x; i += 1) {
             this.map[i] = map[i].clone();
         }
-        /* Create an ROI if we don't have any */
-        if (roiBase == null) {
-            roiBase = new Rectangle<>(0, 0, 0, 0);
+        /* Start an ROI Generator */
+        roiGenerator = new RoiGenerator(size, maxGrowth, baseGrowth);
+        try {
+            roi = roiBase = roiGenerator.nextRoi();
         }
-        /* Copy ROI twice */
-        roi = this.roiBase = roiBase;
+        catch (AlgorithmException ex) {
+            throw new GameException("Invalid baseGrowth", ex);
+        }
     }
 
     /* Creating a game */
-    public static Game create() throws GameException {
+    public static Game create(int maxGrowth, int baseGrowth) throws GameException {
         /* This is a default game */
         /* Create a all-land map */
         MapDatum[][] map = new MapDatum[400][300];
@@ -42,20 +44,16 @@ public class Game {
                 mapLine[i] = MapDatum.LAND;
             }
         }
-        synchronized (Game.class) {
-            if (instance == null) {
-                instance = new Game(map, null);
-                return instance;
-            } else throw new GameException("Cannot create game: Game already exists.");
-        }
+        return create(map, maxGrowth, baseGrowth);
+
     }
-    public static Game create(MapDatum[][] map) throws GameException {
-        synchronized (Game.class) {
-            if (instance == null) {
-                instance = new Game(map, null);
-                return instance;
-            } else throw new GameException("Cannot create game: Game already exists.");
-        }
+
+    public static synchronized Game create(MapDatum[][] map, int maxGrowth, int baseGrowth)
+            throws GameException {
+        if (instance == null) {
+            instance = new Game(map, maxGrowth, baseGrowth);
+            return instance;
+        } else throw new GameException("Cannot create game: Game already exists.");
     }
 
     public void start() throws GameException {
@@ -164,6 +162,7 @@ public class Game {
     }
 
     /* Growth and map */
+    private RoiGenerator roiGenerator;
     private long growthInterval = 30; /* in ticks */
     private long nextGrowth;
     private int maxGrowth = 20; /* stages */
