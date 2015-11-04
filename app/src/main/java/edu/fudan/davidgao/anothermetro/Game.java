@@ -56,6 +56,7 @@ public class Game {
         } else throw new GameException("Cannot create game: Game already exists.");
     }
 
+    /* Life cycle controls */
     public void start() throws GameException {
         synchronized (this) {
             if (state == GameState.NEW) {
@@ -95,12 +96,10 @@ public class Game {
         }
     }
 
-    public void destroy() throws GameException {
-        synchronized (this) {
-            if (state == GameState.ZOMBIE) {
-                Game.instance = null;
-            } else throw new GameException("Cannot destroy game: Game is not a zombie.");
-        }
+    public static synchronized void destroy() throws GameException {
+        if (instance.state == GameState.ZOMBIE) {
+            Game.instance = null;
+        } else throw new GameException("Cannot destroy game: Game is not a zombie.");
     }
 
     /* General */

@@ -31,7 +31,7 @@ public class GameTest {
                 // Nothing
             }
             try {
-                game.destroy();
+                Game.destroy();
             } catch (GameException exception) {
                 // Nothing
             }
@@ -42,7 +42,7 @@ public class GameTest {
     public void getInstance() throws Exception {
         assertNotNull(game);
         game.kill();
-        game.destroy();
+        Game.destroy();
         game = Game.getInstance();
         assertNull(game);
     }
@@ -62,7 +62,7 @@ public class GameTest {
     public void createWithMap() throws Exception {
         Game game = Game.getInstance();
         game.kill();
-        game.destroy();
+        Game.destroy();
         game = Game.create(new MapDatum[20][20], -1, -1);
         assertNotNull(game);
     }
@@ -138,12 +138,12 @@ public class GameTest {
     @Test
     public void destroy() throws Exception {
         game.kill();
-        game.destroy();
+        Game.destroy();
     }
 
     @Test(expected = GameException.class)
     public void badDestroy() throws Exception {
-        game.destroy();
+        Game.destroy();
     }
 
     @Test
