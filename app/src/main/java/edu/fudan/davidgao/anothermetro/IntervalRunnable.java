@@ -1,14 +1,20 @@
 package edu.fudan.davidgao.anothermetro;
 
 class IntervalRunnable implements Runnable {
-    public IntervalRunnable(Runnable runnable, long interval) {
+    public IntervalRunnable(Runnable runnable) {
         this.runnable = runnable;
-        this.interval = interval;
-        this.next = interval;
+    }
+
+    public synchronized void setInterval(long interval) {
+        next = this.interval = interval;
+    }
+
+    public long getInterval() {
+        return interval;
     }
 
     @Override
-    public void run() {
+    public synchronized void run() {
         counter += 1;
         if (counter >= next) {
             next += interval;
@@ -17,5 +23,5 @@ class IntervalRunnable implements Runnable {
     }
 
     private Runnable runnable;
-    private long interval, next, counter = 0;
+    private long interval = 1, next = 1, counter = 0;
 }

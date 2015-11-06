@@ -10,14 +10,16 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Game {
-    private static Game instance = null;
+    /* Default parameters */
+    private static final long defaultTickInterval = 1000; /* in ms */
+    private static final long defaultGrowthInterval = 30; /* in ticks */
 
+    /* Singleton and his constructor */
+    private static Game instance = null;
     public static Game getInstance() {
         return instance;
     }
-
     private Game(MapDatum[][] map, int maxGrowth, int baseGrowth) throws GameException {
-        /* The only constructor is private. Assume valid map. */
         /* Read size and copy map */
         size = new Point<>(map.length, map[0].length);
         this.map = new MapDatum[size.x][size.y];
@@ -34,7 +36,7 @@ public class Game {
         }
     }
 
-    /* Creating a game */
+    /* Game creation */
     public static Game create(int maxGrowth, int baseGrowth) throws GameException {
         /* This is a default game */
         /* Create a all-land map */
@@ -47,7 +49,6 @@ public class Game {
         return create(map, maxGrowth, baseGrowth);
 
     }
-
     public static synchronized Game create(MapDatum[][] map, int maxGrowth, int baseGrowth)
             throws GameException {
         if (instance == null) {
@@ -56,7 +57,7 @@ public class Game {
         } else throw new GameException("Cannot create game: Game already exists.");
     }
 
-    /* Life cycle controls */
+    /* Life cycle control */
     public synchronized void start() throws GameException {
         if (state == GameState.NEW) {
             state = GameState.PAUSED;
@@ -65,61 +66,56 @@ public class Game {
             initSiteSpawn();
         } else throw new GameException("Cannot start game: Game is not new.");
     }
-
-    public void run() throws GameException {
-        synchronized (this) {
-            if (state == GameState.PAUSED) {
-                state = GameState.RUNNING;
-            } else throw new GameException("Cannot run game: Game is not paused.");
-        }
+    public synchronized void run() throws GameException {
+        if (state == GameState.PAUSED) {
+            state = GameState.RUNNING;
+        } else throw new GameException("Cannot run game: Game is not paused.");
         tickTimer.schedule(tickTask, tickInterval, tickInterval);
     }
-
-    public void pause() throws GameException {
-        synchronized (this) {
-            if (state == GameState.RUNNING) {
-                state = GameState.PAUSED;
-            } else throw new GameException("Cannot pause game: Game is not running.");
-        }
+    public synchronized void pause() throws GameException {
+        if (state == GameState.RUNNING) {
+            state = GameState.PAUSED;
+        } else throw new GameException("Cannot pause game: Game is not running.");
         tickTimer.cancel();
     }
-
-    public void kill() throws GameException {
-        synchronized (this) {
-            if (state == GameState.RUNNING) {
-                pause();
-            }
-            if (state == GameState.NEW || state == GameState.PAUSED) {
-                state = GameState.ZOMBIE;
-            } else throw new GameException("Cannot kill game: Game is already a zombie.");
+    public synchronized void kill() throws GameException {
+        if (state == GameState.RUNNING) {
+            pause();
         }
+        if (state == GameState.NEW || state == GameState.PAUSED) {
+            state = GameState.ZOMBIE;
+        } else throw new GameException("Cannot kill game: Game is already a zombie.");
     }
-
     public static synchronized void destroy() throws GameException {
         if (instance.state == GameState.ZOMBIE) {
             Game.instance = null;
         } else throw new GameException("Cannot destroy game: Game is not a zombie.");
     }
 
-    /* General */
+    /* General information */
+    private GameState state = GameState.NEW;
     public GameState getState() {
         return state;
     }
+
+    private MapDatum[][] map;
     public MapDatum[][] getMap() {
         return map;
     }
-    public Rectangle<Integer> getRoi() { /* Game grid coordinate */
+
+    private Rectangle<Integer> roi;
+    public Rectangle<Integer> getRoi() {
         return roi;
     }
+
+    private Point<Integer> size;
     public Point<Integer> getSize() {
         return size;
     }
 
 
-    /* Getting and setting */
-    public long getTickCounter() {
-        return tickCounter.getCounter();
-    }
+    /* Tick timer */
+    private long tickInterval = defaultTickInterval;
     public long getTickInterval() {
         return tickInterval;
     }
@@ -128,42 +124,27 @@ public class Game {
             tickInterval = interval;
         } else throw new GameException("Game already started");
     }
-    public ArrayList<Site> getSites() {
-        return sites;
+    private Counter tickCounter = new Counter();
+    public long getTickCounter() {
+        return tickCounter.getCounter();
     }
-    public long getGrowthInterval() {
-        return growthInterval;
-    }
-    public void setGrowthInterval(long interval) throws GameException {
-        if (state == GameState.NEW) {
-            growthInterval = interval;
-        } else throw new GameException("Game already started");
-    }
-
-    /* Private */
-    private Random rand = new Random();
-    private GameState state = GameState.NEW;
-
-    /* Game Ticks */
-    private long tickInterval = 1000; /* in ms */
     private Broadcaster tickBroadcaster = new Broadcaster();
     private TimerTask tickTask = new RunnableTimerTask(tickBroadcaster);
     private Timer tickTimer = new Timer();
-    private Counter tickCounter = new Counter();
     private synchronized void initTimer() {
         tickBroadcaster.addListener(tickCounter);
     }
 
-    /* Growth and map */
-    private RoiGenerator roiGenerator;
-    private long growthInterval = 30; /* in ticks */
-    private MapDatum[][] map;
-    private Point<Integer> size;
-    private Rectangle<Integer> roi;
-    private void initGrowth() {
-        growthIntervalRunnable = new IntervalRunnable(growthRunnable, growthInterval);
-        tickBroadcaster.addListener(growthIntervalRunnable);
+    /* Growth */
+    public long getGrowthInterval() {
+        return growthIntervalRunnable.getInterval();
     }
+    public void setGrowthInterval(long interval) throws GameException {
+        if (state == GameState.NEW) {
+            growthIntervalRunnable.setInterval(interval);
+        } else throw new GameException("Game already started");
+    }
+    private RoiGenerator roiGenerator;
     private final Runnable growthRunnable = new Runnable() {
         @Override
         public void run() {
@@ -177,7 +158,11 @@ public class Game {
             }
         }
     };
-    private IntervalRunnable growthIntervalRunnable = null;
+    private IntervalRunnable growthIntervalRunnable = new IntervalRunnable(growthRunnable);
+    private void initGrowth() {
+        growthIntervalRunnable.setInterval(defaultGrowthInterval);
+        tickBroadcaster.addListener(growthIntervalRunnable);
+    }
 
     /* Sites */
     private long siteSpawnInterval = 10; /* in ticks */
@@ -244,6 +229,9 @@ public class Game {
         }
         return false;
     }
+    public ArrayList<Site> getSites() {
+        return sites;
+    }
 
     /* Line operation */
     private ArrayList<Line> lines = new ArrayList<>();
@@ -257,4 +245,7 @@ public class Game {
         lines.add(tmp);
         return tmp;
     }
+
+    /* Utilities */
+    private Random rand = new Random();
 }
