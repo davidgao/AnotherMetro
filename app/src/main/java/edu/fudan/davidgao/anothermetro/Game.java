@@ -57,14 +57,13 @@ public class Game {
     }
 
     /* Life cycle controls */
-    public void start() throws GameException {
-        synchronized (this) {
-            if (state == GameState.NEW) {
-                state = GameState.PAUSED;
-                initGrowth();
-                initSiteSpawn();
-            } else throw new GameException("Cannot start game: Game is not new.");
-        }
+    public synchronized void start() throws GameException {
+        if (state == GameState.NEW) {
+            state = GameState.PAUSED;
+            initTimer();
+            initGrowth();
+            initSiteSpawn();
+        } else throw new GameException("Cannot start game: Game is not new.");
     }
 
     public void run() throws GameException {
@@ -119,7 +118,7 @@ public class Game {
 
     /* Getting and setting */
     public long getTickCounter() {
-        return tickCounter;
+        return tickCounter.getCounter();
     }
     public long getTickInterval() {
         return tickInterval;
@@ -147,41 +146,38 @@ public class Game {
 
     /* Game Ticks */
     private long tickInterval = 1000; /* in ms */
-    private long tickCounter = 0;
+    private Broadcaster tickBroadcaster = new Broadcaster();
+    private TimerTask tickTask = new RunnableTimerTask(tickBroadcaster);
     private Timer tickTimer = new Timer();
-    private TimerTask tickTask = new TimerTask() {
-        @Override
-        public void run() {
-            tick();
-        }
-    };
-    private synchronized void tick() {
-        synchronized (this) {
-            tickCounter += 1;
-            if (tickCounter >= nextGrowth) grow();
-            if (tickCounter >= nextSiteSpawn && sites.size() < maxSites) spawnSite();
-        }
+    private Counter tickCounter = new Counter();
+    private synchronized void initTimer() {
+        tickBroadcaster.addListener(tickCounter);
     }
 
     /* Growth and map */
     private RoiGenerator roiGenerator;
     private long growthInterval = 30; /* in ticks */
-    private long nextGrowth;
     private MapDatum[][] map;
     private Point<Integer> size;
     private Rectangle<Integer> roi;
     private void initGrowth() {
-        nextGrowth = growthInterval;
+        growthIntervalRunnable = new IntervalRunnable(growthRunnable, growthInterval);
+        tickBroadcaster.addListener(growthIntervalRunnable);
     }
-    private synchronized void grow() {
-        nextGrowth += growthInterval;
-        try {
-            roi = roiGenerator.nextRoi();
+    private final Runnable growthRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (Game.this) {
+                try {
+                    roi = roiGenerator.nextRoi();
+                }
+                catch (AlgorithmException exception) {
+                    // Fully grown, skipping
+                }
+            }
         }
-        catch (AlgorithmException exception) {
-            // Fully grown, skipping
-        }
-    }
+    };
+    private IntervalRunnable growthIntervalRunnable = null;
 
     /* Sites */
     private long siteSpawnInterval = 10; /* in ticks */
