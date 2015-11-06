@@ -27,7 +27,7 @@ public class Game {
         /* Start an ROI Generator */
         roiGenerator = new RoiGenerator(size, maxGrowth, baseGrowth);
         try {
-            roi = roiBase = roiGenerator.nextRoi();
+            roi = roiGenerator.nextRoi();
         }
         catch (AlgorithmException ex) {
             throw new GameException("Invalid baseGrowth", ex);
@@ -112,6 +112,9 @@ public class Game {
     public Rectangle<Integer> getRoi() { /* Game grid coordinate */
         return roi;
     }
+    public Point<Integer> getSize() {
+        return size;
+    }
 
 
     /* Getting and setting */
@@ -152,10 +155,10 @@ public class Game {
             tick();
         }
     };
-    private void tick() {
+    private synchronized void tick() {
         synchronized (this) {
             tickCounter += 1;
-            if (tickCounter >= nextGrowth && growth < maxGrowth) grow();
+            if (tickCounter >= nextGrowth) grow();
             if (tickCounter >= nextSiteSpawn && sites.size() < maxSites) spawnSite();
         }
     }
@@ -164,25 +167,20 @@ public class Game {
     private RoiGenerator roiGenerator;
     private long growthInterval = 30; /* in ticks */
     private long nextGrowth;
-    private int maxGrowth = 20; /* stages */
-    private int growth = 0;
     private MapDatum[][] map;
     private Point<Integer> size;
-    private Rectangle<Integer> roi, roiBase;
+    private Rectangle<Integer> roi;
     private void initGrowth() {
         nextGrowth = growthInterval;
     }
-    private void grow() {
-        /* NOTE: Caller should always sync */
+    private synchronized void grow() {
         nextGrowth += growthInterval;
-        growth += 1;
-        final double rate = (double)growth / (double)maxGrowth;
-        final double delta = 1 - rate;
-        int x1 = (int)((double)roiBase.x1 * delta);
-        int x2 = (int)((double)size.x * rate + (double)roiBase.x2 * delta);
-        int y1 = (int)((double)roiBase.y1 * delta);
-        int y2 = (int)((double)size.y * rate + (double)roiBase.y2 * delta);
-        roi = new Rectangle<>(x1, x2, y1, y2);
+        try {
+            roi = roiGenerator.nextRoi();
+        }
+        catch (AlgorithmException exception) {
+            // Fully grown, skipping
+        }
     }
 
     /* Sites */
