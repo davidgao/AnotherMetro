@@ -1,8 +1,8 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.tools;
 
 import java.util.ArrayList;
 
-class Broadcaster implements Runnable {
+public class Broadcaster implements Runnable {
     public Broadcaster() {
         listeners = new ArrayList<>();
     }

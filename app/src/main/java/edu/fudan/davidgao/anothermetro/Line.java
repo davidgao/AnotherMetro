@@ -2,6 +2,8 @@ package edu.fudan.davidgao.anothermetro;
 
 import java.util.ArrayList;
 
+import edu.fudan.davidgao.anothermetro.core.GameException;
+
 public class Line {
     public ArrayList<Site> sites = new ArrayList<>(2);
 

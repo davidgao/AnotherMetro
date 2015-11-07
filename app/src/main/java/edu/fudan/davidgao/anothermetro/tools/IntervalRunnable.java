@@ -1,6 +1,6 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.tools;
 
-class IntervalRunnable implements Runnable {
+public class IntervalRunnable implements Runnable {
     public IntervalRunnable(Runnable runnable) {
         this.runnable = runnable;
     }

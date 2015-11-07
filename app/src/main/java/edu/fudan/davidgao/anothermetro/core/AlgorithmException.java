@@ -1,4 +1,4 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.core;
 
 public class AlgorithmException extends Exception {
     public AlgorithmException() {

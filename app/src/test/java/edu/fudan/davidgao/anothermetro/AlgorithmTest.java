@@ -2,6 +2,11 @@ package edu.fudan.davidgao.anothermetro;
 
 import org.junit.Test;
 
+import edu.fudan.davidgao.anothermetro.core.AlgorithmException;
+import edu.fudan.davidgao.anothermetro.core.RoiGenerator;
+import edu.fudan.davidgao.anothermetro.tools.Point;
+import edu.fudan.davidgao.anothermetro.tools.Rectangle;
+
 import static org.junit.Assert.assertTrue;
 
 public class AlgorithmTest {

@@ -1,4 +1,7 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.core;
+
+import edu.fudan.davidgao.anothermetro.tools.Point;
+import edu.fudan.davidgao.anothermetro.tools.Rectangle;
 
 final class RoiGenerator {
     public RoiGenerator(Point<Integer> size, int maxGrowth, int baseGrowth) {

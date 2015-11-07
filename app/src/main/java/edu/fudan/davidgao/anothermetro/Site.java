@@ -1,5 +1,7 @@
 package edu.fudan.davidgao.anothermetro;
 
+import edu.fudan.davidgao.anothermetro.tools.Point;
+
 public class Site {
     public Site(Point<Integer> pos, SiteType type) {
         this.pos = pos;

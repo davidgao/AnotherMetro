@@ -1,37 +1,23 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.core;
 
-/*
- * A game of AnotherMetro
- */
-
-import java.util.ArrayList;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import edu.fudan.davidgao.anothermetro.core.AlgorithmException;
-import edu.fudan.davidgao.anothermetro.core.GameException;
-import edu.fudan.davidgao.anothermetro.core.GameState;
-import edu.fudan.davidgao.anothermetro.core.MapDatum;
-import edu.fudan.davidgao.anothermetro.core.RoiGenerator;
-import edu.fudan.davidgao.anothermetro.tools.Broadcaster;
-import edu.fudan.davidgao.anothermetro.tools.Counter;
-import edu.fudan.davidgao.anothermetro.tools.IntervalRunnable;
-import edu.fudan.davidgao.anothermetro.tools.Point;
-import edu.fudan.davidgao.anothermetro.tools.Rectangle;
-import edu.fudan.davidgao.anothermetro.tools.RunnableTimerTask;
+import edu.fudan.davidgao.anothermetro.tools.*;
 
-public class Game {
+class IGame extends Game {
     /* Default parameters */
     private static final long defaultTickInterval = 1000; /* in ms */
     private static final long defaultGrowthInterval = 30; /* in ticks */
 
-    /* Singleton and his constructor */
-    private static Game instance = null;
+    /* Singleton */
+    protected static Game instance = null;
     public static Game getInstance() {
         return instance;
     }
-    private Game(MapDatum[][] map, int maxGrowth, int baseGrowth) throws GameException {
+
+    /* Private constructor */
+    private IGame(MapDatum[][] map, int maxGrowth, int baseGrowth) throws GameException {
         /* Read size and copy map */
         size = new Point<>(map.length, map[0].length);
         this.map = new MapDatum[size.x][size.y];
@@ -50,7 +36,6 @@ public class Game {
 
     /* Game creation */
     public static Game create(int maxGrowth, int baseGrowth) throws GameException {
-        /* This is a default game */
         /* Create a all-land map */
         MapDatum[][] map = new MapDatum[400][300];
         for (MapDatum[] mapLine: map) {
@@ -63,7 +48,7 @@ public class Game {
     public static synchronized Game create(MapDatum[][] map, int maxGrowth, int baseGrowth)
             throws GameException {
         if (instance == null) {
-            instance = new Game(map, maxGrowth, baseGrowth);
+            instance = new IGame(map, maxGrowth, baseGrowth);
             return instance;
         } else throw new GameException("Cannot create game: Game already exists.");
     }
@@ -74,7 +59,7 @@ public class Game {
             state = GameState.PAUSED;
             initTimer();
             initGrowth();
-            initSiteSpawn();
+            //initSiteSpawn();
         } else throw new GameException("Cannot start game: Game is not new.");
     }
     public synchronized void run() throws GameException {
@@ -97,10 +82,12 @@ public class Game {
             state = GameState.ZOMBIE;
         } else throw new GameException("Cannot kill game: Game is already a zombie.");
     }
-    public static synchronized void destroy() throws GameException {
-        if (instance.state == GameState.ZOMBIE) {
-            Game.instance = null;
-        } else throw new GameException("Cannot destroy game: Game is not a zombie.");
+    public void destroy() throws GameException {
+        synchronized (IGame.class){
+            if (state == GameState.ZOMBIE) {
+                instance = null;
+            } else throw new GameException("Cannot destroy game: Game is not a zombie.");
+        }
     }
 
     /* General information */
@@ -123,7 +110,6 @@ public class Game {
     public Point<Integer> getSize() {
         return size;
     }
-
 
     /* Tick timer */
     private long tickInterval = defaultTickInterval;
@@ -160,7 +146,7 @@ public class Game {
     private final Runnable growthRunnable = new Runnable() {
         @Override
         public void run() {
-            synchronized (Game.this) {
+            synchronized (IGame.this) {
                 try {
                     roi = roiGenerator.nextRoi();
                 }
@@ -174,89 +160,4 @@ public class Game {
         growthIntervalRunnable.setInterval(defaultGrowthInterval);
         tickBroadcaster.addListener(growthIntervalRunnable);
     }
-
-    /* Sites */
-    private long siteSpawnInterval = 10; /* in ticks */
-    private long nextSiteSpawn;
-    private int maxSites = 40;
-    private int siteSpawnTries = 100;
-    private int uniqueSites = 0;
-    private int maxUniqueSites = 5;
-    private double siteDist = 10.0;
-    private double siteRate1[] = {0.4, 0.7, 0.8, 1.0};
-    private double siteRate2[] = {0.5, 0.875, 1.0, 1.0};
-    private ArrayList<Site> sites = new ArrayList<>();
-    public void setSiteSpawnInterval(int interval) throws GameException {
-        if (state == GameState.NEW) {
-            siteSpawnInterval = interval;
-        } else throw new GameException("Game is not new.");
-    }
-    private void initSiteSpawn() {
-        nextSiteSpawn = siteSpawnInterval;
-        spawnSite(SiteType.fromInt(0));
-        spawnSite(SiteType.fromInt(1));
-        spawnSite(SiteType.fromInt(2));
-    }
-    private boolean siteValid(int x, int y) {
-        for (int i = 0; i < sites.size(); i += 1) {
-            if (sites.get(i).dist(x, y) < siteDist) {
-                return false;
-            }
-        }
-        return true;
-    }
-    private void spawnSite() {
-        /* NOTE: Caller should always sync */
-        double[] rate;
-        if (uniqueSites == maxUniqueSites) {
-            rate = siteRate2;
-        } else {
-            rate = siteRate1;
-        }
-        double r = rand.nextDouble();
-        int tier = 0, type;
-        while (r >= rate[tier]) {
-            tier += 1;
-        }
-        if (tier > 2) {
-            type = 3 + uniqueSites;
-        } else {
-            type = tier;
-        }
-        boolean spawned = spawnSite(SiteType.fromInt(type));
-        if (spawned && tier > 2) {
-            uniqueSites += 1;
-        }
-    }
-    private boolean spawnSite(SiteType type) {
-        /* NOTE: Caller should always sync */
-        for (int i = 0; i < siteSpawnTries; i += 1){
-            final int x = rand.nextInt(roi.x2 - roi.x1) + roi.x1;
-            final int y = rand.nextInt(roi.y2 - roi.y1) + roi.y1;
-            if (siteValid(x, y)) {
-                sites.add(new Site(new Point<>(x, y), type));
-                return true;
-            }
-        }
-        return false;
-    }
-    public ArrayList<Site> getSites() {
-        return sites;
-    }
-
-    /* Line operation */
-    private ArrayList<Line> lines = new ArrayList<>();
-    private int maxLines = 3;
-    public ArrayList<Line> getLines() {
-        return lines;
-    }
-    public Line newLine(Site s1, Site s2) throws GameException{
-        if (lines.size() >= maxLines) throw new GameException("Can't add more lines.");
-        Line tmp = new Line(s1, s2);
-        lines.add(tmp);
-        return tmp;
-    }
-
-    /* Utilities */
-    private Random rand = new Random();
 }

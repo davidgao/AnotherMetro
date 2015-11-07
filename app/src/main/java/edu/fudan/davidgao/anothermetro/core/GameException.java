@@ -1,4 +1,4 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.core;
 
 public class GameException extends Exception {
     public GameException() {

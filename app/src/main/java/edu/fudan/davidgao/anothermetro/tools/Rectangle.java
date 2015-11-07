@@ -1,7 +1,7 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.tools;
 
 /* T should be immutable so Rectangle can be immutable */
-final class Rectangle<T> {
+public final class Rectangle<T> {
     public final T x1, x2, y1, y2;
 
     public Rectangle(T x1, T x2, T y1, T y2) {

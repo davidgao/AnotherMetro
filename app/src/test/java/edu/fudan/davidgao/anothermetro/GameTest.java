@@ -6,6 +6,10 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
+import edu.fudan.davidgao.anothermetro.core.GameException;
+import edu.fudan.davidgao.anothermetro.core.GameState;
+import edu.fudan.davidgao.anothermetro.core.MapDatum;
+
 import static org.junit.Assert.*;
 
 public class GameTest {

@@ -1,7 +1,7 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.tools;
 
 /* T should be immutable so Point can be immutable */
-final class Point<T> {
+public final class Point<T> {
     public final T x, y;
 
     public Point(T x, T y) {

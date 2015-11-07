@@ -1,8 +1,8 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.tools;
 
 import java.util.TimerTask;
 
-class RunnableTimerTask extends TimerTask {
+public class RunnableTimerTask extends TimerTask {
     @Override
     public void run (){
         runnable.run();
