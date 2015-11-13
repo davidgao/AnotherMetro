@@ -6,9 +6,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
-import edu.fudan.davidgao.anothermetro.core.GameException;
-import edu.fudan.davidgao.anothermetro.core.GameState;
-import edu.fudan.davidgao.anothermetro.core.MapDatum;
+import edu.fudan.davidgao.anothermetro.core.*;
 
 import static org.junit.Assert.*;
 
@@ -35,7 +33,7 @@ public class GameTest {
                 // Nothing
             }
             try {
-                Game.destroy();
+                game.destroy();
             } catch (GameException exception) {
                 // Nothing
             }
@@ -46,7 +44,7 @@ public class GameTest {
     public void getInstance() throws Exception {
         assertNotNull(game);
         game.kill();
-        Game.destroy();
+        game.destroy();
         game = Game.getInstance();
         assertNull(game);
     }
@@ -66,7 +64,7 @@ public class GameTest {
     public void createWithMap() throws Exception {
         Game game = Game.getInstance();
         game.kill();
-        Game.destroy();
+        game.destroy();
         game = Game.create(new MapDatum[20][20], -1, -1);
         assertNotNull(game);
     }
@@ -142,12 +140,12 @@ public class GameTest {
     @Test
     public void destroy() throws Exception {
         game.kill();
-        Game.destroy();
+        game.destroy();
     }
 
     @Test(expected = GameException.class)
     public void badDestroy() throws Exception {
-        Game.destroy();
+        game.destroy();
     }
 
     @Test

@@ -1,5 +1,8 @@
 package edu.fudan.davidgao.anothermetro.core;
 
+import java.util.ArrayList;
+
+import edu.fudan.davidgao.anothermetro.Site;
 import edu.fudan.davidgao.anothermetro.tools.*;
 
 public abstract class Game {
@@ -38,4 +41,8 @@ public abstract class Game {
     /* Growth */
     public abstract long getGrowthInterval();
     public abstract void setGrowthInterval(long interval) throws GameException;
+
+    /* TODO */
+    public abstract ArrayList<Site> getSites();
+    public abstract void setSiteSpawnInterval(int interval) throws GameException;
 }

@@ -1,8 +1,13 @@
 package edu.fudan.davidgao.anothermetro.core;
 
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import edu.fudan.davidgao.anothermetro.Line;
+import edu.fudan.davidgao.anothermetro.Site;
+import edu.fudan.davidgao.anothermetro.SiteType;
 import edu.fudan.davidgao.anothermetro.tools.*;
 
 class IGame extends Game {
@@ -133,16 +138,6 @@ class IGame extends Game {
     }
 
     /* Growth */
-    private IntervalRunnable growthIntervalRunnable = new IntervalRunnable(growthRunnable);
-    public long getGrowthInterval() {
-        return growthIntervalRunnable.getInterval();
-    }
-    public void setGrowthInterval(long interval) throws GameException {
-        if (state == GameState.NEW) {
-            growthIntervalRunnable.setInterval(interval);
-        } else throw new GameException("Game already started");
-    }
-    private RoiGenerator roiGenerator;
     private final Runnable growthRunnable = new Runnable() {
         @Override
         public void run() {
@@ -156,8 +151,105 @@ class IGame extends Game {
             }
         }
     };
+    private IntervalRunnable growthIntervalRunnable = new IntervalRunnable(growthRunnable);
+    public long getGrowthInterval() {
+        return growthIntervalRunnable.getInterval();
+    }
+    public void setGrowthInterval(long interval) throws GameException {
+        if (state == GameState.NEW) {
+            growthIntervalRunnable.setInterval(interval);
+        } else throw new GameException("Game already started");
+    }
+    private RoiGenerator roiGenerator;
     private void initGrowth() {
         growthIntervalRunnable.setInterval(defaultGrowthInterval);
         tickBroadcaster.addListener(growthIntervalRunnable);
     }
+
+    /* TODO */
+
+    /* Sites */
+    private long siteSpawnInterval = 10; /* in ticks */
+    private long nextSiteSpawn;
+    private int maxSites = 40;
+    private int siteSpawnTries = 100;
+    private int uniqueSites = 0;
+    private int maxUniqueSites = 5;
+    private double siteDist = 10.0;
+    private double siteRate1[] = {0.4, 0.7, 0.8, 1.0};
+    private double siteRate2[] = {0.5, 0.875, 1.0, 1.0};
+    private ArrayList<Site> sites = new ArrayList<>();
+    public void setSiteSpawnInterval(int interval) throws GameException {
+        if (state == GameState.NEW) {
+            siteSpawnInterval = interval;
+        } else throw new GameException("Game is not new.");
+    }
+    private void initSiteSpawn() {
+        nextSiteSpawn = siteSpawnInterval;
+        spawnSite(SiteType.fromInt(0));
+        spawnSite(SiteType.fromInt(1));
+        spawnSite(SiteType.fromInt(2));
+    }
+    private boolean siteValid(int x, int y) {
+        for (int i = 0; i < sites.size(); i += 1) {
+            if (sites.get(i).dist(x, y) < siteDist) {
+                return false;
+            }
+        }
+        return true;
+    }
+    private void spawnSite() {
+        /* NOTE: Caller should always sync */
+        double[] rate;
+        if (uniqueSites == maxUniqueSites) {
+            rate = siteRate2;
+        } else {
+            rate = siteRate1;
+        }
+        double r = rand.nextDouble();
+        int tier = 0, type;
+        while (r >= rate[tier]) {
+            tier += 1;
+        }
+        if (tier > 2) {
+            type = 3 + uniqueSites;
+        } else {
+            type = tier;
+        }
+        boolean spawned = spawnSite(SiteType.fromInt(type));
+        if (spawned && tier > 2) {
+            uniqueSites += 1;
+        }
+    }
+    private boolean spawnSite(SiteType type) {
+        /* NOTE: Caller should always sync */
+        for (int i = 0; i < siteSpawnTries; i += 1){
+            final int x = rand.nextInt(roi.x2 - roi.x1) + roi.x1;
+            final int y = rand.nextInt(roi.y2 - roi.y1) + roi.y1;
+            if (siteValid(x, y)) {
+                sites.add(new Site(new Point<>(x, y), type));
+                return true;
+            }
+        }
+        return false;
+    }
+    public ArrayList<Site> getSites() {
+        return sites;
+    }
+
+    /* Line operation */
+    private ArrayList<Line> lines = new ArrayList<>();
+    private int maxLines = 3;
+    public ArrayList<Line> getLines() {
+        return lines;
+    }
+    public Line newLine(Site s1, Site s2) throws GameException{
+        if (lines.size() >= maxLines) throw new GameException("Can't add more lines.");
+        Line tmp = new Line(s1, s2);
+        lines.add(tmp);
+        return tmp;
+    }
+
+    /* Utilities */
+    private Random rand = new Random();
 }

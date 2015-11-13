@@ -1,11 +1,8 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.core;
 
 import org.junit.Test;
 
-import edu.fudan.davidgao.anothermetro.core.AlgorithmException;
-import edu.fudan.davidgao.anothermetro.core.RoiGenerator;
-import edu.fudan.davidgao.anothermetro.tools.Point;
-import edu.fudan.davidgao.anothermetro.tools.Rectangle;
+import edu.fudan.davidgao.anothermetro.tools.*;
 
 import static org.junit.Assert.assertTrue;
 

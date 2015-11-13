@@ -1,14 +1,9 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.tools;
 
 import org.junit.Test;
 
-import edu.fudan.davidgao.anothermetro.tools.Broadcaster;
-import edu.fudan.davidgao.anothermetro.tools.Point;
-import edu.fudan.davidgao.anothermetro.tools.Rectangle;
-import edu.fudan.davidgao.anothermetro.tools.RunnableTimerTask;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+//import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public class ToolTest {
