@@ -65,14 +65,14 @@ public class GameTest {
         Game game = Game.getInstance();
         game.kill();
         game.destroy();
-        game = Game.create(new MapDatum[20][20], -1, -1);
+        game = Game.create(new GameMapDatum[20][20], -1, -1);
         assertNotNull(game);
     }
 
     @Test(expected = GameException.class)
     public void badCreateWithMap() throws Exception {
-        Game.create(new MapDatum[20][40], -1, -1);
-        MapDatum[][] map = Game.getInstance().getMap();
+        Game.create(new GameMapDatum[20][40], -1, -1);
+        GameMapDatum[][] map = Game.getInstance().getMap();
         assertEquals(map.length, 20);
         assertEquals(map[0].length, 40);
     }

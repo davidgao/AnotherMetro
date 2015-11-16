@@ -1,6 +1,6 @@
 package edu.fudan.davidgao.anothermetro.core;
 
-public enum MapDatum {
+public enum GameMapDatum {
     LAND,
     WATER
 }

@@ -22,10 +22,10 @@ class IGame extends Game {
     }
 
     /* Private constructor */
-    private IGame(MapDatum[][] map, int maxGrowth, int baseGrowth) throws GameException {
+    private IGame(GameMapDatum[][] map, int maxGrowth, int baseGrowth) throws GameException {
         /* Read size and copy map */
         size = new Point<>(map.length, map[0].length);
-        this.map = new MapDatum[size.x][size.y];
+        this.map = new GameMapDatum[size.x][size.y];
         for (int i = 0; i < size.x; i += 1) {
             this.map[i] = map[i].clone();
         }
@@ -42,15 +42,15 @@ class IGame extends Game {
     /* Game creation */
     public static Game create(int maxGrowth, int baseGrowth) throws GameException {
         /* Create a all-land map */
-        MapDatum[][] map = new MapDatum[400][300];
-        for (MapDatum[] mapLine: map) {
+        GameMapDatum[][] map = new GameMapDatum[400][300];
+        for (GameMapDatum[] mapLine: map) {
             for (int i = 0; i < mapLine.length; i+= 1) {
-                mapLine[i] = MapDatum.LAND;
+                mapLine[i] = GameMapDatum.LAND;
             }
         }
         return create(map, maxGrowth, baseGrowth);
     }
-    public static synchronized Game create(MapDatum[][] map, int maxGrowth, int baseGrowth)
+    public static synchronized Game create(GameMapDatum[][] map, int maxGrowth, int baseGrowth)
             throws GameException {
         if (instance == null) {
             instance = new IGame(map, maxGrowth, baseGrowth);
@@ -101,8 +101,8 @@ class IGame extends Game {
         return state;
     }
 
-    private MapDatum[][] map;
-    public MapDatum[][] getMap() {
+    private GameMapDatum[][] map;
+    public GameMapDatum[][] getMap() {
         return map;
     }
 
