@@ -15,7 +15,8 @@ public class Broadcaster implements Runnable {
     }
 
     public boolean addListener(Runnable listener) {
-        return listeners.add(listener);
+        if (listener == null) return false;
+        else return listeners.add(listener);
     }
 
     public boolean removeListener(Runnable listener) {

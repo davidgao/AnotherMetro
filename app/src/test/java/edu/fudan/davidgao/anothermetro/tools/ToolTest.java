@@ -3,42 +3,39 @@ package edu.fudan.davidgao.anothermetro.tools;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-//import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public class ToolTest {
-    private class TestRunnable implements Runnable {
-        @Override
-        public void run() {
-            runCount += 1;
-        }
-        public int getRunCount() {
-            return runCount;
-        }
-        public void clearRunCount() {
-            runCount = 0;
-        }
-        private int runCount = 0;
-    }
-
-    /* TestRunnable */
+    /* Counter */
     @Test
     public void testRunnable() throws Exception {
-        TestRunnable runnable = new TestRunnable();
-        assertEquals(runnable.getRunCount(), 0);
+        Counter counter = new Counter();
+        assertEquals(counter.getCounter(), 0);
+        counter.run();
+        assertEquals(counter.getCounter(), 1);
+        counter.clearCounter();
+        assertEquals(counter.getCounter(), 0);
+    }
+
+    /* IntervalRunnable */
+    @Test
+    public void intervalRunnable() throws Exception {
+        Counter counter = new Counter();
+        IntervalRunnable runnable = new IntervalRunnable(counter);
+        runnable.setInterval(2);
         runnable.run();
-        assertEquals(runnable.getRunCount(), 1);
-        runnable.clearRunCount();
-        assertEquals(runnable.getRunCount(), 0);
+        assertEquals(counter.getCounter(), 0);
+        runnable.run();
+        assertEquals(counter.getCounter(), 1);
     }
 
     /* RunnableTimerTask */
     @Test
     public void newTask() throws Exception {
-        TestRunnable runnable = new TestRunnable();
+        Counter runnable = new Counter();
         RunnableTimerTask task = new RunnableTimerTask(runnable);
         task.run();
-        assertEquals(runnable.getRunCount(), 1);
+        assertEquals(runnable.getCounter(), 1);
     }
 
     @Test(expected=NullPointerException.class)
@@ -50,17 +47,17 @@ public class ToolTest {
     @Test
     public void broadcaster() throws Exception {
         Broadcaster broadcaster = new Broadcaster();
-        TestRunnable runnable = new TestRunnable();
+        Counter runnable = new Counter();
         broadcaster.addListener(runnable);
         broadcaster.run();
-        assertEquals(runnable.getRunCount(), 1);
+        assertEquals(runnable.getCounter(), 1);
         broadcaster.clearListener();
         broadcaster.run();
-        assertEquals(runnable.getRunCount(), 1);
+        assertEquals(runnable.getCounter(), 1);
         broadcaster.addListener(runnable);
         broadcaster.removeListener(runnable);
         broadcaster.run();
-        assertEquals(runnable.getRunCount(), 1);
+        assertEquals(runnable.getCounter(), 1);
     }
 
     @Test
