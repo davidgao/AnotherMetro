@@ -7,6 +7,7 @@ public class IntervalRunnable implements Runnable {
 
     public synchronized void setInterval(long interval) {
         next = this.interval = interval;
+        counter = 0;
     }
 
     public long getInterval() {

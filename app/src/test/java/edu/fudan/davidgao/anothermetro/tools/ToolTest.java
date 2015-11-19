@@ -23,6 +23,7 @@ public class ToolTest {
         Counter counter = new Counter();
         IntervalRunnable runnable = new IntervalRunnable(counter);
         runnable.setInterval(2);
+        assertEquals(runnable.getInterval(), 2);
         runnable.run();
         assertEquals(counter.getCounter(), 0);
         runnable.run();
@@ -84,5 +85,24 @@ public class ToolTest {
         assertTrue(rectangle1.x2 == 2);
         assertTrue(rectangle1.y1 == 3);
         assertTrue(rectangle1.y2 == 4);
+    }
+
+    /* Matrix2d */
+    @Test
+    public void matrix2D1() throws Exception {
+        Matrix2D<Integer> matrix = new Matrix2D<>(10, 20, 42);
+        matrix.set(0, 0, 84);
+        assertTrue(matrix.get(0, 0) == 84);
+        assertTrue(matrix.get(0, 1) == 42);
+        assertTrue(matrix.get(1, 0) == 42);
+    }
+
+    @Test
+    public void matrix2D2() throws Exception {
+        Matrix2D<Integer> matrix = new Matrix2D<>(new Point<>(10, 20), 42);
+        matrix.set(new Point<>(0, 0), 84);
+        assertTrue(matrix.get(new Point<>(0, 0)) == 84);
+        assertTrue(matrix.get(new Point<>(0, 1)) == 42);
+        assertTrue(matrix.get(new Point<>(1, 0)) == 42);
     }
 }
