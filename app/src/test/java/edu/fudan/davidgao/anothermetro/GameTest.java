@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 
 import edu.fudan.davidgao.anothermetro.core.*;
+import edu.fudan.davidgao.anothermetro.tools.Matrix2D;
 
 import static org.junit.Assert.*;
 
@@ -65,16 +66,18 @@ public class GameTest {
         Game game = Game.getInstance();
         game.kill();
         game.destroy();
-        game = Game.create(new GameMapDatum[20][20], -1, -1);
+        Matrix2D<MapDatum> map = new Matrix2D<>(20, 20);
+        game = Game.create(map, -1, -1);
         assertNotNull(game);
     }
 
     @Test(expected = GameException.class)
     public void badCreateWithMap() throws Exception {
-        Game.create(new GameMapDatum[20][40], -1, -1);
-        GameMapDatum[][] map = Game.getInstance().getMap();
-        assertEquals(map.length, 20);
-        assertEquals(map[0].length, 40);
+        Matrix2D<MapDatum> map = new Matrix2D<>(20, 40);
+        Game.create(map, -1, -1);
+        map = Game.getInstance().getMap();
+        assertTrue(map.size.x == 20);
+        assertTrue(map.size.y == 40);
     }
 
     @Test

@@ -15,7 +15,7 @@ public abstract class Game {
     public static Game create(int maxGrowth, int baseGrowth) throws GameException {
         return IGame.create(maxGrowth, baseGrowth);
     }
-    public static Game create(GameMapDatum[][] map, int maxGrowth, int baseGrowth)
+    public static Game create(Matrix2D<MapDatum> map, int maxGrowth, int baseGrowth)
             throws GameException {
         return IGame.create(map, maxGrowth, baseGrowth);
     }
@@ -29,7 +29,7 @@ public abstract class Game {
 
     /* General information */
     public abstract GameState getState();
-    public abstract GameMapDatum[][] getMap();
+    public abstract Matrix2D<MapDatum> getMap();
     public abstract Rectangle<Integer> getRoi();
     public abstract Point<Integer> getSize();
 

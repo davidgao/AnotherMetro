@@ -1,47 +1,52 @@
 package edu.fudan.davidgao.anothermetro.tools;
 
-import java.util.ArrayList;
-
 public class Matrix2D<T> {
-    /* Construction */
-    public Matrix2D(Point<Integer> size, T object){
-        refill(size.x, size.y, object);
+    /* Allocation */
+    @SuppressWarnings("unchecked")
+    public Matrix2D(Point<Integer> size) {
+        data = (T[][])(new Object[size.x][size.y]);
+        this.size = size;
     }
-    public Matrix2D(int x, int y, T object){
-        refill(x, y, object);
+    @SuppressWarnings("unchecked")
+    public Matrix2D(int x, int y) {
+        data = (T[][])(new Object[x][y]);
+        this.size = new Point<>(x, y);
     }
 
-    /* Get */
+    /* Get (atomic) */
     public T get(Point<Integer> pos) {
-        return get(pos.x, pos.y);
+        return data[pos.x][pos.y];
     }
     public T get(int x, int y) {
-        return data.get(x).get(y);
+        return data[x][y];
     }
 
-    /* Set */
+    /* Set (atomic) */
     public void set(Point<Integer> pos, T object) {
-        set(pos.x, pos.y, object);
+        data[pos.x][pos.y] = object;
     }
     public void set(int x, int y, T object) {
-        data.get(x).set(y, object);
+        data[x][y] = object;
     }
 
-    /* Fill up */
-    private void refill(int x, int y, T object){
-        /* Construct baseline */
-        ArrayList<T> baseline = new ArrayList<>();
-        for (int i = 0; i < y; i++) {
-            baseline.add(object);
-        }
-        /* Construct data array */
-        data = new ArrayList<>();
-        for (int i = 0; i < x; i++) {
-            ArrayList<T> line = new ArrayList<>();
-            line.addAll(baseline);
-            data.add(line);
+    /* Fill */
+    public synchronized void fill(T object) {
+        for (T line[]:data) {
+            for (int j = 0; j < size.y; j++) {
+                line[j] = object;
+            }
         }
     }
 
-    private ArrayList<ArrayList<T>> data;
+    /* Copy */
+    public synchronized Matrix2D<T> copy() {
+        Matrix2D<T> dest = new Matrix2D<>(size);
+        for (int i = 0; i < size.x; i++) {
+            System.arraycopy(this.data[i], 0, dest.data[i], 0, size.y);
+        }
+        return dest;
+    }
+
+    public final Point<Integer> size;
+    private T[][] data;
 }

@@ -90,19 +90,34 @@ public class ToolTest {
     /* Matrix2d */
     @Test
     public void matrix2D1() throws Exception {
-        Matrix2D<Integer> matrix = new Matrix2D<>(10, 20, 42);
-        matrix.set(0, 0, 84);
-        assertTrue(matrix.get(0, 0) == 84);
-        assertTrue(matrix.get(0, 1) == 42);
-        assertTrue(matrix.get(1, 0) == 42);
+        Matrix2D<Integer> matrix = new Matrix2D<>(5, 5);
+        matrix.set(0, 0, 42);
+        assertTrue(matrix.get(0, 0) == 42);
     }
 
     @Test
     public void matrix2D2() throws Exception {
-        Matrix2D<Integer> matrix = new Matrix2D<>(new Point<>(10, 20), 42);
-        matrix.set(new Point<>(0, 0), 84);
-        assertTrue(matrix.get(new Point<>(0, 0)) == 84);
-        assertTrue(matrix.get(new Point<>(0, 1)) == 42);
-        assertTrue(matrix.get(new Point<>(1, 0)) == 42);
+        Point<Integer> pos = new Point<>(0, 0);
+        Matrix2D<Integer> matrix = new Matrix2D<>(new Point<>(5, 5));
+        matrix.set(pos, 42);
+        assertTrue(matrix.get(pos) == 42);
+    }
+
+    @Test
+    public void matrix2DFill() throws Exception {
+        Matrix2D<Integer> matrix = new Matrix2D<>(new Point<>(5, 5));
+        matrix.fill(42);
+        assertTrue(matrix.get(0, 0) == 42);
+        assertTrue(matrix.get(4, 4) == 42);
+    }
+
+    @Test
+    public void matrix2DCopy() throws Exception {
+        Matrix2D<Integer> matrix1 = new Matrix2D<>(new Point<>(5, 5));
+        Matrix2D<Integer> matrix2 = matrix1.copy();
+        matrix1.set(0, 0, 42);
+        matrix2.set(0, 0, 84);
+        assertTrue(matrix1.get(0, 0) == 42);
+        assertTrue(matrix2.get(0, 0) == 84);
     }
 }

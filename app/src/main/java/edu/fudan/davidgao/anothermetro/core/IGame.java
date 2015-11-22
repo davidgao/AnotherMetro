@@ -22,13 +22,14 @@ class IGame extends Game {
     }
 
     /* Private constructor */
-    private IGame(GameMapDatum[][] map, int maxGrowth, int baseGrowth) throws GameException {
+    private IGame(Matrix2D<MapDatum> map) {
+        /* Copy map */
+        this.map = map.copy();
+    }
+    private IGame(Matrix2D<MapDatum> map, int maxGrowth, int baseGrowth) throws GameException {
         /* Read size and copy map */
-        size = new Point<>(map.length, map[0].length);
-        this.map = new GameMapDatum[size.x][size.y];
-        for (int i = 0; i < size.x; i += 1) {
-            this.map[i] = map[i].clone();
-        }
+        size = map.size;
+        this.map = map.copy();
         /* Start an ROI Generator */
         roiGenerator = new RoiGenerator(size, maxGrowth, baseGrowth);
         try {
@@ -42,15 +43,11 @@ class IGame extends Game {
     /* Game creation */
     public static Game create(int maxGrowth, int baseGrowth) throws GameException {
         /* Create a all-land map */
-        GameMapDatum[][] map = new GameMapDatum[400][300];
-        for (GameMapDatum[] mapLine: map) {
-            for (int i = 0; i < mapLine.length; i+= 1) {
-                mapLine[i] = GameMapDatum.LAND;
-            }
-        }
+        Matrix2D<MapDatum> map = new Matrix2D<>(400, 300);
+        map.fill(MapDatum.LAND);
         return create(map, maxGrowth, baseGrowth);
     }
-    public static synchronized Game create(GameMapDatum[][] map, int maxGrowth, int baseGrowth)
+    public static synchronized Game create(Matrix2D<MapDatum> map, int maxGrowth, int baseGrowth)
             throws GameException {
         if (instance == null) {
             instance = new IGame(map, maxGrowth, baseGrowth);
@@ -101,9 +98,9 @@ class IGame extends Game {
         return state;
     }
 
-    private GameMapDatum[][] map;
-    public GameMapDatum[][] getMap() {
-        return map;
+    private Matrix2D<MapDatum> map;
+    public Matrix2D<MapDatum> getMap() {
+        return map.copy();
     }
 
     private Rectangle<Integer> roi;
