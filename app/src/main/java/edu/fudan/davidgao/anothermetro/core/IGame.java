@@ -12,6 +12,9 @@ import edu.fudan.davidgao.anothermetro.tools.*;
 
 class IGame extends Game {
     /* Default parameters */
+    private static final int defaultMaxGrowth = 25;
+    private static final int defaultBaseGrowth = 10;
+
     private static final long defaultTickInterval = 1000; /* in ms */
     private static final long defaultGrowthInterval = 30; /* in ticks */
 
@@ -25,31 +28,27 @@ class IGame extends Game {
     private IGame(Matrix2D<MapDatum> map) {
         /* Copy map */
         this.map = map.copy();
-    }
-    private IGame(Matrix2D<MapDatum> map, int maxGrowth, int baseGrowth) throws GameException {
-        /* Copy map */
-        this.map = map.copy();
         /* Start an ROI Generator */
-        roiGenerator = new RoiGenerator(this.map.size, maxGrowth, baseGrowth);
         try {
-            roi = roiGenerator.nextRoi();
+            setGrowth(defaultMaxGrowth, defaultBaseGrowth);
         }
-        catch (AlgorithmException ex) {
-            throw new GameException("Invalid baseGrowth", ex);
+        catch (GameException ex) {
+            /* This is a private constructor and there should be no exception */
         }
+        growthIntervalRunnable.setInterval(defaultGrowthInterval);
     }
 
     /* Game creation */
-    public static Game create(int maxGrowth, int baseGrowth) throws GameException {
+    public static Game create() throws GameException {
         /* Create a all-land map */
         Matrix2D<MapDatum> map = new Matrix2D<>(400, 300);
         map.fill(MapDatum.LAND);
-        return create(map, maxGrowth, baseGrowth);
+        /* and try to create */
+        return create(map);
     }
-    public static synchronized Game create(Matrix2D<MapDatum> map, int maxGrowth, int baseGrowth)
-            throws GameException {
+    public static synchronized Game create(Matrix2D<MapDatum> map) throws GameException {
         if (instance == null) {
-            instance = new IGame(map, maxGrowth, baseGrowth);
+            instance = new IGame(map);
             return instance;
         } else throw new GameException("Cannot create game: Game already exists.");
     }
@@ -117,9 +116,10 @@ class IGame extends Game {
         return tickInterval;
     }
     public void setTickInterval(long interval) throws GameException {
-        if (state == GameState.NEW) {
-            tickInterval = interval;
-        } else throw new GameException("Game already started");
+        if (state != GameState.NEW) {
+            throw new GameException("Game already started");
+        }
+        tickInterval = interval;
     }
     private Counter tickCounter = new Counter();
     public long getTickCounter() {
@@ -152,12 +152,24 @@ class IGame extends Game {
     }
     public void setGrowthInterval(long interval) throws GameException {
         if (state == GameState.NEW) {
-            growthIntervalRunnable.setInterval(interval);
-        } else throw new GameException("Game already started");
+            throw new GameException("Game already started");
+        }
+        growthIntervalRunnable.setInterval(interval);
+    }
+    public synchronized void setGrowth(int maxGrowth, int baseGrowth) throws GameException {
+        if (state != GameState.NEW) {
+            throw new GameException("Game already started");
+        }
+        roiGenerator = new RoiGenerator(this.map.size, maxGrowth, baseGrowth);
+        try {
+            roi = roiGenerator.nextRoi();
+        }
+        catch (AlgorithmException ex) {
+            throw new GameException("Invalid Growth", ex);
+        }
     }
     private RoiGenerator roiGenerator;
     private void initGrowth() {
-        growthIntervalRunnable.setInterval(defaultGrowthInterval);
         tickBroadcaster.addListener(growthIntervalRunnable);
     }
 

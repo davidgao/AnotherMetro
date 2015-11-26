@@ -12,12 +12,11 @@ public abstract class Game {
     }
 
     /* Game creation */
-    public static Game create(int maxGrowth, int baseGrowth) throws GameException {
-        return IGame.create(maxGrowth, baseGrowth);
+    public static Game create() throws GameException {
+        return IGame.create();
     }
-    public static Game create(Matrix2D<MapDatum> map, int maxGrowth, int baseGrowth)
-            throws GameException {
-        return IGame.create(map, maxGrowth, baseGrowth);
+    public static Game create(Matrix2D<MapDatum> map) throws GameException {
+        return IGame.create(map);
     }
 
     /* Life cycle control */
@@ -41,6 +40,7 @@ public abstract class Game {
     /* Growth */
     public abstract long getGrowthInterval();
     public abstract void setGrowthInterval(long interval) throws GameException;
+    public abstract void setGrowth(int maxGrowth, int baseGrowth) throws GameException;
 
     /* TODO */
     public abstract ArrayList<Site> getSites();
