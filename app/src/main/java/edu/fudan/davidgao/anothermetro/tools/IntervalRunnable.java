@@ -10,6 +10,7 @@ public class IntervalRunnable implements Runnable {
         counter = 0;
     }
 
+    /* Atomic */
     public long getInterval() {
         return interval;
     }

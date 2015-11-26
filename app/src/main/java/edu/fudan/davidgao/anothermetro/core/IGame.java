@@ -27,11 +27,10 @@ class IGame extends Game {
         this.map = map.copy();
     }
     private IGame(Matrix2D<MapDatum> map, int maxGrowth, int baseGrowth) throws GameException {
-        /* Read size and copy map */
-        size = map.size;
+        /* Copy map */
         this.map = map.copy();
         /* Start an ROI Generator */
-        roiGenerator = new RoiGenerator(size, maxGrowth, baseGrowth);
+        roiGenerator = new RoiGenerator(this.map.size, maxGrowth, baseGrowth);
         try {
             roi = roiGenerator.nextRoi();
         }
@@ -108,9 +107,8 @@ class IGame extends Game {
         return roi;
     }
 
-    private Point<Integer> size;
     public Point<Integer> getSize() {
-        return size;
+        return map.size;
     }
 
     /* Tick timer */
