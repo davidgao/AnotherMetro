@@ -41,6 +41,7 @@ public abstract class Game {
     public abstract long getGrowthInterval();
     public abstract void setGrowthInterval(long interval) throws GameException;
     public abstract void setGrowth(int maxGrowth, int baseGrowth) throws GameException;
+    public abstract boolean addGrowthListener(Runnable listener)  throws GameException;
 
     /* TODO */
     public abstract ArrayList<Site> getSites();

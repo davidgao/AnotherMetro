@@ -12,10 +12,9 @@ import edu.fudan.davidgao.anothermetro.tools.*;
 
 class IGame extends Game {
     /* Default parameters */
+    private static final long defaultTickInterval = 1000; /* in ms */
     private static final int defaultMaxGrowth = 25;
     private static final int defaultBaseGrowth = 10;
-
-    private static final long defaultTickInterval = 1000; /* in ms */
     private static final long defaultGrowthInterval = 30; /* in ticks */
 
     /* Singleton */
@@ -28,7 +27,7 @@ class IGame extends Game {
     private IGame(Matrix2D<MapDatum> map) {
         /* Copy map */
         this.map = map.copy();
-        /* Start an ROI Generator */
+        /* Init growth */
         try {
             setGrowth(defaultMaxGrowth, defaultBaseGrowth);
         }
@@ -36,6 +35,33 @@ class IGame extends Game {
             /* This is a private constructor and there should be no exception */
         }
         growthIntervalRunnable.setInterval(defaultGrowthInterval);
+        /* Init the game */
+        initDispatcher();
+        initTimer();
+        initGrowth();
+    }
+
+    /* Internal initialization */
+    private void initDispatcher() {
+        dispatcher = new EventDispatcher();
+    }
+    private void initTimer() {
+        tickTimer = new Timer();
+        tickTask = new RunnableTimerTask(dispatcher);
+        tickCounter = new Counter();
+        dispatcher.addInternalListener(tickCounter);
+    }
+    private void initGrowth() {
+        try {
+            setGrowth(defaultMaxGrowth, defaultBaseGrowth);
+        }
+        catch (GameException ex) {
+            /* default values won't cause exceptions */
+        }
+        growthIntervalRunnable = new IntervalRunnable(growthRunnable);
+        growthBroadcaster = new Broadcaster();
+        growthNotifier = dispatcher.addSnoozeCallback(growthBroadcaster);
+        dispatcher.addInternalListener(growthIntervalRunnable);
     }
 
     /* Game creation */
@@ -58,7 +84,7 @@ class IGame extends Game {
         if (state == GameState.NEW) {
             state = GameState.PAUSED;
             initTimer();
-            initGrowth();
+            startGrowth();
             //initSiteSpawn();
         } else throw new GameException("Cannot start game: Game is not new.");
     }
@@ -121,16 +147,13 @@ class IGame extends Game {
         }
         tickInterval = interval;
     }
-    private Counter tickCounter = new Counter();
+    private Counter tickCounter;
     public long getTickCounter() {
         return tickCounter.getCounter();
     }
     private Broadcaster tickBroadcaster = new Broadcaster();
-    private TimerTask tickTask = new RunnableTimerTask(tickBroadcaster);
-    private Timer tickTimer = new Timer();
-    private synchronized void initTimer() {
-        tickBroadcaster.addListener(tickCounter);
-    }
+    private TimerTask tickTask;
+    private Timer tickTimer;
 
     /* Growth */
     private final Runnable growthRunnable = new Runnable() {
@@ -146,7 +169,7 @@ class IGame extends Game {
             }
         }
     };
-    private IntervalRunnable growthIntervalRunnable = new IntervalRunnable(growthRunnable);
+    private IntervalRunnable growthIntervalRunnable;
     public long getGrowthInterval() {
         return growthIntervalRunnable.getInterval();
     }
@@ -168,9 +191,17 @@ class IGame extends Game {
             throw new GameException("Invalid Growth", ex);
         }
     }
+    private Broadcaster growthBroadcaster;
+    public synchronized boolean addGrowthListener(Runnable listener) throws GameException {
+        if (state != GameState.NEW) {
+            throw new GameException("Game already started");
+        }
+        return growthBroadcaster.addListener(listener);
+    }
+    private Runnable growthNotifier;
     private RoiGenerator roiGenerator;
-    private void initGrowth() {
-        tickBroadcaster.addListener(growthIntervalRunnable);
+    private void startGrowth() {
+
     }
 
     /* TODO */
@@ -258,5 +289,6 @@ class IGame extends Game {
     }
 
     /* Utilities */
+    private EventDispatcher dispatcher;
     private Random rand = new Random();
 }

@@ -2,11 +2,12 @@ package edu.fudan.davidgao.anothermetro.core;
 
 import edu.fudan.davidgao.anothermetro.tools.*;
 
-public class EventDispatcher extends Broadcaster {
-    public EventDispatcher() {
-        super();
-        addListener(internalBroadcaster);
-        addListener(externalBroadcaster);
+public class EventDispatcher implements Runnable {
+
+    @Override
+    public void run() {
+        internalBroadcaster.run();
+        externalBroadcaster.run();
     }
 
     public synchronized boolean addInternalListener(Runnable listener) {
