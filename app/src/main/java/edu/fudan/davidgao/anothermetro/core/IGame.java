@@ -27,14 +27,6 @@ class IGame extends Game {
     private IGame(Matrix2D<MapDatum> map) {
         /* Copy map */
         this.map = map.copy();
-        /* Init growth */
-        try {
-            setGrowth(defaultMaxGrowth, defaultBaseGrowth);
-        }
-        catch (GameException ex) {
-            /* This is a private constructor and there should be no exception */
-        }
-        growthIntervalRunnable.setInterval(defaultGrowthInterval);
         /* Init the game */
         initDispatcher();
         initTimer();
@@ -59,6 +51,7 @@ class IGame extends Game {
             /* default values won't cause exceptions */
         }
         growthIntervalRunnable = new IntervalRunnable(growthRunnable);
+        growthIntervalRunnable.setInterval(defaultGrowthInterval);
         growthBroadcaster = new Broadcaster();
         growthNotifier = dispatcher.addSnoozeCallback(growthBroadcaster);
         dispatcher.addInternalListener(growthIntervalRunnable);
@@ -162,6 +155,7 @@ class IGame extends Game {
             synchronized (IGame.this) {
                 try {
                     roi = roiGenerator.nextRoi();
+                    growthNotifier.run();
                 }
                 catch (AlgorithmException exception) {
                     // Fully grown, skipping
