@@ -56,6 +56,12 @@ class IGame extends Game {
         growthNotifier = dispatcher.addSnoozeCallback(growthBroadcaster);
         dispatcher.addInternalListener(growthIntervalRunnable);
     }
+    private void initSiteSpawn() {
+        //spawnSite(SiteType.fromInt(0));
+        //spawnSite(SiteType.fromInt(1));
+        //spawnSite(SiteType.fromInt(2));
+
+    }
 
     /* Game creation */
     public static Game create() throws GameException {
@@ -114,6 +120,9 @@ class IGame extends Game {
     public GameState getState() {
         return state;
     }
+    private void assertState(GameState state) throws GameException {
+        if (this.state != state) throw new GameException("Not in proper game state");
+    }
 
     private Matrix2D<MapDatum> map;
     public Matrix2D<MapDatum> getMap() {
@@ -135,9 +144,7 @@ class IGame extends Game {
         return tickInterval;
     }
     public void setTickInterval(long interval) throws GameException {
-        if (state != GameState.NEW) {
-            throw new GameException("Game already started");
-        }
+        assertState(GameState.NEW);
         tickInterval = interval;
     }
     private Counter tickCounter;
@@ -168,15 +175,11 @@ class IGame extends Game {
         return growthIntervalRunnable.getInterval();
     }
     public void setGrowthInterval(long interval) throws GameException {
-        if (state == GameState.NEW) {
-            throw new GameException("Game already started");
-        }
+        assertState(GameState.NEW);
         growthIntervalRunnable.setInterval(interval);
     }
     public synchronized void setGrowth(int maxGrowth, int baseGrowth) throws GameException {
-        if (state != GameState.NEW) {
-            throw new GameException("Game already started");
-        }
+        assertState(GameState.NEW);
         roiGenerator = new RoiGenerator(this.map.size, maxGrowth, baseGrowth);
         try {
             roi = roiGenerator.nextRoi();
@@ -187,9 +190,7 @@ class IGame extends Game {
     }
     private Broadcaster growthBroadcaster;
     public synchronized boolean addGrowthListener(Runnable listener) throws GameException {
-        if (state != GameState.NEW) {
-            throw new GameException("Game already started");
-        }
+        assertState(GameState.NEW);
         return growthBroadcaster.addListener(listener);
     }
     private Runnable growthNotifier;
@@ -212,15 +213,8 @@ class IGame extends Game {
     private double siteRate2[] = {0.5, 0.875, 1.0, 1.0};
     private ArrayList<Site> sites = new ArrayList<>();
     public void setSiteSpawnInterval(int interval) throws GameException {
-        if (state == GameState.NEW) {
-            siteSpawnInterval = interval;
-        } else throw new GameException("Game is not new.");
-    }
-    private void initSiteSpawn() {
-        nextSiteSpawn = siteSpawnInterval;
-        spawnSite(SiteType.fromInt(0));
-        spawnSite(SiteType.fromInt(1));
-        spawnSite(SiteType.fromInt(2));
+        assertState(GameState.NEW);
+        siteSpawnInterval = interval;
     }
     private boolean siteValid(int x, int y) {
         for (int i = 0; i < sites.size(); i += 1) {
