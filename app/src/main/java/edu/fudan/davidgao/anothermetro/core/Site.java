@@ -1,4 +1,4 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.core;
 
 import edu.fudan.davidgao.anothermetro.tools.Point;
 

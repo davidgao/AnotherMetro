@@ -2,7 +2,6 @@ package edu.fudan.davidgao.anothermetro.core;
 
 import java.util.ArrayList;
 
-import edu.fudan.davidgao.anothermetro.Site;
 import edu.fudan.davidgao.anothermetro.tools.*;
 
 public abstract class Game {

@@ -5,9 +5,6 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import edu.fudan.davidgao.anothermetro.Line;
-import edu.fudan.davidgao.anothermetro.Site;
-import edu.fudan.davidgao.anothermetro.SiteType;
 import edu.fudan.davidgao.anothermetro.tools.*;
 
 class IGame extends Game {
@@ -124,7 +121,7 @@ class IGame extends Game {
     public GameState getState() {
         return state;
     }
-    private void assertState(GameState state) throws GameException {
+    public void assertState(GameState state) throws GameException {
         if (this.state != state) throw new GameException("Not in proper game state");
     }
     private Matrix2D<MapDatum> map;
