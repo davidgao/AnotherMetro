@@ -37,9 +37,9 @@ public class DrawLine {
     private final int colorStride = COLOR_PER_VERTEX * 4; // 4 bytes per vertex
 
     private final String vertexShaderCode =
-            "attribute vec4 vPosition;" + "attribute vec4 vColor" + "varying vec4 aColor" +
+            "attribute vec4 vPosition;" + "attribute vec4 vColor;" + "varying vec4 aColor;" +
                     "void main() {" +
-                    "  gl_Position = vPosition;" + "aColor = vColor"+
+                    "  gl_Position = vPosition;" + "aColor = vColor;"+
                     "}";
 
     private final String fragmentShaderCode =
@@ -158,8 +158,8 @@ public class DrawLine {
 
     private void init(){
         game=Game.getInstance();
-        lineCoords=new float[Config.MAX_LINES*4];
-        lineColors=new float[Config.MAX_LINES*4];
+        lineCoords=new float[Config.MAX_SEGMENTS*12];
+        lineColors=new float[Config.MAX_SEGMENTS*16];
     }
 
     private VsSite findVsSite(Site site){

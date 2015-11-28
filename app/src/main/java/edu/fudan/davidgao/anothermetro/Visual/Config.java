@@ -9,7 +9,11 @@ import edu.fudan.davidgao.anothermetro.tools.Point;
 public class Config {
     public static int GRID_X=0;
     public static int GRID_Y=0;
-    public static final int MAX_LINES=20;
+
+    public static final float SITE_RADIUS=0.05f;
+
+    public static final int MAX_LINES=8;
+    public static final int MAX_SEGMENTS=160;
     public static final double LATENT_SITE_RADIUS=0.05;
     public static final float MAX_INF=1e20f;
     public static final float color_list[][] ={{ 0.63671875f, 0.76953125f, 0.22265625f, 1.0f }, { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f }}; //TODO
