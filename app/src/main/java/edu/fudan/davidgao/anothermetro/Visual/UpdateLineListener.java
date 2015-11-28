@@ -70,7 +70,7 @@ public class UpdateLineListener implements OnTouchListener {
 
             case MotionEvent.ACTION_MOVE:
                 if (updating){
-                    if((nextSite = isSite(touchPos))!=null){
+                    if((touchedSite = isSite(touchPos))!=null){
                         if(leftSite) { //reaching a new site
                             if(game.lineUpdateCheck(touchedSite)) {
                                 leftSite = false;
