@@ -12,7 +12,7 @@ import edu.fudan.davidgao.anothermetro.tools.Point;
  * Created by fs on 15/11/28.
  */
 public class VsLineHead {
-    private Site site;
+    public Site site;
     private int direction;
     public int color;
     public PointF[] pos = new PointF[4]; //root, middle, left, right
@@ -25,8 +25,8 @@ public class VsLineHead {
 
         setRotate();
 
-        pos[0] = Config.BG2FGpoint(site.pos);
-        pos[1] = rotate(Config.SITE_RADIUS * 3, 0f, pos[0]);
+        pos[0] = rotate(Config.SITE_RADIUS, 0f, Config.BG2FGpoint(site.pos));
+        pos[1] = rotate(Config.SITE_RADIUS * 2, 0f, pos[0]);
         pos[2] = rotate(0f, Config.SITE_RADIUS, pos[1]);
         pos[3] = rotate(0f, -Config.SITE_RADIUS, pos[1]);
     }

@@ -35,6 +35,12 @@ public class DrawLineHead {
     static float[] lineCoords;
     static float[] lineColors;
 
+    private static DrawLineHead singleton = null;
+    public static DrawLineHead getInstance(){
+        if(singleton == null)singleton = new DrawLineHead();
+        return singleton;
+    }
+
     private int vertexCount = 0;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
     private final int colorStride = COLOR_PER_VERTEX * 4; // 4 bytes per vertex
@@ -52,14 +58,6 @@ public class DrawLineHead {
                     "  gl_FragColor = aColor;" +
                     "}";
     //End of GLSL
-
-    private class lineHeadPair{
-        public VsLineHead start, end;
-        lineHeadPair(VsLineHead s, VsLineHead e){
-            start = s;
-            end = e;
-        }
-    }
 
     private ArrayList<VsLineHead> lineHeads;
     private HashMap<Site, Integer> occupiedDirs;
@@ -81,7 +79,7 @@ public class DrawLineHead {
 
 
     public void draw() {
-        prepare();
+        reload();
 
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
@@ -173,7 +171,7 @@ public class DrawLineHead {
     }
 
     //prepare data to draw heads
-    private void prepare(){
+    private void reload(){
         ArrayList<Line> temp_lines=game.getLines();
         occupiedDirs.clear();
 
