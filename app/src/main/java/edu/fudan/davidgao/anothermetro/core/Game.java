@@ -26,11 +26,12 @@ public abstract class Game {
     public abstract void kill() throws GameException;
     public abstract void destroy() throws GameException;
 
-    /* General information */
+    /* Game Data */
     public abstract GameState getState();
     public abstract Matrix2D<MapDatum> getMap();
     public abstract Rectangle<Integer> getRoi();
     public abstract Point<Integer> getSize();
+    public abstract ArrayList<Site> getSites();
 
     /* Tick timer */
     public abstract long getTickInterval();
@@ -43,7 +44,7 @@ public abstract class Game {
     public abstract void setGrowth(int maxGrowth, int baseGrowth) throws GameException;
     public abstract boolean addGrowthListener(Runnable listener)  throws GameException;
 
-    /* TODO */
-    public abstract ArrayList<Site> getSites();
-    public abstract void setSiteSpawnInterval(int interval) throws GameException;
+    /* Site Spawn */
+    public abstract long getSiteSpawnInterval();
+    public abstract void setSiteSpawnInterval(long interval) throws GameException;
 }
