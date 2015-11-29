@@ -18,13 +18,13 @@ public class Config {
     public static PointF BG2FGpoint(Point<Integer> point){
         PointF t=new PointF(0,0);
         t.x=(float)(point.x/GRID_X*2.0-1.0);
-        t.y=(float)(point.y/GRID_Y*2.0-1.0);
+        t.y=(float)((GRID_Y-point.y)/GRID_Y*2.0-1.0);
         return t;
     }
     public static float BG2FGx(float x){
         return (float)(x/GRID_X*2.0-1.0);
     }
     public static float BG2FGy(float y){
-        return (float)(y/GRID_Y*2.0-1.0);
+        return (float)((GRID_Y-y)/GRID_Y*2.0-1.0);
     }
 }

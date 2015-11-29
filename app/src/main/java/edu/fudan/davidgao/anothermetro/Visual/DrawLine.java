@@ -218,12 +218,12 @@ public class DrawLine {
         PointF ed=Config.BG2FGpoint(vsSegment.line.sites.get(vsSegment.ed).pos);
         if (st.x==ed.x){
             if (st.y<ed.y) {
-                vsSegment.st_a = 2;
-                vsSegment.ed_a = 6;
-            }else
-            {
                 vsSegment.st_a = 6;
                 vsSegment.ed_a = 2;
+            }else
+            {
+                vsSegment.st_a = 2;
+                vsSegment.ed_a = 6;
             }
             return;
         }
@@ -262,15 +262,33 @@ public class DrawLine {
         switch (idx){
             case 0:
                 if (ed.y<st.y) {
-                    vsSegment.st_a = 5;
+                    vsSegment.st_a = 3;
                     vsSegment.ed_a = 0;
                 }else{
-                    vsSegment.st_a = 1;
+                    vsSegment.st_a = 7;
                     vsSegment.ed_a = 4;
                 }
                 break;
             case 1:
                 if (ed.x<st.x) {
+                    vsSegment.st_a = 3;
+                    vsSegment.ed_a = 6;
+                }else{
+                    vsSegment.st_a = 7;
+                    vsSegment.ed_a = 2;
+                }
+                break;
+            case 2:
+                if (ed.y<st.y) {
+                    vsSegment.st_a = 1;
+                    vsSegment.ed_a = 4;
+                }else{
+                    vsSegment.st_a = 5;
+                    vsSegment.ed_a = 0;
+                }
+                break;
+            case 3:
+                if (ed.x<st.x) {
                     vsSegment.st_a = 5;
                     vsSegment.ed_a = 2;
                 }else{
@@ -278,58 +296,40 @@ public class DrawLine {
                     vsSegment.ed_a = 6;
                 }
                 break;
-            case 2:
-                if (ed.y<st.y) {
-                    vsSegment.st_a = 7;
-                    vsSegment.ed_a = 4;
-                }else{
-                    vsSegment.st_a = 3;
-                    vsSegment.ed_a = 0;
-                }
-                break;
-            case 3:
-                if (ed.x<st.x) {
-                    vsSegment.st_a = 3;
-                    vsSegment.ed_a = 6;
-                }else{
-                    vsSegment.st_a = 7;
-                    vsSegment.ed_a = 2;
-                }
-                break;
             case 4:
                 if (st.y<ed.y) {
                     vsSegment.st_a = 0;
-                    vsSegment.ed_a = 5;
+                    vsSegment.ed_a = 3;
                 }else{
                     vsSegment.st_a = 4;
-                    vsSegment.ed_a = 1;
+                    vsSegment.ed_a = 7;
                 }
                 break;
             case 5:
                 if (st.x<ed.x) {
-                    vsSegment.st_a = 2;
-                    vsSegment.ed_a = 5;
-                }else{
                     vsSegment.st_a = 6;
-                    vsSegment.ed_a = 1;
+                    vsSegment.ed_a = 3;
+                }else{
+                    vsSegment.st_a = 2;
+                    vsSegment.ed_a = 7;
                 }
                 break;
             case 6:
                 if (st.y<ed.y) {
                     vsSegment.st_a = 4;
-                    vsSegment.ed_a = 7;
+                    vsSegment.ed_a = 1;
                 }else{
                     vsSegment.st_a = 0;
-                    vsSegment.ed_a = 3;
+                    vsSegment.ed_a = 5;
                 }
                 break;
             case 7:
                 if (st.x<ed.x) {
-                    vsSegment.st_a = 6;
-                    vsSegment.ed_a = 3;
-                }else{
                     vsSegment.st_a = 2;
-                    vsSegment.ed_a = 7;
+                    vsSegment.ed_a = 5;
+                }else{
+                    vsSegment.st_a = 6;
+                    vsSegment.ed_a = 1;
                 }
                 break;
         }
