@@ -35,12 +35,6 @@ public class DrawLineHead {
     static float[] lineCoords;
     static float[] lineColors;
 
-    private static DrawLineHead singleton = null;
-    public static DrawLineHead getInstance(){
-        if(singleton == null)singleton = new DrawLineHead();
-        return singleton;
-    }
-
     private int vertexCount = 0;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
     private final int colorStride = COLOR_PER_VERTEX * 4; // 4 bytes per vertex
@@ -174,6 +168,7 @@ public class DrawLineHead {
     private void reload(){
         ArrayList<Line> temp_lines=game.getLines();
         occupiedDirs.clear();
+        lineHeads.clear();
 
         for (int i=0;i<temp_lines.size();i++){
             ArrayList<Site> line = temp_lines.get(i).sites;
@@ -218,20 +213,5 @@ public class DrawLineHead {
         }
     }
 
-    //check if any head is touched
-    public VsLineHead isLineHead(PointF onTouch){
-        Iterator<VsLineHead> iter = lineHeads.iterator();
-
-        for(VsLineHead currentHead = iter.next(); iter.hasNext(); iter.next()){
-            if(distance(onTouch, currentHead.pos[1]) <= Config.SITE_RADIUS){
-                return currentHead;
-            }
-        }
-
-        return null;
-    }
-    private float distance(PointF a, PointF b){
-        return (float)Math.sqrt(Math.pow(b.x-a.x,2)+Math.pow(b.y-a.y,2));
-    }
 
 }
