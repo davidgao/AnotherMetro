@@ -9,9 +9,7 @@ public class BasicSiteValidator extends SiteValidator {
     final Runnable onSiteSpawn = new Runnable() {
         @Override
         public void run() {
-            synchronized (BasicSiteValidator.this) {
-                sites = game.getSites();
-            }
+            maintain();
         }
     };
     private double minDist = 10.0;
@@ -34,18 +32,21 @@ public class BasicSiteValidator extends SiteValidator {
     @Override
     public synchronized boolean validate(int x, int y) {
         synchronized (game) {
-            for (int i = 0; i < sites.size(); i += 1) {
-                if (sites.get(i).dist(x, y) < minDist) {
+            for (Site site:sites) {
+                if (site.dist(x, y) < minDist) {
                     return false;
                 }
             }
             return true;
-
         }
     }
 
     @Override
     public boolean validate(Point<Integer> pos) {
         return validate(pos.x, pos.y);
+    }
+
+    private synchronized void maintain() {
+        sites = game.getSites();
     }
 }

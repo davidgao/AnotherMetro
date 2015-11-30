@@ -57,6 +57,10 @@ class IGame extends Game {
         dispatcher.addInternalListener(growthIntervalRunnable);
     }
     private void initSiteSpawn() {
+        BasicSiteValidator tmp = new BasicSiteValidator(this);
+        //tmp.setMinDist(5.0);
+        siteValidator = tmp;
+
         siteSpawnIntervalRunnable = new IntervalRunnable(siteSpawnRunnable);
         siteSpawnIntervalRunnable.setInterval(defaultSiteSpawnInterval);
         siteSpawnBroadcaster = new Broadcaster();
@@ -228,6 +232,7 @@ class IGame extends Game {
         return siteSpawnBroadcaster.addListener(listener);
     }
     private Runnable siteSpawnNotifier;
+    private SiteValidator siteValidator;
     private void startSiteSpawn() {
         spawnSite(SiteType.fromInt(0));
         spawnSite(SiteType.fromInt(1));
@@ -246,12 +251,7 @@ class IGame extends Game {
     private double siteRate2[] = {0.5, 0.875, 1.0, 1.0};
     private ArrayList<Site> sites = new ArrayList<>();
     private boolean siteValid(int x, int y) {
-        for (int i = 0; i < sites.size(); i += 1) {
-            if (sites.get(i).dist(x, y) < siteDist) {
-                return false;
-            }
-        }
-        return true;
+        return siteValidator.validate(x, y);
     }
     private void spawnSite() throws GameException {
         /* NOTE: Caller should always sync */
