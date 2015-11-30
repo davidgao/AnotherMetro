@@ -46,4 +46,9 @@ public abstract class Game {
     /* Site Spawn */
     public abstract long getSiteSpawnInterval();
     public abstract void setSiteSpawnInterval(long interval) throws GameException;
+
+    /* Lines */
+    public abstract ArrayList<Line> getLines();
+    public void addLine(Site s1, Site s2) throws GameException;
+    public void extendLine(Line l, Site src, Site dest) throws GameException;
 }
