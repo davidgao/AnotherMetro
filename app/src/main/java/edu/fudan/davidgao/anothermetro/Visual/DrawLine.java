@@ -162,6 +162,7 @@ public class DrawLine {
         lineColors=new float[Config.MAX_SEGMENTS*4*4];
     }
 
+    //find the VsSite with given site by position
     private VsSite findVsSite(Site site){
         for (int i=0;i<sites.size();i++){
             VsSite temp=sites.get(i);
@@ -171,6 +172,7 @@ public class DrawLine {
         return null;
     }
 
+    //pass each line, separate each segment(part line between two sites)
     private void passLine(VsLine line){
         for (int i=0;i<line.sites.size()-1;i++){
             VsSegment temp_vssegment=new VsSegment(i, i+1, line);
@@ -183,6 +185,7 @@ public class DrawLine {
         }
     }
 
+    //pass each site, dispatch the in angle and out angle for each segment
     private void passSite(ArrayList<VsSite> sites){
         for (int i=0;i<sites.size();i++){
             VsSite temp=sites.get(i);
@@ -191,16 +194,19 @@ public class DrawLine {
         }
     }
 
+    //return a point at given angle on a circle
     private PointF getPosByAngle(Site site, double angle){
         PointF result=new PointF(0,0);
         result.x=(float)(Config.BG2FGx(site.pos.x)+Math.cos(angle)*Config.LATENT_SITE_RADIUS);result.y=(float)(Config.BG2FGy(site.pos.y)+Math.sin(angle)*Config.LATENT_SITE_RADIUS);
         return result;
     }
 
+    //calc Euler distance
     private static float distance(float x0, float y0, float x1, float y1){
         return (float)Math.sqrt((x0-x1)*(x0-x1)+(y0-y1)*(y0-y1));
     }
 
+    //get index of minimum of array
     private static int minIndex(float[] a){
         int idx=-1;
         float minV=Config.MAX_INF;
@@ -213,6 +219,7 @@ public class DrawLine {
         return idx;
     }
 
+    //calc start angle and end angle of vsSegment
     public static void calcAngle(VsSegment vsSegment){
         PointF st=Config.BG2FGpoint(vsSegment.line.sites.get(vsSegment.st).pos);
         PointF ed=Config.BG2FGpoint(vsSegment.line.sites.get(vsSegment.ed).pos);
@@ -335,6 +342,7 @@ public class DrawLine {
         }
     }
 
+    //return three point of line from st to ed
     private ArrayList<PointF> calcLine(PointF st, PointF ed){
         if (st.x==ed.x){
             ArrayList<PointF> result=new ArrayList<>();
@@ -373,6 +381,7 @@ public class DrawLine {
         return result;
     }
 
+    //send data to GL's buffer
     private void segment2GLline(ArrayList<VsSegment> segments){
         for (int i=0;i<segments.size();i++){
             VsSegment temp=segments.get(i);
@@ -387,6 +396,7 @@ public class DrawLine {
         }
     }
 
+    //prepare every thing, get Sites and lines, convert site, line to VsSite, VsLine. pass Line , pass Site, send to GL
     private void prepare(){
         ArrayList<Site> temp_sites=game.getSites();
         ArrayList<Line> temp_lines=game.getLines();

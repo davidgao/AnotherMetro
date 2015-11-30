@@ -21,10 +21,10 @@ public class Config {
         t.y=(float)((GRID_Y-point.y)/GRID_Y*2.0-1.0);
         return t;
     }
-    public static float BG2FGx(float x){
+    public static float BG2FGx(Integer x){
         return (float)(x/GRID_X*2.0-1.0);
     }
-    public static float BG2FGy(float y){
+    public static float BG2FGy(Integer y){
         return (float)((GRID_Y-y)/GRID_Y*2.0-1.0);
     }
 }
