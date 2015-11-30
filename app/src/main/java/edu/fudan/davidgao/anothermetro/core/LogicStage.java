@@ -13,6 +13,8 @@ class LogicStage implements Runnable {
         addEvent(GameEvent.TICK);
         addEvent(GameEvent.GROW);
         addEvent(GameEvent.SITE_SPAWN);
+        addEvent(GameEvent.LINE_CHANGE);
+        addEvent(GameEvent.TRAIN_STATE_CHANGE);
     }
 
     @Override
@@ -28,7 +30,7 @@ class LogicStage implements Runnable {
         return alarmMap.get(event);
     }
 
-    synchronized void addEvent(GameEvent event) {
+    private synchronized void addEvent(GameEvent event) {
         Broadcaster bc = new Broadcaster();
         SnoozeRunnable snooze = new SnoozeRunnable(bc);
         broadcasterMap.put(event, bc);

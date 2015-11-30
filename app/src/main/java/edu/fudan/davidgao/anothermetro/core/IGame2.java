@@ -294,9 +294,12 @@ public class IGame2 extends Game { //TODO
     }
     public void addLine(Site s1, Site s2) throws GameException {
         lines.add(new Line(s1, s2));
+        forceNotify(GameEvent.LINE_CHANGE);
+        forceNotify(GameEvent.TRAIN_STATE_CHANGE);
     }
     public void extendLine(Line l, Site src, Site dest) throws GameException {
         l.extend(src, dest);
+        forceNotify(GameEvent.LINE_CHANGE);
     }
 
 

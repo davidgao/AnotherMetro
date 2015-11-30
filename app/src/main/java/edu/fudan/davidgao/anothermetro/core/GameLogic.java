@@ -14,9 +14,11 @@ class GameLogic implements Runnable {
         writeBack = new LogicStage();
         internalCallback = new LogicStage();
         externalCallback = new LogicStage();
-        initEvent(GameEvent.TICK);
-        initEvent(GameEvent.GROW);
-        initEvent(GameEvent.SITE_SPAWN);
+        addEvent(GameEvent.TICK);
+        addEvent(GameEvent.GROW);
+        addEvent(GameEvent.SITE_SPAWN);
+        addEvent(GameEvent.LINE_CHANGE);
+        addEvent(GameEvent.TRAIN_STATE_CHANGE);
         action.addListener(getAlarm(GameEvent.TICK));
     }
 
@@ -28,7 +30,7 @@ class GameLogic implements Runnable {
         externalCallback.run();
     }
 
-    private synchronized void initEvent(GameEvent event) {
+    private synchronized void addEvent(GameEvent event) {
         Broadcaster bc = new Broadcaster();
         bc.addListener(writeBack.getAlarm(event));
         bc.addListener(internalCallback.getAlarm(event));
