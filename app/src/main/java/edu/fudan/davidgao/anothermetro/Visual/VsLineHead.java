@@ -13,9 +13,9 @@ import edu.fudan.davidgao.anothermetro.tools.Point;
  */
 public class VsLineHead {
     public Site site;
-    private int direction;
+    private int direction; // 0~7, 8 directions
     public int color;
-    public PointF[] pos = new PointF[4]; //root, middle, left, right
+    public PointF[] pos = new PointF[4]; //root, middle, left, right points of a head, forming a 'T' pattern
     private float rotateSin, rotateCos;
 
     VsLineHead(Site site, int color, int dir){

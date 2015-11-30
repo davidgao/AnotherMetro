@@ -73,7 +73,7 @@ public class DrawLineHead {
 
 
     public void draw() {
-        reload();
+        reload(); //get line information from BG and compute values of heads
 
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
@@ -180,7 +180,7 @@ public class DrawLineHead {
         heads2GLline();
 
     }
-    private int getDir(Site site){
+    private int getDir(Site site){ //give an available direction of a site to draw a new head
         Integer occupied = occupiedDirs.get(site);
         if(occupied == null){
             occupiedDirs.put(site, 1);

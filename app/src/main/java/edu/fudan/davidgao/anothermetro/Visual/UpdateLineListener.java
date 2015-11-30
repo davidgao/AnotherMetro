@@ -22,7 +22,7 @@ public class UpdateLineListener implements OnTouchListener {
 
     private Game game;
 
-    public PointF touchPos;
+    public PointF touchPos; //Current touch place which could be get by others
 
     private boolean updating, leftSite;
     private long lastDownTime;
@@ -49,25 +49,34 @@ public class UpdateLineListener implements OnTouchListener {
     @Override
     public boolean onTouch(View v, MotionEvent event){
 
+        /* convert v into GameView which contains its scale information, convert pixel coordinates into (-1, 1) range */
         GameView view = (GameView)v;
         touchPos = UI2FGpoint(event.getX(), event.getY(), view.view_width, view.view_height);
 
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
 
-                if(event.getDownTime() <= lastDownTime + 500)return false;
-
+                if(event.getDownTime() <= lastDownTime + 500)return false; //avoid too frequent reaction
                 lastDownTime = event.getDownTime();
-                reload();
+                reload(); //get line and site information from BG and compute necessary values
 
                 VsLineHead touchedLineHead;
-                if ((touchedLineHead = isLineHead(touchPos)) != null) {  //touching head
+                if ((touchedLineHead = isLineHead(touchPos)) != null) {
+                    /* user is touching a line head
+                     * inform BG that user is trying to modify an existed line
+                     * pass line color(index) and site where change starts as arguments
+                     */
                     if(game.lineUpdateModify(touchedLineHead.color, touchedLineHead.site)) {
                         updating = true;
                         leftSite = true;
                     }
-                } else if ((touchedSite = isSite(touchPos)) != null) {  //touching site
+                } else if ((touchedSite = isSite(touchPos)) != null) {
+                    /* user is touching a site
+                     * inform BG that user is trying to add a new line
+                     * pass the start site as argument
+                     */
                     if(game.lineUpdateNew(touchedSite)) {
+
                         updating = true;
                         leftSite = false;
                     }
@@ -77,7 +86,11 @@ public class UpdateLineListener implements OnTouchListener {
             case MotionEvent.ACTION_MOVE:
                 if (updating){
                     if((touchedSite = isSite(touchPos))!=null){
-                        if(leftSite) { //reaching a new site
+                        if(leftSite) {
+                            /* user has dragged to a site
+                             * inform BG that user dragged through a site when updating a line,
+                             * pass the site as argument
+                             */
                             if(game.lineUpdateCheck(touchedSite)) {
                                 leftSite = false;
                             }
@@ -89,6 +102,9 @@ public class UpdateLineListener implements OnTouchListener {
 
             case MotionEvent.ACTION_UP:
                 if (updating) {
+                    /* user has ended current drag action
+                     * inform BG that current line update event is end
+                     */
                     updating = false;
                     game.lineUpdateConfirm();
                 }
@@ -146,11 +162,11 @@ public class UpdateLineListener implements OnTouchListener {
         }
         return null;
     }
-    public VsLineHead isLineHead(PointF onTouch){
+    public VsLineHead isLineHead(PointF touchPos){
         Iterator<VsLineHead> iter = lineHeads.iterator();
 
         for(VsLineHead currentHead = iter.next(); iter.hasNext(); iter.next()){
-            if(distance(onTouch, currentHead.pos[1]) <= Config.SITE_RADIUS){
+            if(distance(touchPos, currentHead.pos[1]) <= Config.SITE_RADIUS){
                 return currentHead;
             }
         }
