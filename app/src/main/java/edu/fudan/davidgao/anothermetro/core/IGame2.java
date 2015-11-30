@@ -33,6 +33,7 @@ public class IGame2 extends Game { //TODO
         initTick();
         initGrowth();
         initSiteSpawn();
+        initTrainMove();
     }
 
     /* Game creation */
@@ -79,6 +80,10 @@ public class IGame2 extends Game { //TODO
         siteSpawnNotifier = logic.getAlarm(GameEvent.SITE_SPAWN);
         logic.action.addListener(siteSpawnIntervalRunnable);
     }
+    private void initTrainMove() {
+        trainMoveNotifier = logic.getAlarm(GameEvent.TRAIN_STATE_CHANGE);
+        logic.action.addListener(trainMoveRunnable);
+    }
 
     /* Callback */
     public Broadcaster getCallbackBroadcaster(GameEvent event) {
@@ -98,6 +103,7 @@ public class IGame2 extends Game { //TODO
             state = GameState.PAUSED;
             startGrowth();
             startSiteSpawn();
+            startTrainMove();
         } else throw new GameException("Cannot start game: Game is not new.");
     }
     public synchronized void run() throws GameException {
@@ -302,6 +308,51 @@ public class IGame2 extends Game { //TODO
         forceNotify(GameEvent.LINE_CHANGE);
     }
 
+    /* Train Moving */
+    private Runnable trainMoveRunnable = new Runnable() {
+        @Override
+        public void run() {
+            trainMove();
+        }
+    };
+    private synchronized void trainMove() {
+        boolean have_moved = false;
+        long now = getTickCounter();
+        for (Line line : lines){
+            TrainState ts = line.getTrainState();
+            ArrayList<Site> s = line.getSites();
+            if (ts instanceof StandbyTrainState) {
+                Site curr = ((StandbyTrainState) ts).site;
+                Site next = s.get(s.indexOf(curr) + ts.direction);
+                double dist = curr.dist(next.pos);
+                ts = new RunningTrainState(line, curr, next, ts.direction, now, now + (long)dist);
+                line.setTrainState(ts);
+                have_moved = true;
+            } else if (ts instanceof RunningTrainState) {
+                if (now < ((RunningTrainState) ts).arrival) {
+                    continue;
+                }
+                Site curr = ((RunningTrainState) ts).s2;
+                int dir = ts.direction;
+                if (dir == 1 && curr == s.get(s.size())) {
+                    dir = -1;
+                }
+                if (dir == -1 && curr == s.get(0)) {
+                    dir = 1;
+                }
+                ts = new StandbyTrainState(line, curr, dir);
+                line.setTrainState(ts);
+                have_moved = true;
+            }
+        }
+        if (have_moved) {
+            trainMoveNotifier.run();
+        }
+    }
+    private Runnable trainMoveNotifier;
+    private void startTrainMove() {
+
+    }
 
     private void forceNotify(GameEvent event) {
         logic.writeBack.getBroadcaster(event).run();

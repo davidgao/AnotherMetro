@@ -10,6 +10,10 @@ public class Site {
     public final Point<Integer> pos;
     public final SiteType type;
 
+    public double dist(Point<Integer> pos) {
+        return dist(pos.x, pos.y);
+    }
+
     public double dist(int x, int y) {
         final int deltaX = pos.x - x;
         final int deltaY = pos.y - y;

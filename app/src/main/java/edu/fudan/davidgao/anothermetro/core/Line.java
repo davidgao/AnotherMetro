@@ -31,4 +31,8 @@ public class Line {
     public TrainState getTrainState() {
         return trainState;
     }
+
+    void setTrainState(TrainState trainState) {
+        this.trainState = trainState;
+    }
 }
