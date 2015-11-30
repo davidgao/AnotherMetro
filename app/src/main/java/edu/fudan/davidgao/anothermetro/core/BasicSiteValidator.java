@@ -14,8 +14,9 @@ public class BasicSiteValidator extends SiteValidator {
     };
     private double minDist = 10.0;
 
-    public BasicSiteValidator(IGame game) {
+    public BasicSiteValidator(IGame2 game) {
         super(game);
+        maintain();
     }
 
     public double getMinDist() {

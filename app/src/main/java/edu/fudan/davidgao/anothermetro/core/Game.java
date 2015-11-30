@@ -7,16 +7,19 @@ import edu.fudan.davidgao.anothermetro.tools.*;
 public abstract class Game {
     /* Singleton */
     public static Game getInstance() {
-        return IGame.getInstance();
+        return IGame2.getInstance();
     }
 
     /* Game creation */
     public static Game create() throws GameException {
-        return IGame.create();
+        return IGame2.create();
     }
     public static Game create(Matrix2D<MapDatum> map) throws GameException {
-        return IGame.create(map);
+        return IGame2.create(map);
     }
+
+    /* Callback */
+    public abstract Broadcaster getCallbackBroadcaster(GameEvent event);
 
     /* Life cycle control */
     public abstract void start() throws GameException;
@@ -41,7 +44,6 @@ public abstract class Game {
     public abstract long getGrowthInterval();
     public abstract void setGrowthInterval(long interval) throws GameException;
     public abstract void setGrowth(int maxGrowth, int baseGrowth) throws GameException;
-    public abstract boolean addGrowthListener(Runnable listener)  throws GameException;
 
     /* Site Spawn */
     public abstract long getSiteSpawnInterval();
@@ -49,6 +51,6 @@ public abstract class Game {
 
     /* Lines */
     public abstract ArrayList<Line> getLines();
-    public void addLine(Site s1, Site s2) throws GameException;
-    public void extendLine(Line l, Site src, Site dest) throws GameException;
+    public abstract void addLine(Site s1, Site s2) throws GameException;
+    public abstract void extendLine(Line l, Site src, Site dest) throws GameException;
 }

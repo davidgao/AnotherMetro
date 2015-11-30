@@ -17,6 +17,7 @@ class GameLogic implements Runnable {
         initEvent(GameEvent.TICK);
         initEvent(GameEvent.GROW);
         initEvent(GameEvent.SITE_SPAWN);
+        action.addListener(getAlarm(GameEvent.TICK));
     }
 
     @Override
