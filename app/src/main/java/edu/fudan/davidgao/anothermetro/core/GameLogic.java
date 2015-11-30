@@ -5,8 +5,8 @@ import java.util.EnumMap;
 import edu.fudan.davidgao.anothermetro.tools.Broadcaster;
 
 class GameLogic implements Runnable {
-    private final Broadcaster action;
-    private final LogicStage writeBack, internalCallback, externalCallback;
+    final Broadcaster action;
+    final LogicStage writeBack, internalCallback, externalCallback;
     private final EnumMap<GameEvent, Runnable> alarmMap = new EnumMap<>(GameEvent.class);
 
     GameLogic() {
@@ -14,6 +14,9 @@ class GameLogic implements Runnable {
         writeBack = new LogicStage();
         internalCallback = new LogicStage();
         externalCallback = new LogicStage();
+        initEvent(GameEvent.TICK);
+        initEvent(GameEvent.GROW);
+        initEvent(GameEvent.SITE_SPAWN);
     }
 
     @Override
