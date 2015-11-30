@@ -73,9 +73,7 @@ public class IGame2 extends Game { //TODO
         logic.action.addListener(growthIntervalRunnable);
     }
     private void initSiteSpawn() {
-        BasicSiteValidator tmp = new BasicSiteValidator(this);
-        //tmp.setMinDist(5.0);
-        siteValidator = tmp;
+        siteValidator = new BasicSiteValidator(this);
         siteSpawnIntervalRunnable = new IntervalRunnable(siteSpawnRunnable);
         siteSpawnIntervalRunnable.setInterval(defaultSiteSpawnInterval);
         siteSpawnNotifier = logic.getAlarm(GameEvent.SITE_SPAWN);
@@ -289,14 +287,16 @@ public class IGame2 extends Game { //TODO
     }
 
     /* Lines */
+    ArrayList<Line> lines = new ArrayList<>();
+    @SuppressWarnings("unchecked")
     public ArrayList<Line> getLines() {
-        return null;
+        return (ArrayList<Line>)lines.clone();
     }
     public void addLine(Site s1, Site s2) throws GameException {
-
+        lines.add(new Line(s1, s2));
     }
     public void extendLine(Line l, Site src, Site dest) throws GameException {
-
+        l.extend(src, dest);
     }
 
 

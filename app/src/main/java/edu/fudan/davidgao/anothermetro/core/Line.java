@@ -6,7 +6,7 @@ import edu.fudan.davidgao.anothermetro.core.GameException;
 import edu.fudan.davidgao.anothermetro.core.Site;
 
 public class Line {
-    public ArrayList<Site> sites = new ArrayList<>(2);
+    public ArrayList<Site> sites = new ArrayList<>();
 
     public Line(Site s1, Site s2) {
         sites.add(s1);
