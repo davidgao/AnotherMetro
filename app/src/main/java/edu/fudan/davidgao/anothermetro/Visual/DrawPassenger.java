@@ -161,7 +161,7 @@ public class DrawPassenger {
 	|   |   |   |   |   |  <- (r = 0, c = 0 ~ col - 1)  |
 	+---+---+---+---+2pr+                               -
 	|       |                                           |
-	| aSite |                                           | site
+	|   #   |                                           | site
 	|       |                                           |
 	+--2*r--+                                           -
 	
@@ -169,6 +169,16 @@ public class DrawPassenger {
 	
 	*/
 	
+	/*
+	
+	+---+---+---+                         -
+	|   |   |   |  <- (r = 1, c = 0 ~ 2)  |
+	+---+-#-+---+                         | passengerTrainbox
+	|   |   |   |  <- (r = 0, c = 0 ~ 2)  |
+	+---+---+---+                         -
+	
+	*/
+		
 	private void GTMDvertexCoords() {
 		ArrayList<Site> sites = gameMain.getSites();
 		for (int i = 0; i < sites.length; i ++) {
@@ -204,9 +214,48 @@ public class DrawPassenger {
 		for (int i = 0; i < lines.length; i ++) {
 			Line line = lines.get(i);
 			Train train = line.getTrain();
+			TrainState trainState = train.getState();
+			double tx, ty;
+			int angle;
+			if (trainState instanceof StandbyTrainState) {
+				int ix = trainState.site.pos.x;
+				int iy = trainState.site.pos.y;
+				tx = Config.BG2FGx(ix);
+				ty = Config.BG2FGy(iy);
+				angle = 0;
+			}
+			if (trainState instanceof RunningTrainState) {
+				VsLine vsLine = new VsLine(line);
+				VsSegment vsSegment = new VsSegment(vsLine, trainState.s1, trainState.s2);
+				long depart = trainState.departure;
+				long arrival = trainState.arrival;
+				long currentTick = gameMain.getTickCounter();
+				float fraction = (float)(currentTick - depart) / (arrival - depart);
+				VsTrainState vsTrainState = vsSegment.getTrainState(fraction, trainState.direction);
+				tx = vsTrainState.coordinate.x;
+				ty = vsTrainState.coordinate.y;
+				angle = vsTrainState.angle;
+			}
 			ArrayList<Passenger> passengers = train.getPassengers();
+			int r = 0, c = 0;
 			for (int j = 0; j < passengers.length; j ++) {
-				
+				Passenger passenger = passengers.get(j);
+				double px = tx - 3 * (pr + gap) + (pr + gap) * (2 * c + 1);
+				double py = ty - 2 * (pr + gap) + (pr + gap) * (2 * r + 1);
+				switch (passenger.type) {
+					case CIRCLE: addCircle(px, py); break;
+					case TRIANGLE: addTriangle(px, py); break;
+					case SQUARE: addSquare(px, py); break;
+					case UNIQUE1: addU1(px, py); break;
+					case UNIQUE2: addU2(px, py); break;
+					//...
+					default: 
+				}
+				c ++;
+				if (c == 3) {
+					r ++;
+					c = 0;
+				}
 			}
 		}
 	}
