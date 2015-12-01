@@ -7,13 +7,13 @@ import edu.fudan.davidgao.anothermetro.tools.Point;
  * Created by gqp on 2015/11/28.
  */
 public class Config {
-    public static int GRID_X=400;
-    public static int GRID_Y=300;
+    public static int GRID_X=40;
+    public static int GRID_Y=30;
     public static final float SITE_RADIUS=0.05f;
 
     public static final int MAX_LINES=8;
     public static final int MAX_SEGMENTS=200;
-    public static final double LATENT_SITE_RADIUS=0.05;
+    public static final double LATENT_SITE_RADIUS=0.01;
 
     public static final float MAX_INF=1e20f;
     public static final float Z_SEGMENT=0.0f;
@@ -31,7 +31,7 @@ public class Config {
             { 0.8f, 0.1f, 0.8f, 1.0f },
             { 0.9f, 0.7f, 0.7f, 1.0f },
             { 0.7f, 0.7f, 0.9f, 1.0f }}; //TODO
-    public static final float color_extra_line[] = {0.2f, 0.2f, 0.2f, 0.5f};
+    public static final float color_extra_line[] = {0.4f, 0.4f, 0.4f, 1.0f};
 
     public Config(){
     }

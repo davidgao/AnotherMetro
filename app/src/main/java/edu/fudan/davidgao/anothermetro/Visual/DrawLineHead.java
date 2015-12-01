@@ -153,8 +153,8 @@ public class DrawLineHead {
     }
     //End of GLSL
 
-    private ArrayList<VsLineHead> lineHeads;
-    private HashMap<Site, Integer> occupiedDirs;
+    private ArrayList<VsLineHead> lineHeads = new ArrayList<>();
+    private HashMap<Site, Integer> occupiedDirs=new HashMap<>();
     private Game game;
 
     private class LineChangeListener implements Runnable{
@@ -194,11 +194,11 @@ public class DrawLineHead {
 
         }
         private void heads2GLline(){
-            Iterator<VsLineHead> iter = lineHeads.iterator();
-            VsLineHead currentHead = iter.next();
+            VsLineHead currentHead;
 
             synchronized (lineCoords) {
-                for (int i = 0; iter.hasNext(); i++, iter.next()) {
+                for (int i = 0; i<lineHeads.size(); i++) {
+                    currentHead = lineHeads.get(i);
                     for (int j = 0; j < 4; j++) {
                         for (int k = 0; k < 4; k++) {
                             lineColors[i * 16 + j * 4 + k] = Config.color_list[currentHead.color][k];
@@ -210,6 +210,10 @@ public class DrawLineHead {
                 }
                 vertexCount = lineHeads.size() * 4;
             }
+            colorBuffer.put(lineColors);
+            colorBuffer.position(0);
+            vertexBuffer.put(lineCoords);
+            vertexBuffer.position(0);
         }
     }
     private LineChangeListener LCListener = new LineChangeListener();

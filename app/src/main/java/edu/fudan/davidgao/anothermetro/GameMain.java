@@ -36,8 +36,6 @@ public class GameMain extends AppCompatActivity {
         try {
             Matrix2D<MapDatum> map = new Matrix2D<>(Config.GRID_X, Config.GRID_Y);
             Game game = Game.create();
-            game.start();
-            game.run();
         }catch(GameException e) {
             e.printStackTrace();
         }

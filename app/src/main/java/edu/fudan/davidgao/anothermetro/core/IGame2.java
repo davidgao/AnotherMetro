@@ -40,7 +40,7 @@ public class IGame2 extends Game { //TODO
     /* Game creation */
     public static Game create() throws GameException {
         /* Create a all-land map */
-        Matrix2D<MapDatum> map = new Matrix2D<>(400, 300);
+        Matrix2D<MapDatum> map = new Matrix2D<>(40, 30);
         map.fill(MapDatum.LAND);
         /* and try to create */
         return create(map);
@@ -349,7 +349,7 @@ public class IGame2 extends Game { //TODO
                 }
                 Site curr = ((RunningTrainState) ts).s2;
                 int dir = ts.direction;
-                if (dir == 1 && curr == s.get(s.size())) {
+                if (dir == 1 && curr == s.get(s.size()-1)) {
                     dir = -1;
                 }
                 if (dir == -1 && curr == s.get(0)) {

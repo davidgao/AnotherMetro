@@ -8,6 +8,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
+import edu.fudan.davidgao.anothermetro.core.GameException;
 import edu.fudan.davidgao.anothermetro.core.Line;
 import edu.fudan.davidgao.anothermetro.core.Site;
 import edu.fudan.davidgao.anothermetro.core.Game;
@@ -162,6 +163,9 @@ public class DrawLine {
 
         // creates OpenGL ES program executables
         GLES20.glLinkProgram(mProgram);
+
+
+
     }
     //End of GLSL
 
@@ -169,7 +173,7 @@ public class DrawLine {
         game=Game.getInstance();
         lineCoords=new float[Config.MAX_SEGMENTS*4*3];          // 4 for vertices (2 line segments), 3 for xyz-coordinates
         lineColors=new float[Config.MAX_SEGMENTS*4*4];          // 4 for vertices (2 line segments), 4 for rgba colors
-        Broadcaster b = game.getCallbackBroadcaster(GameEvent.TICK);
+        Broadcaster b = game.getCallbackBroadcaster(GameEvent.LINE_CHANGE);
         Runnable drawLine = new Runnable() {
             @Override
             public synchronized void run(){
@@ -230,7 +234,7 @@ public class DrawLine {
         int idx=-1;
         float minV=Config.MAX_INF;
         for (int i=0;i<a.length;i++){
-            if (minV>a[i]){
+            if (minV>a[i]+Config.EPSI){
                 minV=a[i];
                 idx=i;
             }
@@ -292,10 +296,10 @@ public class DrawLine {
         cpointx[7]=(float)(1.0*st.x); cpointy[7]=(float)(s*st.x+ed.y-s*ed.x);  //E2
         float [] cresult=new float[8];
         for (int i=0;i<4;i++){
-            cresult[i]=distance(st.x, st.y, cpointx[i], cpointy[i]);
+            cresult[i]=distance(st.x, st.y, cpointx[i], cpointy[i])+distance(ed.x, ed.y, cpointx[i], cpointy[i]);
         }
         for (int i=4;i<8;i++) {
-            cresult[i] = distance(ed.x, ed.y, cpointx[i], cpointy[i]);
+            cresult[i] = distance(ed.x, ed.y, cpointx[i], cpointy[i])+distance(st.x, st.y, cpointx[i], cpointy[i]);
         }
         int idx = minIndex(cresult);
         switch (idx){
@@ -417,10 +421,10 @@ public class DrawLine {
         cpointx[7]=(float)(1.0*st.x); cpointy[7]=(float)(s*st.x+ed.y-s*ed.x);  //E2
         float [] cresult=new float[8];
         for (int i=0;i<4;i++){
-            cresult[i]=distance(st.x, st.y, cpointx[i], cpointy[i]);
+            cresult[i]=distance(st.x, st.y, cpointx[i], cpointy[i])+distance(ed.x, ed.y, cpointx[i], cpointy[i]);
         }
         for (int i=4;i<8;i++) {
-            cresult[i] = distance(ed.x, ed.y, cpointx[i], cpointy[i]);
+            cresult[i] = distance(ed.x, ed.y, cpointx[i], cpointy[i])+distance(st.x, st.y, cpointx[i], cpointy[i]);
         }
         int idx = minIndex(cresult);
         ArrayList<PointF> result=new ArrayList<>();
@@ -442,6 +446,8 @@ public class DrawLine {
                     lineColors[i*16+j*4+k]=Config.color_list[temp.line.color][k];
         }
 	    vertexCount = segments.size()*4;
+        colorBuffer.put(lineColors);
+        colorBuffer.position(0);
         vertexBuffer.put(lineCoords);
         vertexBuffer.position(0);
     }
@@ -452,7 +458,6 @@ public class DrawLine {
         ArrayList<Site> temp_sites=game.getSites();
         ArrayList<Line> temp_lines=game.getLines();
         System.out.printf("Site Size = %d\n", temp_sites.size());
-        temp_lines.add(new Line(temp_sites.get(0), temp_sites.get(1)));
         segments.clear();
         sites.clear();
         lines.clear();

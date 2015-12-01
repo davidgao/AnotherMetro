@@ -47,7 +47,7 @@ public class VsLineHead {
         }
     }
     private PointF rotate(float x, float y, PointF offset){
-        PointF target = new PointF(x*rotateCos - y*rotateSin, x*rotateSin + y*rotateSin);
+        PointF target = new PointF(x*rotateCos - y*rotateSin, x*rotateSin + y*rotateCos);
         target.offset(offset.x, offset.y);
         return target;
     }

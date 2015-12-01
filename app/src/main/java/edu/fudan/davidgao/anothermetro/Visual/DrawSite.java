@@ -131,7 +131,7 @@ public class DrawSite {
 	
 	private void addTriangleSite(double x, double y) {
 		double v3 = Math.sqrt(3.0);
-		addVertex(x + r * v3, y - hr); addVertex(x - r * v3, y - hr); addVertex(x, y + r);
+		addVertex(x + r * v3/2.0, y - hr); addVertex(x - r * v3/2.0, y - hr); addVertex(x, y + r);
 	}
 	
 	private void addSquareSite(double x, double y) {

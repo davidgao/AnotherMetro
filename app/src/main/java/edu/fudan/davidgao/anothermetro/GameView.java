@@ -3,6 +3,7 @@ package edu.fudan.davidgao.anothermetro;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 
+import edu.fudan.davidgao.anothermetro.Visual.UpdateLineListener;
 import edu.fudan.davidgao.anothermetro.core.GameException;
 
 
@@ -34,5 +35,9 @@ public class GameView extends GLSurfaceView {
         setRenderMode(RENDERMODE_CONTINUOUSLY);
 
         singleton = this;
+    }
+
+    public void addUpdateLineListener(UpdateLineListener listener){
+        setOnTouchListener(listener);
     }
 }

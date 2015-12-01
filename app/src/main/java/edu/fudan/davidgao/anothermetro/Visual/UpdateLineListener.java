@@ -150,9 +150,8 @@ public class UpdateLineListener implements OnTouchListener {
 
             synchronized (sites) {
                 sites.clear();
-                Iterator<Site> iter = temp_sites.iterator();
-                for (Site temp = iter.next(); iter.hasNext(); temp = iter.next()) {
-                    sites.add(new Site_FGpoint(temp));
+                for (int i=0;i<temp_sites.size();i++) {
+                    sites.add(new Site_FGpoint(temp_sites.get(i)));
                 }
             }
         }
@@ -209,7 +208,7 @@ public class UpdateLineListener implements OnTouchListener {
                                 ArrayList<PointF> temp = DrawLine.calcLine(Config.BG2FGpoint(startSite.pos), Config.BG2FGpoint(endSite.pos));
                                 temp.add(temp.get(1));
                                 for(int i=0;i<4;i++) {
-                                    lineColors[i*4 + 3] = 0.5f;
+                                    lineColors[i*4 + 3] = 1.0f;
                                     lineColors[i*4 + 2] = Config.color_list[planColor][2];
                                     lineColors[i*4 + 1] = Config.color_list[planColor][1];
                                     lineColors[i*4 + 0] = Config.color_list[planColor][0];
@@ -217,13 +216,17 @@ public class UpdateLineListener implements OnTouchListener {
                                     lineCoords[i*3 + 1] = temp.get(i).y;
                                     lineCoords[i*3 + 0] = temp.get(i).x;
                                 }
+                                colorBuffer.put(lineColors);
+                                colorBuffer.position(0);
+                                vertexBuffer.put(lineCoords);
+                                vertexBuffer.position(0);
                             }
                             else if( adding && game.canAddLine(startSite, touchedSite) ) {
                                 endSite = touchedSite;
                                 ArrayList<PointF> temp = DrawLine.calcLine(Config.BG2FGpoint(startSite.pos), Config.BG2FGpoint(endSite.pos));
                                 temp.add(temp.get(1));
                                 for(int i=0;i<4;i++) {
-                                    lineColors[i*4 + 3] = 0.5f;
+                                    lineColors[i*4 + 3] = 1.0f;
                                     lineColors[i*4 + 2] = Config.color_list[nextColor][2];
                                     lineColors[i*4 + 1] = Config.color_list[nextColor][1];
                                     lineColors[i*4 + 0] = Config.color_list[nextColor][0];
@@ -231,6 +234,10 @@ public class UpdateLineListener implements OnTouchListener {
                                     lineCoords[i*3 + 1] = temp.get(i).y;
                                     lineCoords[i*3 + 0] = temp.get(i).x;
                                 }
+                                colorBuffer.put(lineColors);
+                                colorBuffer.position(0);
+                                vertexBuffer.put(lineCoords);
+                                vertexBuffer.position(0);
                             }
                         }
                     }
@@ -239,23 +246,26 @@ public class UpdateLineListener implements OnTouchListener {
                 return true;
 
             case MotionEvent.ACTION_UP:
-                if(endSite != null) {
-                    if(extending) {
+                if(extending) {
+                    if(endSite!=null) {
                         try {
                             game.extendLine(planLine, startSite, endSite);
                         } catch (GameException e) {
 
                         }
-                        extending = false;
                     }
-                    else if(adding){
+                    extending = false;
+                    vertexCount = 0;
+                }
+                else if(adding){
+                    if(endSite!=null) {
                         try {
                             game.addLine(startSite, endSite);
                         } catch (GameException e) {
 
                         }
-                        adding = false;
                     }
+                    adding = false;
                     vertexCount = 0;
                 }
                 return true;
@@ -269,8 +279,9 @@ public class UpdateLineListener implements OnTouchListener {
 
     private Site isSite(PointF touchPos){
         synchronized (sites) {
-            Iterator<Site_FGpoint> iter = sites.iterator();
-            for (Site_FGpoint temp = iter.next(); iter.hasNext(); temp = iter.next()) {
+            Site_FGpoint temp;
+            for (int i=0;i<sites.size();i++) {
+                temp = sites.get(i);
                 if (distance(temp.pos, touchPos) < Config.SITE_RADIUS) {
                     return temp.site;
                 }
@@ -280,8 +291,9 @@ public class UpdateLineListener implements OnTouchListener {
     }
     public VsLineHead isLineHead(PointF touchPos){
         synchronized (lineHeads) {
-            Iterator<VsLineHead> iter = lineHeads.iterator();
-            for (VsLineHead currentHead = iter.next(); iter.hasNext(); iter.next()) {
+            VsLineHead currentHead;
+            for (int i=0;i<lineHeads.size();i++) {
+                currentHead = lineHeads.get(i);
                 if (distance(touchPos, currentHead.pos[1]) <= Config.SITE_RADIUS) {
                     return currentHead;
                 }
@@ -355,6 +367,10 @@ public class UpdateLineListener implements OnTouchListener {
                 lineCoords[i*3 + 1] = temp.get(i).y;
                 lineCoords[i*3 + 0] = temp.get(i).x;
             }
+            colorBuffer.put(lineColors);
+            colorBuffer.position(0);
+            vertexBuffer.put(lineCoords);
+            vertexBuffer.position(0);
         }
 
         // Add program to OpenGL ES environment
