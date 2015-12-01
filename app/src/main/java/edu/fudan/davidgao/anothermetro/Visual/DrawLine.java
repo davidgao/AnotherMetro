@@ -195,7 +195,7 @@ public class DrawLine {
     }
 
     //return a point at given angle on a circle
-    private PointF getPosByAngle(Site site, double angle){
+    public static PointF getPosByAngle(Site site, double angle){
         PointF result=new PointF(0,0);
         result.x=(float)(Config.BG2FGx(site.pos.x)+Math.cos(angle)*Config.LATENT_SITE_RADIUS);result.y=(float)(Config.BG2FGy(site.pos.y)+Math.sin(angle)*Config.LATENT_SITE_RADIUS);
         return result;
@@ -234,6 +234,19 @@ public class DrawLine {
             }
             return;
         }
+
+        double k = (ed.y - st.y)/(ed.x-st.x);
+        if (Math.abs(Math.abs(k)-1)<Config.EPSI){
+            if (Math.round(k)==1){
+                vsSegment.st_a = 7;
+                vsSegment.ed_a = 3;
+            }
+            if (Math.round(k)==-1){
+                vsSegment.st_a = 1;
+                vsSegment.ed_a = 5;
+            }
+        }
+
         if (st.y==ed.y){
             if (st.x<ed.x){
                 vsSegment.st_a=0;
@@ -272,11 +285,29 @@ public class DrawLine {
                     vsSegment.st_a = 3;
                     vsSegment.ed_a = 0;
                 }else{
-                    vsSegment.st_a = 7;
+                    vsSegment.st_a = 1;
                     vsSegment.ed_a = 4;
                 }
                 break;
             case 1:
+                if (ed.x<st.x) {
+                    vsSegment.st_a = 5;
+                    vsSegment.ed_a = 2;
+                }else{
+                    vsSegment.st_a = 1;
+                    vsSegment.ed_a = 6;
+                }
+                break;
+            case 2:
+                if (ed.y<st.y) {
+                    vsSegment.st_a = 7;
+                    vsSegment.ed_a = 4;
+                }else{
+                    vsSegment.st_a = 3;
+                    vsSegment.ed_a = 0;
+                }
+                break;
+            case 3:
                 if (ed.x<st.x) {
                     vsSegment.st_a = 3;
                     vsSegment.ed_a = 6;
@@ -285,75 +316,72 @@ public class DrawLine {
                     vsSegment.ed_a = 2;
                 }
                 break;
-            case 2:
-                if (ed.y<st.y) {
-                    vsSegment.st_a = 1;
-                    vsSegment.ed_a = 4;
-                }else{
-                    vsSegment.st_a = 5;
-                    vsSegment.ed_a = 0;
-                }
-                break;
-            case 3:
-                if (ed.x<st.x) {
-                    vsSegment.st_a = 5;
-                    vsSegment.ed_a = 2;
-                }else{
-                    vsSegment.st_a = 1;
-                    vsSegment.ed_a = 6;
-                }
-                break;
             case 4:
                 if (st.y<ed.y) {
                     vsSegment.st_a = 0;
-                    vsSegment.ed_a = 3;
+                    vsSegment.ed_a = 5;
                 }else{
                     vsSegment.st_a = 4;
-                    vsSegment.ed_a = 7;
+                    vsSegment.ed_a = 1;
                 }
                 break;
             case 5:
                 if (st.x<ed.x) {
-                    vsSegment.st_a = 6;
-                    vsSegment.ed_a = 3;
-                }else{
                     vsSegment.st_a = 2;
-                    vsSegment.ed_a = 7;
+                    vsSegment.ed_a = 5;
+                }else{
+                    vsSegment.st_a = 6;
+                    vsSegment.ed_a = 1;
                 }
                 break;
             case 6:
                 if (st.y<ed.y) {
                     vsSegment.st_a = 4;
-                    vsSegment.ed_a = 1;
+                    vsSegment.ed_a = 7;
                 }else{
                     vsSegment.st_a = 0;
-                    vsSegment.ed_a = 5;
+                    vsSegment.ed_a = 3;
                 }
                 break;
             case 7:
                 if (st.x<ed.x) {
-                    vsSegment.st_a = 2;
-                    vsSegment.ed_a = 5;
-                }else{
                     vsSegment.st_a = 6;
-                    vsSegment.ed_a = 1;
+                    vsSegment.ed_a = 3;
+                }else{
+                    vsSegment.st_a = 2;
+                    vsSegment.ed_a = 7;
                 }
                 break;
         }
     }
 
     //return three point of line from st to ed
-    private ArrayList<PointF> calcLine(PointF st, PointF ed){
+    public static ArrayList<PointF> calcLine(PointF st, PointF ed){
         if (st.x==ed.x){
             ArrayList<PointF> result=new ArrayList<>();
-            result.add(st);result.add(new PointF(st.x, st.y));result.add(ed);
+            result.add(st);result.add(new PointF(st.x, 0.5f*(st.y+ed.y)));result.add(ed);
             return result;
         }
         if (st.y==ed.y){
             ArrayList<PointF> result=new ArrayList<>();
-            result.add(st);result.add(new PointF(st.x,st.y));result.add(ed);
+            result.add(st);result.add(new PointF(0.5f*(st.x+ed.x),st.y));result.add(ed);
             return result;
         }
+
+        double k = (ed.y - st.y)/(ed.x-st.x);
+        if (Math.abs(Math.abs(k)-1)<Config.EPSI){
+            if (Math.round(k)==1){
+                ArrayList<PointF> result=new ArrayList<>();
+                result.add(st);result.add(new PointF(0.5f*(st.x+ed.x),0.5f*(st.y+ed.y)));result.add(ed);
+                return result;
+            }
+            if (Math.round(k)==-1){
+                ArrayList<PointF> result=new ArrayList<>();
+                result.add(st);result.add(new PointF(0.5f*(st.x+ed.x),0.5f*(st.y+ed.y)));result.add(ed);
+                return result;
+            }
+        }
+
         float [] cpointx=new float[8];
         float [] cpointy=new float[8];
         float s =1.0f;
