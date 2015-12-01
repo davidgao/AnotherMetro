@@ -406,7 +406,7 @@ public class IGame2 extends Game { //TODO
         }
         int index = rand.nextInt(sites.size());
         Site s = sites.get(index);
-        Passenger p = new Passenger(type, s);
+        Passenger p = new Passenger(SiteType.fromInt(type), s);
         passengers.add(p);
         passengerChangeNotifier.run();
     }
