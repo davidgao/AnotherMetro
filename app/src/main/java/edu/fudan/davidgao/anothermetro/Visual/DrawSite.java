@@ -16,13 +16,13 @@ public class DrawSite {
 	
 	private FloatBuffer vertexBuffer;
 	private int mPositionHandle;
-    private int mColorHandle;
-	static final int COORDS_PER_VERTEX = 3;
-    private final int vertexStride = COORDS_PER_VERTEX * 4;
+	private int mColorHandle;
+	private static final int COORDS_PER_VERTEX = 3;
+	private final int vertexStride = COORDS_PER_VERTEX * 4;
 	
 	private int vertexCount = 0;
 	private float[] vertexCoords;
-	static final int GTMDCoordsCount = 100000;
+	private static final int GTMDCoordsCount = 100000;
 	
 	private final String vertexShaderCode = 
 		"attribute vec4 vPosition;" + 
@@ -45,7 +45,7 @@ public class DrawSite {
 	
 	private Game gameMain;
 	private final int mProgram;
-	private static float color = 1.0f;
+	private static float color = 1.0f; /* Config.siteColor */
 		
 	public DrawSite {
 		gameMain = Game.getInstance();
@@ -76,8 +76,9 @@ public class DrawSite {
 		GLES20.glDisableVertexAttribArray(mPositionHandle);
 	}
 	
-	static final double r = 0.05;
-	static final double hr = r / 2.0;
+	private static final double r = 0.05; /* Config.siteRadius */
+	private static final double hr = r / 2.0; /* Config.siteHalfRadius */
+	private static final float z = 0.0f; /* Config.siteZ */
 	
 	public static double BG2FGx(int x){
         return (double)x / Config.GRID_X * 2.0 - 1.0;
@@ -90,7 +91,7 @@ public class DrawSite {
 	private addVertex(double x, double y) {
 		vertexCoords[vertexCount ++] = (float) x;
 		vertexCoords[vertexCount ++] = (float) y;
-		vertexCoords[vertexCount ++] = 0.0f;
+		vertexCoords[vertexCount ++] = z;
 	}
 	
 	private void addCircleSite(double x, double y) {
