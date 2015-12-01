@@ -7,9 +7,14 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import edu.fudan.davidgao.anothermetro.Line;
-import edu.fudan.davidgao.anothermetro.Site;
+import edu.fudan.davidgao.anothermetro.core.Line;
+import edu.fudan.davidgao.anothermetro.core.RunningTrainState;
+import edu.fudan.davidgao.anothermetro.core.Site;
 import edu.fudan.davidgao.anothermetro.core.Game;
+import edu.fudan.davidgao.anothermetro.core.GameEvent;
+import edu.fudan.davidgao.anothermetro.core.StandbyTrainState;
+import edu.fudan.davidgao.anothermetro.core.Train;
+import edu.fudan.davidgao.anothermetro.core.TrainState;
 import edu.fudan.davidgao.anothermetro.tools.Broadcaster;
 
 /**
@@ -19,14 +24,14 @@ public class DrawTrain {
     private final String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
-            "uniform mat4 uMVPMatrix;" +
             "attribute vec4 vPosition;" +
             "void main() {" +
             // the matrix must be included as a modifier of gl_Position
             // Note that the uMVPMatrix factor *must be first* in order
             // for the matrix multiplication product to be correct.
-            "  gl_Position = uMVPMatrix * vPosition;" +
+            "  gl_Position = vPosition;" +
             "}";
+    // TODO: later change color according to line
     private final String fragmentShaderCode =
             "precision mediump float;" +
             "uniform vec4 vColor;" +
@@ -39,9 +44,9 @@ public class DrawTrain {
 
     private int mPositionHandle;
     private int mColorHandle;
-    private int mMVPMatrixHandle;
     // number of coordinates per vertex in this array
-    static final int  COORDS_PRE_VERTEX = 4;
+    private static final int COORDS_PER_VERTEX = 3;
+    private final int vertexStride = COORDS_PER_VERTEX * 4;
     private float[] vertexCoords;
     private int vertexCount = 0;
 
@@ -65,7 +70,7 @@ public class DrawTrain {
         game = Game.getInstance();
         vertexCoords = new float[3 * 4 * Config.MAX_SEGMENTS];
         Broadcaster broadcaster = game.getCallbackBroadcaster(GameEvent.TICK);
-        broadcaster.addListener(TrainRefresh_RUNABLE());
+        broadcaster.addListener(TrainRefreshRunnable);
 
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 //(number of coordinate values * 4 byte per float)
@@ -103,21 +108,13 @@ public class DrawTrain {
         GLES20.glEnableVertexAttribArray(mPositionHandle);
 
         // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PRE_VERTEX, GLES20.GL_FLOAT, flase, vertexStride, vertexBuffer);
+        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
 
         // get handle to fragment shader's vColor member
         mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 
         // Set color for drawing the triangle
         GLES20.glUniform4fv(mColorHandle, 1, color, 0);
-
-        // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
-        checkGlError("glGetUniformLocation");
-
-        // Apply the projection and view transformation
-        GLES20.gluniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-        checkGlError("glUniformMatrix4fv");
 
         // Draw the train
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
@@ -163,13 +160,12 @@ public class DrawTrain {
     private ArrayList<Train> trains;
     private ArrayList<TrainState> trainStates;
     private long tickCounter;
-    private Runnable TrainRefresh_RUNABLE = new Runnable() {
+    private Runnable TrainRefreshRunnable = new Runnable() {
         public void run() {
             synchronized (this) {
                 lines = game.getLines();
                 sites = game.getSites();
                 trains = game.getTrains();
-                trainStates = game.getTrainStates();
                 tickCounter = game.getTickCounter();
             }
         }
@@ -177,19 +173,21 @@ public class DrawTrain {
 
     private VsTrainState transformTrainToVsTrain(Train train)
     {
-        TrainState state = train.getTrainState();
+        TrainState state = train.getState();
         VsTrainState vsTrainState;
         if (state instanceof StandbyTrainState)
         {
-            Site site = state.site;
+            StandbyTrainState standbyTrainState = (StandbyTrainState)state;
+            Site site = standbyTrainState.site;
             VsSite vsSite = new VsSite(site);
             vsTrainState = new VsTrainState(vsSite.pos, 0);
         } else if (state instanceof RunningTrainState)
         {
-            VsSegment vsSegment = new VsSegment(state.s1, state.s2, new VsLine(state.line));
-            long timePeriod = state.arrival - state.departure;
-            long timePassed = tickCounter - state.departure;
-            fraction = (double)timePassed / (double) timePeriod;
+            RunningTrainState runningTrainState = (RunningTrainState)state;
+            VsSegment vsSegment = new VsSegment(runningTrainState.s1, runningTrainState.s2, new VsLine(state.line));
+            long timePeriod = runningTrainState.arrival - runningTrainState.departure;
+            long timePassed = tickCounter - runningTrainState.departure;
+            float fraction = (float)timePassed / (float) timePeriod;
             vsTrainState = vsSegment.getTrainState(fraction, state.direction);
         } else vsTrainState = null;
         return vsTrainState;
@@ -199,19 +197,21 @@ public class DrawTrain {
         int len = trains.size();
         ArrayList<VsTrainState> VsTrains = new ArrayList<VsTrainState>();
         for (int i = 0; i < len; ++i) {
+            Train train = trains.get(i);
             VsTrains.add(transformTrainToVsTrain(train));
         }
         return VsTrains;
     }
 
     private void drawer(){
+        ArrayList<VsTrainState> VsTrains;
         synchronized (this) {
-                ArrayList<VsTrainState> VsTrains = transformTrainToVsTrain(trains);
+                VsTrains = transformTrainToVsTrain(trains);
         }
         int len = VsTrains.size();
         for (int i = 0; i < len; ++ i)
         {
-            addTrain(VsTrains.get(i).x,VsTrains[i].y,VsTrain[i].angle,1.00f);
+            addTrain(VsTrains.get(i).coordinate.x,VsTrains.get(i).coordinate.y,VsTrains.get(i).angle,1.00f);
         }
     }
 }

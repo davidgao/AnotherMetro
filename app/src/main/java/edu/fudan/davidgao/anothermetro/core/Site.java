@@ -1,5 +1,7 @@
 package edu.fudan.davidgao.anothermetro.core;
 
+import java.util.ArrayList;
+
 import edu.fudan.davidgao.anothermetro.tools.Point;
 
 public class Site implements PassengerState {
@@ -9,6 +11,11 @@ public class Site implements PassengerState {
     }
     public final Point<Integer> pos;
     public final SiteType type;
+
+    // TODO: getPassengers()
+    public ArrayList<Passenger> getPassengers() {
+        return null;
+    }
 
     public double dist(Point<Integer> pos) {
         return dist(pos.x, pos.y);

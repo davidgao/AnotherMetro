@@ -4,8 +4,8 @@ import android.graphics.PointF;
 
 import java.util.ArrayList;
 
-import edu.fudan.davidgao.anothermetro.Site;
-import edu.fudan.davidgao.anothermetro.SiteType;
+import edu.fudan.davidgao.anothermetro.core.Site;
+import edu.fudan.davidgao.anothermetro.core.SiteType;
 
 /**
  * Created by gqp on 2015/11/26.

@@ -8,13 +8,17 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import edu.fudan.davidgao.anothermetro.Line;
-import edu.fudan.davidgao.anothermetro.Site;
+import edu.fudan.davidgao.anothermetro.core.Line;
+import edu.fudan.davidgao.anothermetro.core.Passenger;
+import edu.fudan.davidgao.anothermetro.core.RunningTrainState;
+import edu.fudan.davidgao.anothermetro.core.Site;
 import edu.fudan.davidgao.anothermetro.core.Game;
+import edu.fudan.davidgao.anothermetro.core.StandbyTrainState;
+import edu.fudan.davidgao.anothermetro.core.Train;
+import edu.fudan.davidgao.anothermetro.core.TrainState;
 
 public class DrawPassenger {
-	
-	private FloatBuffer vertexBuffer;
+
 	private FloatBuffer vertexBuffer;
 	private int mPositionHandle;
 	private int mColorHandle;
@@ -38,17 +42,17 @@ public class DrawPassenger {
 		"}";
 	
 	private static int loadShader(int type, String shaderCode) {
-		int shader = CLES20.glCreateShader(type);
-		CLES20.glShaderSource(shader, shaderCode);
+		int shader = GLES20.glCreateShader(type);
+		GLES20.glShaderSource(shader, shaderCode);
 		GLES20.glCompileShader(shader);
 		return shader;
 	}
 	
 	private Game gameMain;
 	private final int mProgram;
-	private static final float color = 1.0f; /* Config.passengerColor */
+	private static float color[] = { 1.0f, 1.0f, 1.0f, 1.0f };; /* Config.siteColor */
 		
-	public DrawPassenger {
+	public DrawPassenger() {
 		gameMain = Game.getInstance();
 		vertexCoords = new float[GTMDCoordsCount];
 		ByteBuffer bb = ByteBuffer.allocateDirect(vertexCoords.length * 4);
@@ -57,7 +61,7 @@ public class DrawPassenger {
 		vertexBuffer.put(vertexCoords);
 		vertexBuffer.position(0);
 		int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-		int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, framentShaderCode);
+		int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
 		mProgram = GLES20.glCreateProgram();
 		GLES20.glAttachShader(mProgram, vertexShader);
 		GLES20.glAttachShader(mProgram, fragmentShader);
@@ -93,7 +97,7 @@ public class DrawPassenger {
 		return (Config.GRID_Y - (double)y) / Config.GRID_Y * 2.0 - 1.0;
 	}
 	
-	private addVertex(double x, double y) {
+	private void addVertex(double x, double y) {
 		vertexCoords[vertexCount ++] = (float) x;
 		vertexCoords[vertexCount ++] = (float) y;
 		vertexCoords[vertexCount ++] = pz;
@@ -143,9 +147,9 @@ public class DrawPassenger {
 		addVertex(x - pr, y); addVertex(x, y - pr); addVertex(x + pr, y);
 	}
 	
-	private static final row = 5; /* Config.passengerSiteboxRow */
-	private static final col = 5; /* Config.passengerSiteboxColumn */
-	private static final gap = pr * 1.0; /* Config.passgerSiteboxGap */
+	private static final int row = 5; /* Config.passengerSiteboxRow */
+	private static final int col = 5; /* Config.passengerSiteboxColumn */
+	private static final double gap = pr * 1.0; /* Config.passgerSiteboxGap */
 	
 	/*
 	
@@ -181,7 +185,7 @@ public class DrawPassenger {
 		
 	private void GTMDvertexCoords() {
 		ArrayList<Site> sites = gameMain.getSites();
-		for (int i = 0; i < sites.length; i ++) {
+		for (int i = 0; i < sites.size(); i ++) {
 			Site site = sites.get(i);
 			int ix = site.pos.x;
 			int iy = site.pos.y;
@@ -189,7 +193,7 @@ public class DrawPassenger {
 			double y = Config.BG2FGy(iy);
 			ArrayList<Passenger> passengers = site.getPassengers();
 			int r = 0, c = 0;
-			for (int j = 0; j < passengers.length; j ++) {
+			for (int j = 0; j < passengers.size(); j ++) {
 				Passenger passenger = passengers.get(j);
 				double px = x - r + (pr + gap) * (2 * c + 1);
 				double py = y + r + (pr + gap) * (2 * r + 1);
@@ -211,24 +215,26 @@ public class DrawPassenger {
 		}
 		
 		ArrayList<Line> lines = gameMain.getLines();
-		for (int i = 0; i < lines.length; i ++) {
+		for (int i = 0; i < lines.size(); i ++) {
 			Line line = lines.get(i);
-			Train train = line.getTrain();
+			Train train = line.train;
 			TrainState trainState = train.getState();
-			double tx, ty;
+			double tx = 0, ty = 0;
 			int angle;
 			if (trainState instanceof StandbyTrainState) {
-				int ix = trainState.site.pos.x;
-				int iy = trainState.site.pos.y;
+				StandbyTrainState standbyTrainState = (StandbyTrainState)trainState;
+				int ix = standbyTrainState.site.pos.x;
+				int iy = standbyTrainState.site.pos.y;
 				tx = Config.BG2FGx(ix);
 				ty = Config.BG2FGy(iy);
 				angle = 0;
 			}
 			if (trainState instanceof RunningTrainState) {
+				RunningTrainState runningTrainState = (RunningTrainState)trainState;
 				VsLine vsLine = new VsLine(line);
-				VsSegment vsSegment = new VsSegment(vsLine, trainState.s1, trainState.s2);
-				long depart = trainState.departure;
-				long arrival = trainState.arrival;
+				VsSegment vsSegment = new VsSegment(runningTrainState.s1, runningTrainState.s2, vsLine);
+				long depart = runningTrainState.departure;
+				long arrival = runningTrainState.arrival;
 				long currentTick = gameMain.getTickCounter();
 				float fraction = (float)(currentTick - depart) / (arrival - depart);
 				VsTrainState vsTrainState = vsSegment.getTrainState(fraction, trainState.direction);
@@ -238,7 +244,7 @@ public class DrawPassenger {
 			}
 			ArrayList<Passenger> passengers = train.getPassengers();
 			int r = 0, c = 0;
-			for (int j = 0; j < passengers.length; j ++) {
+			for (int j = 0; j < passengers.size(); j ++) {
 				Passenger passenger = passengers.get(j);
 				double px = tx - 3 * (pr + gap) + (pr + gap) * (2 * c + 1);
 				double py = ty - 2 * (pr + gap) + (pr + gap) * (2 * r + 1);

@@ -60,4 +60,7 @@ public abstract class Game {
     public abstract ArrayList<Passenger> getPassengers();
     public abstract long getPassengerSpawnInterval();
     public abstract void setPassengerSpawnInterval(long interval) throws GameException;
+
+    // TODO: getTrains()
+    public abstract ArrayList<Train> getTrains();
 }

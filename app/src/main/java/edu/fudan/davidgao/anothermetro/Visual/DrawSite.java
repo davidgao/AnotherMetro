@@ -8,8 +8,8 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import edu.fudan.davidgao.anothermetro.Line;
-import edu.fudan.davidgao.anothermetro.Site;
+import edu.fudan.davidgao.anothermetro.core.Line;
+import edu.fudan.davidgao.anothermetro.core.Site;
 import edu.fudan.davidgao.anothermetro.core.Game;
 
 public class DrawSite {
@@ -37,17 +37,17 @@ public class DrawSite {
 		"}";
 	
 	private static int loadShader(int type, String shaderCode) {
-		int shader = CLES20.glCreateShader(type);
-		CLES20.glShaderSource(shader, shaderCode);
+		int shader = GLES20.glCreateShader(type);
+		GLES20.glShaderSource(shader, shaderCode);
 		GLES20.glCompileShader(shader);
 		return shader;
 	}
 	
 	private Game gameMain;
 	private final int mProgram;
-	private static float color = 1.0f; /* Config.siteColor */
+	private static float color[] = { 1.0f, 1.0f, 1.0f, 1.0f };; /* Config.siteColor */
 		
-	public DrawSite {
+	public DrawSite() {
 		gameMain = Game.getInstance();
 		vertexCoords = new float[GTMDCoordsCount];
 		ByteBuffer bb = ByteBuffer.allocateDirect(vertexCoords.length * 4);
@@ -56,7 +56,7 @@ public class DrawSite {
 		vertexBuffer.put(vertexCoords);
 		vertexBuffer.position(0);
 		int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-		int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, framentShaderCode);
+		int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
 		mProgram = GLES20.glCreateProgram();
 		GLES20.glAttachShader(mProgram, vertexShader);
 		GLES20.glAttachShader(mProgram, fragmentShader);
@@ -88,7 +88,7 @@ public class DrawSite {
         return (Config.GRID_Y - (double)y) / Config.GRID_Y * 2.0 - 1.0;
     }
 	
-	private addVertex(double x, double y) {
+	private void addVertex(double x, double y) {
 		vertexCoords[vertexCount ++] = (float) x;
 		vertexCoords[vertexCount ++] = (float) y;
 		vertexCoords[vertexCount ++] = z;
@@ -139,7 +139,7 @@ public class DrawSite {
 	}
 		
 	private void GTMDvertexCoords() {
-		ArrayList<Site> sites = game.getSites();
+		ArrayList<Site> sites = gameMain.getSites();
 		for (int i = 0; i < sites.size(); i ++) {
 			Site site = sites.get(i);
 			int ix = site.pos.x;
