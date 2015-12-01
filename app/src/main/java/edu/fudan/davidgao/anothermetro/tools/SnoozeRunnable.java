@@ -12,16 +12,20 @@ public class SnoozeRunnable {
     public final Runnable alarm = new Runnable() {
         @Override
         public void run() {
-            snoozing = true;
+            synchronized (SnoozeRunnable.this){
+                snoozing = true;
+            }
         }
     };
 
     public final Runnable deadline = new Runnable() {
         @Override
         public void run() {
-            if (snoozing) {
-                snoozing = false;
-                runnable.run();
+            synchronized (SnoozeRunnable.this){
+                if (snoozing) {
+                    snoozing = false;
+                    runnable.run();
+                }
             }
         }
     };

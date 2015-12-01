@@ -18,7 +18,7 @@ public class GameTest {
     @Before
     public void buildup() {
         try{
-            game = Game.create(-1, -1);
+            game = Game.create();
         } catch (GameException exception) {
             // Nothing
         }
@@ -58,7 +58,7 @@ public class GameTest {
 
     @Test(expected = GameException.class)
     public void badCreate() throws Exception {
-        Game.create(-1, -1);
+        Game.create();
     }
 
     @Test
@@ -67,14 +67,14 @@ public class GameTest {
         game.kill();
         game.destroy();
         Matrix2D<MapDatum> map = new Matrix2D<>(20, 20);
-        game = Game.create(map, -1, -1);
+        game = Game.create(map);
         assertNotNull(game);
     }
 
     @Test(expected = GameException.class)
     public void badCreateWithMap() throws Exception {
         Matrix2D<MapDatum> map = new Matrix2D<>(20, 40);
-        Game.create(map, -1, -1);
+        Game.create(map);
         map = Game.getInstance().getMap();
         assertTrue(map.size.x == 20);
         assertTrue(map.size.y == 40);

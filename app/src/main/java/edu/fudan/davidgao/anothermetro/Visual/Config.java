@@ -9,6 +9,9 @@ import edu.fudan.davidgao.anothermetro.tools.Point;
 public class Config {
     public static int GRID_X=0;
     public static int GRID_Y=0;
+    public static final float SITE_RADIUS=0.05f;
+
+    public static final int MAX_LINES=8;
     public static final int MAX_SEGMENTS=200;
     public static final double LATENT_SITE_RADIUS=0.05;
     public static final float MAX_INF=1e20f;

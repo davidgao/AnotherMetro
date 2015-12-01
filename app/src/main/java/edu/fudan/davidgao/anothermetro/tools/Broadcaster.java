@@ -3,29 +3,29 @@ package edu.fudan.davidgao.anothermetro.tools;
 import java.util.ArrayList;
 
 public class Broadcaster implements Runnable {
+    private final ArrayList<Runnable> listeners;
+
     public Broadcaster() {
         listeners = new ArrayList<>();
     }
 
     @Override
-    public void run() {
+    public synchronized void run() {
         for (Runnable listener:listeners) {
             listener.run();
         }
     }
 
-    public boolean addListener(Runnable listener) {
-        if (listener == null) return false;
-        else return listeners.add(listener);
+    public synchronized boolean addListener(Runnable listener) {
+        return listener != null && listeners.add(listener);
     }
-
-    public boolean removeListener(Runnable listener) {
+/*
+    public synchronized boolean removeListener(Runnable listener) {
         return listeners.remove(listener);
     }
 
-    public void clearListener() {
+    public synchronized void clearListener() {
         listeners.clear();
     }
-
-    private final ArrayList<Runnable> listeners;
+*/
 }

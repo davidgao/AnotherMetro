@@ -158,8 +158,8 @@ public class DrawLine {
 
     private void init(){
         game=Game.getInstance();
-        lineCoords=new float[Config.MAX_SEGMENTS*4*3];
-        lineColors=new float[Config.MAX_SEGMENTS*4*4];
+        lineCoords=new float[Config.MAX_SEGMENTS*4*3];          // 4 for vertices (2 line segments), 3 for xyz-coordinates
+        lineColors=new float[Config.MAX_SEGMENTS*4*4];          // 4 for vertices (2 line segments), 4 for rgba colors
     }
 
     //find the VsSite with given site by position
