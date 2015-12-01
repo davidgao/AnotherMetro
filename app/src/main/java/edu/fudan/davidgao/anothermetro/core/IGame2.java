@@ -14,6 +14,7 @@ public class IGame2 extends Game { //TODO
     private static final int defaultBaseGrowth = 10;
     private static final long defaultGrowthInterval = 30; /* in ticks */
     private static final long defaultSiteSpawnInterval = 20; /* in ticks */
+    private static final long defaultPassengerSpawnInterval = 5; /* in ticks */
 
     /* Singleton */
     protected static Game instance = null;
@@ -83,6 +84,12 @@ public class IGame2 extends Game { //TODO
     private void initTrainMove() {
         trainMoveNotifier = logic.getAlarm(GameEvent.TRAIN_STATE_CHANGE);
         logic.action.addListener(trainMoveRunnable);
+    }
+    private void initPassengerSpawn() {
+        passengerSpawnIntervalRunnable = new IntervalRunnable(passengerSpawnRunnable);
+        passengerSpawnIntervalRunnable.setInterval(defaultPassengerSpawnInterval);
+        passengerChangeNotifier = logic.getAlarm(GameEvent.PASSENGER_CHANGE);
+        logic.action.addListener(passengerSpawnIntervalRunnable);
     }
 
     /* Callback */
@@ -327,14 +334,14 @@ public class IGame2 extends Game { //TODO
         boolean have_moved = false;
         long now = getTickCounter();
         for (Line line : lines){
-            TrainState ts = line.getTrainState();
+            TrainState ts = line.train.getState();
             ArrayList<Site> s = line.getSites();
             if (ts instanceof StandbyTrainState) {
                 Site curr = ((StandbyTrainState) ts).site;
                 Site next = s.get(s.indexOf(curr) + ts.direction);
                 double dist = curr.dist(next.pos);
                 ts = new RunningTrainState(line, curr, next, ts.direction, now, now + (long)dist);
-                line.setTrainState(ts);
+                line.train.setState(ts);
                 have_moved = true;
             } else if (ts instanceof RunningTrainState) {
                 if (now < ((RunningTrainState) ts).arrival) {
@@ -349,7 +356,7 @@ public class IGame2 extends Game { //TODO
                     dir = 1;
                 }
                 ts = new StandbyTrainState(line, curr, dir);
-                line.setTrainState(ts);
+                line.train.setState(ts);
                 have_moved = true;
             }
         }
@@ -361,6 +368,50 @@ public class IGame2 extends Game { //TODO
     private void startTrainMove() {
 
     }
+
+    /* Passenger */
+    ArrayList<Passenger> passengers = new ArrayList<>();
+    @SuppressWarnings("unchecked")
+    public ArrayList<Passenger> getPassengers() {
+        return (ArrayList<Passenger>)passengers.clone();
+    }
+    private IntervalRunnable passengerSpawnIntervalRunnable;
+    public long getPassengerSpawnInterval() {
+        return passengerSpawnIntervalRunnable.getInterval();
+    }
+    public void setPassengerSpawnInterval(long interval) throws GameException {
+        assertState(GameState.NEW);
+        passengerSpawnIntervalRunnable.setInterval(interval);
+    }
+    private Runnable passengerSpawnRunnable = new Runnable() {
+        @Override
+        public void run() {
+            spawnPassenger();
+        }
+    };
+    private synchronized void spawnPassenger() {
+        final double uniqueRate = (double)uniqueSites / (double)sites.size();
+        final int type;
+        if (rand.nextDouble() < uniqueRate) {
+            type = rand.nextInt(uniqueSites) + 3;
+        } else {
+            double tmp = rand.nextDouble();
+            if (tmp < 0.5) {
+                type = 0;
+            } else if (tmp < 0.875) {
+                type = 1;
+            } else {
+                type = 2;
+            }
+        }
+        int index = rand.nextInt(sites.size());
+        Site s = sites.get(index);
+        Passenger p = new Passenger(type, s);
+        passengers.add(p);
+        passengerChangeNotifier.run();
+    }
+    private Runnable passengerChangeNotifier;
+
 
     private void forceNotify(GameEvent event) {
         logic.writeBack.getBroadcaster(event).run();

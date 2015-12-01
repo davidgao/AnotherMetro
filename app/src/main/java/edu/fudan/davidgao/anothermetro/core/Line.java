@@ -7,12 +7,13 @@ import edu.fudan.davidgao.anothermetro.core.Site;
 
 public class Line {
     private final ArrayList<Site> sites = new ArrayList<>();
+    public final Train train;
     private TrainState trainState;
 
     public Line(Site s1, Site s2) {
         sites.add(s1);
         sites.add(s2);
-        trainState = new StandbyTrainState(this, s1, 1);
+        train = new Train(this);
     }
 
     public void extend(Site source, Site target) throws GameException {
@@ -26,10 +27,6 @@ public class Line {
     @SuppressWarnings("unchecked")
     public ArrayList<Site> getSites() {
         return (ArrayList<Site>)sites.clone();
-    }
-
-    public TrainState getTrainState() {
-        return trainState;
     }
 
     void setTrainState(TrainState trainState) {

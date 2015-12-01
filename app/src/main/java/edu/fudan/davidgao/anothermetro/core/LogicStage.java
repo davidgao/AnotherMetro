@@ -15,6 +15,7 @@ class LogicStage implements Runnable {
         addEvent(GameEvent.SITE_SPAWN);
         addEvent(GameEvent.LINE_CHANGE);
         addEvent(GameEvent.TRAIN_STATE_CHANGE);
+        addEvent(GameEvent.PASSENGER_CHANGE);
     }
 
     @Override
