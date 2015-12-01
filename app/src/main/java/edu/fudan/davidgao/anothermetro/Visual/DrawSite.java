@@ -25,6 +25,13 @@ public class DrawSite {
 	private int vertexCount = 0;
 	private float[] vertexCoords;
 	private static final int GTMDCoordsCount = 1000;
+
+	static float triangleCoords[] = {   // in counterclockwise order:
+			0.0f,  0.622008459f, 0.0f, // top
+			-0.5f, -0.311004243f, 0.0f, // bottom left // bottom right
+			0.5f, 0.2f, 0.0f,
+			0.0f, 0.1f, 0.0f
+	};
 	
 	private final String vertexShaderCode = 
 		"attribute vec4 vPosition;" + 
@@ -62,9 +69,13 @@ public class DrawSite {
 		vertexBuffer = bb.asFloatBuffer();
 		vertexBuffer.put(vertexCoords);
 		vertexBuffer.position(0);
+
+
+
 		int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
 		int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
 		mProgram = GLES20.glCreateProgram();
+		System.out.printf("8888888Program = %d\n", mProgram);
 		GLES20.glAttachShader(mProgram, vertexShader);
 		GLES20.glAttachShader(mProgram, fragmentShader);
 		GLES20.glLinkProgram(mProgram);
@@ -82,6 +93,7 @@ public class DrawSite {
 	public void draw() {
 		//System.out.println("hhhh2");
 		//GTMDvertexCoords();
+		//System.out.printf("Program = %d\n", mProgram);
 		GLES20.glUseProgram(mProgram);
 		mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
 		GLES20.glEnableVertexAttribArray(mPositionHandle);
@@ -151,7 +163,8 @@ public class DrawSite {
 	}
 	
 	private void addU2Site(double x, double y) {
-		addVertex(x + r, y); addVertex(x, y + r); addVertex(x - r, y);
+		addVertex(x + r, y);
+		addVertex(x, y + r); addVertex(x - r, y);
 		addVertex(x - r, y); addVertex(x, y - r); addVertex(x + r, y);
 	}
 
@@ -175,11 +188,10 @@ public class DrawSite {
 				case UNIQUE2: addU2Site(x, y);
 					break;
 				//...
-				default: 
+				default:
 			}
 		}
 		System.out.printf("hhh %d\n", vertexCount);
-		vertexBuffer.clear();
 		vertexBuffer.put(vertexCoords);
 		vertexBuffer.position(0);
 	}

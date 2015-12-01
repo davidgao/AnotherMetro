@@ -17,14 +17,15 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     //private DrawLine drawLine = new DrawLine();
     //private DrawLineHead drawLineHead = new DrawLineHead();
     //private DrawPassenger drawPassenger = new DrawPassenger();
-    private DrawSite drawSite = new DrawSite();
+    private DrawSite drawSite;
     //private DrawTrain drawTrain = new DrawTrain();
     //private UpdateLineListener updateLineListener = new UpdateLineListener();
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
         // Set the background frame color
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        drawSite = new DrawSite();
     }
 
     public void onDrawFrame(GL10 unused) {
