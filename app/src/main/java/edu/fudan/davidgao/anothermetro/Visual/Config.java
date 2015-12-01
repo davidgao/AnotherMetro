@@ -20,9 +20,16 @@ public class Config {
     public static final double EPSI=1e-6;
     public static final int C2CC_list[]={0,7,6,5,4,3,2,1};
 
-    public static final float color_list[][] ={{ 0.63671875f, 0.76953125f, 0.22265625f, 1.0f }, { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f }}; //TODO
-    public static final int color_extra_line = MAX_LINES+1;
-    public static final int color_new_line = MAX_LINES;
+    public static final float color_list[][] ={
+            { 0.9f, 0.1f, 0.1f, 1.0f },
+            { 0.8f, 0.8f, 0.1f, 1.0f },
+            { 0.1f, 0.9f, 0.1f, 1.0f },
+            { 0.1f, 0.8f, 0.8f, 1.0f },
+            { 0.1f, 0.1f, 0.9f, 1.0f },
+            { 0.8f, 0.1f, 0.8f, 1.0f },
+            { 0.9f, 0.7f, 0.7f, 1.0f },
+            { 0.7f, 0.7f, 0.9f, 1.0f }}; //TODO
+    public static final float color_extra_line[] = {0.2f, 0.2f, 0.2f, 0.5f};
 
     public Config(){
     }

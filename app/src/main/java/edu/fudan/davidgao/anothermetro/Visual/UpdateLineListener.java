@@ -34,7 +34,7 @@ public class UpdateLineListener implements OnTouchListener {
 
     private Site touchedSite, startSite, lastSite;
     private ArrayList<Site> planLine;
-    private int planColor;
+    private int planColor, nextColor;
     private Line line_to_extend;
 
     private class Site_FGpoint{
@@ -141,7 +141,7 @@ public class UpdateLineListener implements OnTouchListener {
                      */
                     if((planColor = game.checkNewLine(touchedSite)) >= 0) {
                         line_to_extend = null;
-                        planColor = Config.color_new_line;
+                        planColor = nextColor;
                         lastSite = startSite = touchedSite;
                         vertexCount = 4;
                         adding = true;
@@ -170,7 +170,7 @@ public class UpdateLineListener implements OnTouchListener {
                                     temp.add(temp.get(1));
                                     lastSite = touchedSite;
                                     for(int i=0;i<4;i++) {
-                                        lineColors[(vertexCount-i)*4 - 1] = Config.color_list[planColor][3];
+                                        lineColors[(vertexCount-i)*4 - 1] = 0.5f;
                                         lineColors[(vertexCount-i)*4 - 2] = Config.color_list[planColor][2];
                                         lineColors[(vertexCount-i)*4 - 3] = Config.color_list[planColor][1];
                                         lineColors[(vertexCount-i)*4 - 4] = Config.color_list[planColor][0];
@@ -242,6 +242,8 @@ public class UpdateLineListener implements OnTouchListener {
             lineHeads.add(new VsLineHead(line, start, i, getDir(start)));
             lineHeads.add(new VsLineHead(line, end, i, getDir(end)));
         }
+
+        nextColor = temp_lines.size();
     }
     private int getDir(Site site){
         Integer occupied = occupiedDirs.get(site);
@@ -342,10 +344,10 @@ public class UpdateLineListener implements OnTouchListener {
         ArrayList<PointF> temp = DrawLine.calcLine(Config.BG2FGpoint(lastSite.pos), touchPos);
         temp.add(temp.get(1));
         for(int i=0;i<4;i++) {
-            lineColors[(vertexCount-i)*4 - 1] = Config.color_list[Config.color_extra_line][3];
-            lineColors[(vertexCount-i)*4 - 2] = Config.color_list[Config.color_extra_line][2];
-            lineColors[(vertexCount-i)*4 - 3] = Config.color_list[Config.color_extra_line][1];
-            lineColors[(vertexCount-i)*4 - 4] = Config.color_list[Config.color_extra_line][0];
+            lineColors[(vertexCount-i)*4 - 1] = Config.color_extra_line[3];
+            lineColors[(vertexCount-i)*4 - 2] = Config.color_extra_line[2];
+            lineColors[(vertexCount-i)*4 - 3] = Config.color_extra_line[1];
+            lineColors[(vertexCount-i)*4 - 4] = Config.color_extra_line[0];
             lineCoords[(vertexCount-i)*3 - 1] = 0;
             lineCoords[(vertexCount-i)*3 - 2] = temp.get(i).y;
             lineCoords[(vertexCount-i)*3 - 3] = temp.get(i).x;
