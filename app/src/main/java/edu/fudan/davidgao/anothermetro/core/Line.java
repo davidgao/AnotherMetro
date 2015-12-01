@@ -8,7 +8,6 @@ import edu.fudan.davidgao.anothermetro.core.Site;
 public class Line {
     private final ArrayList<Site> sites = new ArrayList<>();
     public final Train train;
-    private TrainState trainState;
 
     public Line(Site s1, Site s2) {
         sites.add(s1);
@@ -27,9 +26,5 @@ public class Line {
     @SuppressWarnings("unchecked")
     public ArrayList<Site> getSites() {
         return (ArrayList<Site>)sites.clone();
-    }
-
-    void setTrainState(TrainState trainState) {
-        this.trainState = trainState;
     }
 }
