@@ -52,20 +52,11 @@ public class ToolTest {
         broadcaster.addListener(runnable);
         broadcaster.run();
         assertEquals(runnable.getCounter(), 1);
-        broadcaster.clearListener();
-        broadcaster.run();
-        assertEquals(runnable.getCounter(), 1);
-        broadcaster.addListener(runnable);
-        broadcaster.removeListener(runnable);
-        broadcaster.run();
-        assertEquals(runnable.getCounter(), 1);
     }
 
     @Test
     public void emptyBroadcaster() throws Exception {
         Broadcaster broadcaster = new Broadcaster();
-        broadcaster.addListener(null);
-        broadcaster.removeListener(null);
         broadcaster.run();
     }
 
