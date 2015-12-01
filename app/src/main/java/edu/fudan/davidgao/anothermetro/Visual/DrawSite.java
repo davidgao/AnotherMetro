@@ -24,7 +24,7 @@ public class DrawSite {
 	
 	private int vertexCount = 0;
 	private float[] vertexCoords;
-	private static final int GTMDCoordsCount = 1000;
+	private static final int GTMDCoordsCount = 100000;
 
 	static float triangleCoords[] = {   // in counterclockwise order:
 			0.0f,  0.622008459f, 0.0f, // top
@@ -70,12 +70,9 @@ public class DrawSite {
 		vertexBuffer.put(vertexCoords);
 		vertexBuffer.position(0);
 
-
-
 		int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
 		int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
 		mProgram = GLES20.glCreateProgram();
-		System.out.printf("8888888Program = %d\n", mProgram);
 		GLES20.glAttachShader(mProgram, vertexShader);
 		GLES20.glAttachShader(mProgram, fragmentShader);
 		GLES20.glLinkProgram(mProgram);
@@ -91,9 +88,7 @@ public class DrawSite {
 	}
 	
 	public void draw() {
-		//System.out.println("hhhh2");
 		//GTMDvertexCoords();
-		//System.out.printf("Program = %d\n", mProgram);
 		GLES20.glUseProgram(mProgram);
 		mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
 		GLES20.glEnableVertexAttribArray(mPositionHandle);
@@ -169,9 +164,8 @@ public class DrawSite {
 	}
 
 	private void GTMDvertexCoords() {
-		System.out.println("hihihi");
+		vertexCount = 0;
 		ArrayList<Site> sites = gameMain.getSites();
-		System.out.println("hahaha");
 		for (int i = 0; i < sites.size(); i ++) {
 			System.out.printf("size=%d i=%d\n", sites.size(), i);
 			Site site = sites.get(i);
@@ -179,7 +173,6 @@ public class DrawSite {
 			int iy = site.pos.y;
 			double x = Config.BG2FGx(ix);
 			double y = Config.BG2FGy(iy);
-			System.out.printf("%d %d %f %f \n", ix, iy, x, y);
 			switch (site.type) {
 				case CIRCLE: addCircleSite(x, y); break;
 				case TRIANGLE: addTriangleSite(x, y); break;
@@ -191,7 +184,6 @@ public class DrawSite {
 				default:
 			}
 		}
-		System.out.printf("hhh %d\n", vertexCount);
 		vertexBuffer.put(vertexCoords);
 		vertexBuffer.position(0);
 	}

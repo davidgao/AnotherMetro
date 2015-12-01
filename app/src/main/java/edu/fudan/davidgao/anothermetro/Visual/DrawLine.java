@@ -103,6 +103,7 @@ public class DrawLine {
                 GLES20.GL_FLOAT, false,
                 colorStride, colorBuffer);
 
+        GLES20.glLineWidth(9);
         // Draw the triangle
         GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
 
@@ -168,7 +169,7 @@ public class DrawLine {
         game=Game.getInstance();
         lineCoords=new float[Config.MAX_SEGMENTS*4*3];          // 4 for vertices (2 line segments), 3 for xyz-coordinates
         lineColors=new float[Config.MAX_SEGMENTS*4*4];          // 4 for vertices (2 line segments), 4 for rgba colors
-        Broadcaster b = game.getCallbackBroadcaster(GameEvent.SITE_SPAWN);
+        Broadcaster b = game.getCallbackBroadcaster(GameEvent.TICK);
         Runnable drawLine = new Runnable() {
             @Override
             public synchronized void run(){
@@ -182,9 +183,10 @@ public class DrawLine {
     private VsSite findVsSite(Site site){
         for (int i=0;i<sites.size();i++){
             VsSite temp=sites.get(i);
-            if (temp.pos==Config.BG2FGpoint(site.pos)&&temp.type==site.type)
+            if (Config.BG2FGpoint(site.pos).equals(temp.pos.x, temp.pos.y)&&temp.type==site.type)
                 return temp;
         }
+        System.out.println("bad ~~~~");
         return null;
     }
 
@@ -439,7 +441,9 @@ public class DrawLine {
                 for (int k=0;k<4;k++)
                     lineColors[i*16+j*4+k]=Config.color_list[temp.line.color][k];
         }
-	vertexCount = segments.size()*4;
+	    vertexCount = segments.size()*4;
+        vertexBuffer.put(lineCoords);
+        vertexBuffer.position(0);
     }
 
     //prepare every thing, get Sites and lines, convert site, line to VsSite, VsLine. pass Line , pass Site, send to GL
@@ -447,6 +451,7 @@ public class DrawLine {
         System.out.println("GTMD!!!!");
         ArrayList<Site> temp_sites=game.getSites();
         ArrayList<Line> temp_lines=game.getLines();
+        System.out.printf("Site Size = %d\n", temp_sites.size());
         temp_lines.add(new Line(temp_sites.get(0), temp_sites.get(1)));
         segments.clear();
         sites.clear();
@@ -456,6 +461,7 @@ public class DrawLine {
             sites.add(temp_vssite);
         }
         VsLine.color_ptr=0;
+        System.out.printf("Size = %d\n", temp_lines.size());
         for (int i=0;i<temp_lines.size();i++){
             VsLine temp_vsline=new VsLine(temp_lines.get(i));
             lines.add(temp_vsline);

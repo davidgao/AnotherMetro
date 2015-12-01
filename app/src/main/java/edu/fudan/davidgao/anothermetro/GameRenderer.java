@@ -14,7 +14,7 @@ import edu.fudan.davidgao.anothermetro.Visual.UpdateLineListener;
 
 public class GameRenderer implements GLSurfaceView.Renderer {
 
-    //private DrawLine drawLine = new DrawLine();
+    private DrawLine drawLine;
     //private DrawLineHead drawLineHead = new DrawLineHead();
     //private DrawPassenger drawPassenger = new DrawPassenger();
     private DrawSite drawSite;
@@ -25,13 +25,14 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
         // Set the background frame color
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        drawLine = new DrawLine();
         drawSite = new DrawSite();
     }
 
     public void onDrawFrame(GL10 unused) {
         // Redraw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        //drawLine.draw();
+        drawLine.draw();
         //drawLineHead.draw();
         //drawPassenger.draw();
         drawSite.draw();
