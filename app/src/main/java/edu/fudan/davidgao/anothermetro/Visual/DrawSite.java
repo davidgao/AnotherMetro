@@ -8,9 +8,11 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
+import edu.fudan.davidgao.anothermetro.core.GameEvent;
 import edu.fudan.davidgao.anothermetro.core.Line;
 import edu.fudan.davidgao.anothermetro.core.Site;
 import edu.fudan.davidgao.anothermetro.core.Game;
+import edu.fudan.davidgao.anothermetro.tools.Broadcaster;
 
 public class DrawSite {
 	
@@ -46,8 +48,13 @@ public class DrawSite {
 	private Game gameMain;
 	private final int mProgram;
 	private static float color[] = { 1.0f, 1.0f, 1.0f, 1.0f };; /* Config.siteColor */
-		
+	private static DrawSite instance = null;
+	public static DrawSite getInstance(){
+		return instance;
+	}
+
 	public DrawSite() {
+		instance=this;
 		gameMain = Game.getInstance();
 		vertexCoords = new float[GTMDCoordsCount];
 		ByteBuffer bb = ByteBuffer.allocateDirect(vertexCoords.length * 4);
@@ -61,10 +68,19 @@ public class DrawSite {
 		GLES20.glAttachShader(mProgram, vertexShader);
 		GLES20.glAttachShader(mProgram, fragmentShader);
 		GLES20.glLinkProgram(mProgram);
+
+		Broadcaster b = gameMain.getCallbackBroadcaster(GameEvent.PASSENGER_CHANGE);
+		final Runnable drawSite = new Runnable() {
+			@Override
+			public synchronized void run(){
+				DrawSite.getInstance().GTMDvertexCoords();
+			}
+		};
+		b.addListener(drawSite);
 	}
 	
 	public void draw() {
-		GTMDvertexCoords();
+		//GTMDvertexCoords();
 		GLES20.glUseProgram(mProgram);
 		mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
 		GLES20.glEnableVertexAttribArray(mPositionHandle);

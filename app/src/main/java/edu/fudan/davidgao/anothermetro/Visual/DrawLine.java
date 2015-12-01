@@ -112,7 +112,7 @@ public class DrawLine {
     }
 
     public DrawLine() {
-	instance = this;
+	    instance = this;
         init();
 
         // initialize vertex byte buffer for shape coordinates
@@ -168,14 +168,14 @@ public class DrawLine {
         game=Game.getInstance();
         lineCoords=new float[Config.MAX_SEGMENTS*4*3];          // 4 for vertices (2 line segments), 3 for xyz-coordinates
         lineColors=new float[Config.MAX_SEGMENTS*4*4];          // 4 for vertices (2 line segments), 4 for rgba colors
-	Broadcaster b = game.getCallbackBroadcaster(GameEvent.LINE_CHANGE);
-	Runnable drawLine = new Runnable() {
-		@Override
-		public synchronized void run(){
-			DrawLine.getInstance().prepare();
-		}
-	};
-	b.addListener(drawLine);
+        Broadcaster b = game.getCallbackBroadcaster(GameEvent.LINE_CHANGE);
+        Runnable drawLine = new Runnable() {
+            @Override
+            public synchronized void run(){
+                DrawLine.getInstance().prepare();
+            }
+        };
+        b.addListener(drawLine);
     }
 
     //find the VsSite with given site by position

@@ -8,6 +8,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
+import edu.fudan.davidgao.anothermetro.core.GameEvent;
 import edu.fudan.davidgao.anothermetro.core.Line;
 import edu.fudan.davidgao.anothermetro.core.Passenger;
 import edu.fudan.davidgao.anothermetro.core.RunningTrainState;
@@ -16,6 +17,7 @@ import edu.fudan.davidgao.anothermetro.core.Game;
 import edu.fudan.davidgao.anothermetro.core.StandbyTrainState;
 import edu.fudan.davidgao.anothermetro.core.Train;
 import edu.fudan.davidgao.anothermetro.core.TrainState;
+import edu.fudan.davidgao.anothermetro.tools.Broadcaster;
 
 public class DrawPassenger {
 
@@ -51,8 +53,12 @@ public class DrawPassenger {
 	private Game gameMain;
 	private final int mProgram;
 	private static float color[] = { 1.0f, 1.0f, 1.0f, 1.0f };; /* Config.siteColor */
-		
+	private static DrawPassenger instance = null;
+	public static DrawPassenger getInstance(){
+		return instance;
+	}
 	public DrawPassenger() {
+		instance = this;
 		gameMain = Game.getInstance();
 		vertexCoords = new float[GTMDCoordsCount];
 		ByteBuffer bb = ByteBuffer.allocateDirect(vertexCoords.length * 4);
@@ -66,10 +72,19 @@ public class DrawPassenger {
 		GLES20.glAttachShader(mProgram, vertexShader);
 		GLES20.glAttachShader(mProgram, fragmentShader);
 		GLES20.glLinkProgram(mProgram);
+
+		Broadcaster b = gameMain.getCallbackBroadcaster(GameEvent.PASSENGER_CHANGE);
+		Runnable drawPassenger = new Runnable() {
+			@Override
+			public synchronized void run(){
+				DrawPassenger.getInstance().GTMDvertexCoords();
+			}
+		};
+		b.addListener(drawPassenger);
 	}
 	
 	public void draw() {
-		GTMDvertexCoords();
+		//GTMDvertexCoords();
 		GLES20.glUseProgram(mProgram);
 		mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
 		GLES20.glEnableVertexAttribArray(mPositionHandle);
