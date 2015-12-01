@@ -14,11 +14,23 @@ public class Config {
     public static final int MAX_LINES=8;
     public static final int MAX_SEGMENTS=200;
     public static final double LATENT_SITE_RADIUS=0.05;
+
     public static final float MAX_INF=1e20f;
     public static final float Z_SEGMENT=0.0f;
     public static final double EPSI=1e-6;
     public static final int C2CC_list[]={0,7,6,5,4,3,2,1};
-    public static final float color_list[][] ={{ 0.63671875f, 0.76953125f, 0.22265625f, 1.0f }, { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f }}; //TODO
+
+    public static final float color_list[][] ={
+            { 0.9f, 0.1f, 0.1f, 1.0f },
+            { 0.8f, 0.8f, 0.1f, 1.0f },
+            { 0.1f, 0.9f, 0.1f, 1.0f },
+            { 0.1f, 0.8f, 0.8f, 1.0f },
+            { 0.1f, 0.1f, 0.9f, 1.0f },
+            { 0.8f, 0.1f, 0.8f, 1.0f },
+            { 0.9f, 0.7f, 0.7f, 1.0f },
+            { 0.7f, 0.7f, 0.9f, 1.0f }}; //TODO
+    public static final float color_extra_line[] = {0.2f, 0.2f, 0.2f, 0.5f};
+
     public Config(){
     }
     public static int C2CC(int t){

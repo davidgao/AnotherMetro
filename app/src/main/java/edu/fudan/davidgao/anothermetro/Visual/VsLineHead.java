@@ -3,8 +3,8 @@ package edu.fudan.davidgao.anothermetro.Visual;
 import android.graphics.PointF;
 import java.math.*;
 
-import edu.fudan.davidgao.anothermetro.Site;
-import edu.fudan.davidgao.anothermetro.Line;
+import edu.fudan.davidgao.anothermetro.core.Site;
+import edu.fudan.davidgao.anothermetro.core.Line;
 import edu.fudan.davidgao.anothermetro.tools.Point;
 
 
@@ -12,13 +12,15 @@ import edu.fudan.davidgao.anothermetro.tools.Point;
  * Created by fs on 15/11/28.
  */
 public class VsLineHead {
+    public Line line;
     public Site site;
     private int direction; // 0~7, 8 directions
     public int color;
     public PointF[] pos = new PointF[4]; //root, middle, left, right points of a head, forming a 'T' pattern
     private float rotateSin, rotateCos;
 
-    VsLineHead(Site site, int color, int dir){
+    VsLineHead(Line line, Site site, int color, int dir){
+        this.line = line;
         this.site = site;
         this.color = color;
         direction = dir;

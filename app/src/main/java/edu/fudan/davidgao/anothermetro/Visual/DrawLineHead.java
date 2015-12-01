@@ -1,9 +1,7 @@
 package edu.fudan.davidgao.anothermetro.Visual;
 
-import android.graphics.PointF;
 import android.opengl.GLES20;
 
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -11,8 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import edu.fudan.davidgao.anothermetro.Line;
-import edu.fudan.davidgao.anothermetro.Site;
+import edu.fudan.davidgao.anothermetro.core.Line;
+import edu.fudan.davidgao.anothermetro.core.Site;
 import edu.fudan.davidgao.anothermetro.core.Game;
 
 /**
@@ -23,8 +21,6 @@ public class DrawLineHead {
     private FloatBuffer vertexBuffer;
     private FloatBuffer colorBuffer;
     private final int mProgram;
-    // Set color with red, green, blue and alpha (opacity) values
-    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
 
     private int mPositionHandle;
     private int mColorHandle;
@@ -171,10 +167,11 @@ public class DrawLineHead {
         lineHeads.clear();
 
         for (int i=0;i<temp_lines.size();i++){
-            ArrayList<Site> line = temp_lines.get(i).sites;
-            Site start = line.get(0), end = line.get(line.size()-1);
-            lineHeads.add(new VsLineHead(start, i, getDir(start)));
-            lineHeads.add(new VsLineHead(end, i, getDir(end)));
+            Line line = temp_lines.get(i);
+            ArrayList<Site> sites = line.getSites();
+            Site start = sites.get(0), end = sites.get(sites.size()-1);
+            lineHeads.add(new VsLineHead(line, start, i, getDir(start)));
+            lineHeads.add(new VsLineHead(line, end, i, getDir(end)));
         }
 
         heads2GLline();
@@ -211,6 +208,7 @@ public class DrawLineHead {
                 lineCoords[i*12 + j*3 + 2]=0.0f;
             }
         }
+        vertexCount = lineHeads.size()*4;
     }
 
 
