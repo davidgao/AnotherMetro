@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import edu.fudan.davidgao.anothermetro.GameView;
+import edu.fudan.davidgao.anothermetro.core.GameEvent;
 import edu.fudan.davidgao.anothermetro.core.GameException;
 import edu.fudan.davidgao.anothermetro.core.Line;
 import edu.fudan.davidgao.anothermetro.core.Site;
@@ -44,17 +45,13 @@ public class UpdateLineListener implements OnTouchListener {
             pos = Config.BG2FGpoint(site.pos);
         }
     }
-    private ArrayList<Site_FGpoint> sites = new ArrayList<>();
-    private ArrayList<VsLineHead> lineHeads = new ArrayList<>();
+    private final ArrayList<Site_FGpoint> sites = new ArrayList<>();
+    private final ArrayList<VsLineHead> lineHeads = new ArrayList<>();
     private HashMap<Site, Integer> occupiedDirs = new HashMap<>();
 
     public UpdateLineListener(){
         super();
-        game = Game.getInstance();
-        extending = adding = false;
-
-        lineCoords=new float[12];
-        lineColors=new float[16];
+        init();
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
@@ -104,6 +101,75 @@ public class UpdateLineListener implements OnTouchListener {
         GLES20.glLinkProgram(mProgram);
     }
 
+    private class LineChangeListener implements Runnable{
+
+        @Override
+        public void run() { //fetch line stats from BG
+            ArrayList<Line> temp_lines=game.getLines();
+            occupiedDirs.clear();
+
+            synchronized (lineHeads) {
+                lineHeads.clear();
+                for (int i = 0; i < temp_lines.size(); i++) {
+                    Line line = temp_lines.get(i);
+                    ArrayList<Site> sites = line.getSites();
+                    Site start = sites.get(0), end = sites.get(sites.size() - 1);
+                    lineHeads.add(new VsLineHead(line, start, i, getDir(start)));
+                    lineHeads.add(new VsLineHead(line, end, i, getDir(end)));
+                }
+            }
+
+            nextColor = temp_lines.size();
+        }
+        private int getDir(Site site){ //give an available direction of a site to draw a new head
+            Integer occupied = occupiedDirs.get(site);
+            if(occupied == null){
+                occupiedDirs.put(site, 1);
+                return 0;
+            }
+            else{
+                int mask = 1;
+                for(int i=0;i<8;i++, mask <<= 1){
+                    if((occupied & mask)==0){
+                        occupiedDirs.put(site, occupied|mask);
+                        return i;
+                    }
+                }
+                return 0;
+            }
+
+        }
+    }
+    private LineChangeListener LCListener = new LineChangeListener();
+
+    private class SiteSpawnListener implements Runnable{
+
+        @Override
+        public void run() { //fetch site stats from BG
+            ArrayList<Site> temp_sites = game.getSites();
+
+            synchronized (sites) {
+                sites.clear();
+                Iterator<Site> iter = temp_sites.iterator();
+                for (Site temp = iter.next(); iter.hasNext(); temp = iter.next()) {
+                    sites.add(new Site_FGpoint(temp));
+                }
+            }
+        }
+    }
+    private SiteSpawnListener SSListener = new SiteSpawnListener();
+
+    private void init(){
+        game = Game.getInstance();
+        extending = adding = false;
+
+        lineCoords=new float[12];
+        lineColors=new float[16];
+
+        game.getCallbackBroadcaster(GameEvent.LINE_CHANGE).addListener(LCListener);
+        game.getCallbackBroadcaster(GameEvent.SITE_SPAWN).addListener(SSListener);
+    }
+
     @Override
     public boolean onTouch(View v, MotionEvent event){
 
@@ -116,14 +182,9 @@ public class UpdateLineListener implements OnTouchListener {
 
                 if(event.getDownTime() <= lastDownTime + 500)return false; //avoid too frequent reaction
                 lastDownTime = event.getDownTime();
-                reload(); //get line and site information from BG and compute necessary values
 
                 VsLineHead touchedLineHead;
                 if ((touchedLineHead = isLineHead(touchPos)) != null) {
-                    /* user is touching a line head
-                     * inform BG that user is trying to modify an existed line
-                     * pass line color(index) and site where change starts as arguments
-                     */
                     planColor = touchedLineHead.color;
                     planLine = touchedLineHead.line;
                     startSite = touchedLineHead.site;
@@ -131,10 +192,6 @@ public class UpdateLineListener implements OnTouchListener {
                     vertexCount = 4;
                     extending = true;
                 } else if ((touchedSite = isSite(touchPos)) != null) {
-                    /* user is touching a site
-                     * inform BG that user is trying to add a new line
-                     * pass the start site as argument
-                     */
                     planColor = nextColor;
                     startSite = touchedSite;
                     endSite = null;
@@ -170,7 +227,7 @@ public class UpdateLineListener implements OnTouchListener {
                                     lineColors[i*4 + 2] = Config.color_list[nextColor][2];
                                     lineColors[i*4 + 1] = Config.color_list[nextColor][1];
                                     lineColors[i*4 + 0] = Config.color_list[nextColor][0];
-                                    lineCoords[i*3 + 2] = 0;
+                                    lineCoords[i*3 + 2] = Config.Z_BLUEPRINT;
                                     lineCoords[i*3 + 1] = temp.get(i).y;
                                     lineCoords[i*3 + 0] = temp.get(i).x;
                                 }
@@ -206,68 +263,31 @@ public class UpdateLineListener implements OnTouchListener {
         return false;
     }
 
-    private void reload() {
-        ArrayList<Site> temp_sites = game.getSites();
-        sites.clear();
-        Iterator<Site> iter = temp_sites.iterator();
-        for(Site temp = iter.next();iter.hasNext();temp = iter.next()){
-            sites.add(new Site_FGpoint(temp));
-        }
-
-        ArrayList<Line> temp_lines=game.getLines();
-        occupiedDirs.clear();
-        lineHeads.clear();
-        for (int i=0;i<temp_lines.size();i++){
-            Line line = temp_lines.get(i);
-            ArrayList<Site> sites = line.getSites();
-            Site start = sites.get(0), end = sites.get(sites.size()-1);
-            lineHeads.add(new VsLineHead(line, start, i, getDir(start)));
-            lineHeads.add(new VsLineHead(line, end, i, getDir(end)));
-        }
-
-        nextColor = temp_lines.size();
-    }
-    private int getDir(Site site){
-        Integer occupied = occupiedDirs.get(site);
-        if(occupied == null){
-            occupiedDirs.put(site, 1);
-            return 0;
-        }
-        else{
-            int mask = 1;
-            for(int i=0;i<8;i++, mask <<= 1){
-                if((occupied & mask)==0){
-                    occupiedDirs.put(site, occupied|mask);
-                    return i;
-                }
-            }
-            return 0;
-        }
-
-    }
     private PointF UI2FGpoint(float x, float y, int width, int height) {
         return new PointF(x/width*2-1,1-y/height*2);
     }
 
     private Site isSite(PointF touchPos){
-        Iterator<Site_FGpoint> iter = sites.iterator();
-        for(Site_FGpoint temp = iter.next();iter.hasNext();temp = iter.next()){
-            if(distance(temp.pos,touchPos)<Config.SITE_RADIUS){
-                return temp.site;
+        synchronized (sites) {
+            Iterator<Site_FGpoint> iter = sites.iterator();
+            for (Site_FGpoint temp = iter.next(); iter.hasNext(); temp = iter.next()) {
+                if (distance(temp.pos, touchPos) < Config.SITE_RADIUS) {
+                    return temp.site;
+                }
             }
+            return null;
         }
-        return null;
     }
     public VsLineHead isLineHead(PointF touchPos){
-        Iterator<VsLineHead> iter = lineHeads.iterator();
-
-        for(VsLineHead currentHead = iter.next(); iter.hasNext(); iter.next()){
-            if(distance(touchPos, currentHead.pos[1]) <= Config.SITE_RADIUS){
-                return currentHead;
+        synchronized (lineHeads) {
+            Iterator<VsLineHead> iter = lineHeads.iterator();
+            for (VsLineHead currentHead = iter.next(); iter.hasNext(); iter.next()) {
+                if (distance(touchPos, currentHead.pos[1]) <= Config.SITE_RADIUS) {
+                    return currentHead;
+                }
             }
+            return null;
         }
-
-        return null;
     }
     private float distance(PointF a, PointF b){
         return (float)Math.sqrt(Math.pow(b.x-a.x,2)+Math.pow(b.y-a.y,2));
@@ -331,7 +351,7 @@ public class UpdateLineListener implements OnTouchListener {
                 lineColors[i*4 + 0] = Config.color_extra_line[2];
                 lineColors[i*4 + 0] = Config.color_extra_line[1];
                 lineColors[i*4 + 0] = Config.color_extra_line[0];
-                lineCoords[i*3 + 2] = 0;
+                lineCoords[i*3 + 2] = Config.Z_BLUEPRINT;
                 lineCoords[i*3 + 1] = temp.get(i).y;
                 lineCoords[i*3 + 0] = temp.get(i).x;
             }
