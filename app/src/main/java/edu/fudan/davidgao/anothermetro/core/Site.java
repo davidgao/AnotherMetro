@@ -13,11 +13,6 @@ public class Site extends PassengerState {
     public final Point<Integer> pos;
     public final SiteType type;
 
-    // TODO: getPassengers()
-    public ArrayList<Passenger> getPassengers() {
-        return null;
-    }
-
     public double dist(Point<Integer> pos) {
         return dist(pos.x, pos.y);
     }

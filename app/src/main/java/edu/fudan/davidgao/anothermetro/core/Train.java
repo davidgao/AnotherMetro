@@ -6,11 +6,6 @@ public class Train extends PassengerState {
     private TrainState state;
     private final ArrayList<Passenger> passengers = new ArrayList<>();
 
-    //TODO: getPassengers()
-    public ArrayList<Passenger> getPassengers(){
-        return null;
-    }
-
     public Train(Line l) {
         state = new StandbyTrainState(l, l.getSites().get(0), 1);
     }
