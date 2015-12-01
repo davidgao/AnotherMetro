@@ -158,10 +158,11 @@ public class DrawLine {
 
     private void init(){
         game=Game.getInstance();
-        lineCoords=new float[Config.MAX_SEGMENTS*12];
-        lineColors=new float[Config.MAX_SEGMENTS*16];
+        lineCoords=new float[Config.MAX_SEGMENTS*4*3];
+        lineColors=new float[Config.MAX_SEGMENTS*4*4];
     }
 
+    //find the VsSite with given site by position
     private VsSite findVsSite(Site site){
         for (int i=0;i<sites.size();i++){
             VsSite temp=sites.get(i);
@@ -171,6 +172,7 @@ public class DrawLine {
         return null;
     }
 
+    //pass each line, separate each segment(part line between two sites)
     private void passLine(VsLine line){
         for (int i=0;i<line.sites.size()-1;i++){
             VsSegment temp_vssegment=new VsSegment(i, i+1, line);
@@ -183,6 +185,7 @@ public class DrawLine {
         }
     }
 
+    //pass each site, dispatch the in angle and out angle for each segment
     private void passSite(ArrayList<VsSite> sites){
         for (int i=0;i<sites.size();i++){
             VsSite temp=sites.get(i);
@@ -191,16 +194,19 @@ public class DrawLine {
         }
     }
 
-    private PointF getPosByAngle(Site site, double angle){
+    //return a point at given angle on a circle
+    public static PointF getPosByAngle(Site site, double angle){
         PointF result=new PointF(0,0);
         result.x=(float)(Config.BG2FGx(site.pos.x)+Math.cos(angle)*Config.LATENT_SITE_RADIUS);result.y=(float)(Config.BG2FGy(site.pos.y)+Math.sin(angle)*Config.LATENT_SITE_RADIUS);
         return result;
     }
 
+    //calc Euler distance
     private static float distance(float x0, float y0, float x1, float y1){
         return (float)Math.sqrt((x0-x1)*(x0-x1)+(y0-y1)*(y0-y1));
     }
 
+    //get index of minimum of array
     private static int minIndex(float[] a){
         int idx=-1;
         float minV=Config.MAX_INF;
@@ -213,20 +219,34 @@ public class DrawLine {
         return idx;
     }
 
+    //calc start angle and end angle of vsSegment
     public static void calcAngle(VsSegment vsSegment){
         PointF st=Config.BG2FGpoint(vsSegment.line.sites.get(vsSegment.st).pos);
         PointF ed=Config.BG2FGpoint(vsSegment.line.sites.get(vsSegment.ed).pos);
         if (st.x==ed.x){
             if (st.y<ed.y) {
-                vsSegment.st_a = 2;
-                vsSegment.ed_a = 6;
-            }else
-            {
                 vsSegment.st_a = 6;
                 vsSegment.ed_a = 2;
+            }else
+            {
+                vsSegment.st_a = 2;
+                vsSegment.ed_a = 6;
             }
             return;
         }
+
+        double k = (ed.y - st.y)/(ed.x-st.x);
+        if (Math.abs(Math.abs(k)-1)<Config.EPSI){
+            if (Math.round(k)==1){
+                vsSegment.st_a = 7;
+                vsSegment.ed_a = 3;
+            }
+            if (Math.round(k)==-1){
+                vsSegment.st_a = 1;
+                vsSegment.ed_a = 5;
+            }
+        }
+
         if (st.y==ed.y){
             if (st.x<ed.x){
                 vsSegment.st_a=0;
@@ -262,7 +282,7 @@ public class DrawLine {
         switch (idx){
             case 0:
                 if (ed.y<st.y) {
-                    vsSegment.st_a = 5;
+                    vsSegment.st_a = 3;
                     vsSegment.ed_a = 0;
                 }else{
                     vsSegment.st_a = 1;
@@ -335,17 +355,33 @@ public class DrawLine {
         }
     }
 
-    private ArrayList<PointF> calcLine(PointF st, PointF ed){
+    //return three point of line from st to ed
+    public static ArrayList<PointF> calcLine(PointF st, PointF ed){
         if (st.x==ed.x){
             ArrayList<PointF> result=new ArrayList<>();
-            result.add(st);result.add(new PointF(st.x, st.y));result.add(ed);
+            result.add(st);result.add(new PointF(st.x, 0.5f*(st.y+ed.y)));result.add(ed);
             return result;
         }
         if (st.y==ed.y){
             ArrayList<PointF> result=new ArrayList<>();
-            result.add(st);result.add(new PointF(st.x,st.y));result.add(ed);
+            result.add(st);result.add(new PointF(0.5f*(st.x+ed.x),st.y));result.add(ed);
             return result;
         }
+
+        double k = (ed.y - st.y)/(ed.x-st.x);
+        if (Math.abs(Math.abs(k)-1)<Config.EPSI){
+            if (Math.round(k)==1){
+                ArrayList<PointF> result=new ArrayList<>();
+                result.add(st);result.add(new PointF(0.5f*(st.x+ed.x),0.5f*(st.y+ed.y)));result.add(ed);
+                return result;
+            }
+            if (Math.round(k)==-1){
+                ArrayList<PointF> result=new ArrayList<>();
+                result.add(st);result.add(new PointF(0.5f*(st.x+ed.x),0.5f*(st.y+ed.y)));result.add(ed);
+                return result;
+            }
+        }
+
         float [] cpointx=new float[8];
         float [] cpointy=new float[8];
         float s =1.0f;
@@ -373,6 +409,7 @@ public class DrawLine {
         return result;
     }
 
+    //send data to GL's buffer
     private void segment2GLline(ArrayList<VsSegment> segments){
         for (int i=0;i<segments.size();i++){
             VsSegment temp=segments.get(i);
@@ -387,6 +424,7 @@ public class DrawLine {
         }
     }
 
+    //prepare every thing, get Sites and lines, convert site, line to VsSite, VsLine. pass Line , pass Site, send to GL
     private void prepare(){
         ArrayList<Site> temp_sites=game.getSites();
         ArrayList<Line> temp_lines=game.getLines();
