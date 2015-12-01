@@ -175,7 +175,7 @@ public class DrawLine {
     //pass each line, separate each segment(part line between two sites)
     private void passLine(VsLine line){
         for (int i=0;i<line.sites.size()-1;i++){
-            VsSegment temp_vssegment=new VsSegment(i, i+1, line);
+            VsSegment temp_vssegment=new VsSegment(line.sites.get(i), line.sites.get(i+1), line);
             VsSite temp_vssite = findVsSite(line.sites.get(i));
             calcAngle(temp_vssegment);
             temp_vssite.add_out(temp_vssegment);
@@ -221,8 +221,8 @@ public class DrawLine {
 
     //calc start angle and end angle of vsSegment
     public static void calcAngle(VsSegment vsSegment){
-        PointF st=Config.BG2FGpoint(vsSegment.line.sites.get(vsSegment.st).pos);
-        PointF ed=Config.BG2FGpoint(vsSegment.line.sites.get(vsSegment.ed).pos);
+        PointF st=Config.BG2FGpoint(vsSegment.st.pos);
+        PointF ed=Config.BG2FGpoint(vsSegment.ed.pos);
         if (st.x==ed.x){
             if (st.y<ed.y) {
                 vsSegment.st_a = 6;
@@ -413,7 +413,7 @@ public class DrawLine {
     private void segment2GLline(ArrayList<VsSegment> segments){
         for (int i=0;i<segments.size();i++){
             VsSegment temp=segments.get(i);
-            ArrayList<PointF> line_dot = calcLine(getPosByAngle(temp.line.sites.get(temp.st), temp.st_angle), getPosByAngle(temp.line.sites.get(temp.ed), temp.ed_angle));
+            ArrayList<PointF> line_dot = calcLine(getPosByAngle(temp.st, temp.st_angle), getPosByAngle(temp.ed, temp.ed_angle));
             lineCoords[i*12]=line_dot.get(0).x;lineCoords[i*12+1]=line_dot.get(0).y;lineCoords[i*12+2]=0.0f;
             lineCoords[i*12+3]=line_dot.get(1).x;lineCoords[i*12+4]=line_dot.get(1).y;lineCoords[i*12+5]=0.0f;
             lineCoords[i*12+6]=line_dot.get(1).x;lineCoords[i*12+7]=line_dot.get(1).y;lineCoords[i*12+8]=0.0f;

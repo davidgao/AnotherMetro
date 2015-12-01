@@ -4,23 +4,22 @@ import android.graphics.PointF;
 
 import java.util.ArrayList;
 
-import edu.fudan.davidgao.anothermetro.Line;
-import edu.fudan.davidgao.anothermetro.tools.Point;
+import edu.fudan.davidgao.anothermetro.Site;
 
 /**
  * Created by gqp on 2015/11/26.
  */
 public class VsSegment {
     public VsLine line;
-    public int st, ed;
-    public int st_a, ed_a;
-    public double st_angle, ed_angle;
+    public Site st, ed;
+    public int st_a, ed_a; //int 8 direct
+    public double st_angle, ed_angle; //graphic
 
     private static double distance(PointF a, PointF b){
         return Math.sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));
     }
 
-    public VsSegment(int st, int ed, VsLine line){
+    public VsSegment(Site st, Site ed, VsLine line){
         this.st=st;
         this.ed=ed;
         this.line=line;
@@ -40,7 +39,7 @@ public class VsSegment {
  */
 
     VsTrainState getTrainState(float fraction, int direction){
-        ArrayList<PointF> line_dot = DrawLine.calcLine(DrawLine.getPosByAngle(line.sites.get(st), st_angle), DrawLine.getPosByAngle(line.sites.get(ed), ed_angle));
+        ArrayList<PointF> line_dot = DrawLine.calcLine(DrawLine.getPosByAngle(st, st_angle), DrawLine.getPosByAngle(ed, ed_angle));
         double d12=distance(line_dot.get(0), line_dot.get(1)), d23=distance(line_dot.get(1), line_dot.get(2));
         double d13 =d12+d23;
         double mid_frac = 0;
