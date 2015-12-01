@@ -155,9 +155,9 @@ public class DrawTrain {
         addTrain(x,y,Math.PI/4 * angle, high);
     }
 
-    private ArrayList<Line> lines;
-    private ArrayList<Site> sites;
-    private ArrayList<Train> trains;
+    private ArrayList<Line> lines = null;
+    private ArrayList<Site> sites = null;
+    private ArrayList<Train> trains = null;
     private ArrayList<TrainState> trainStates;
     private long tickCounter;
     private Runnable TrainRefreshRunnable = new Runnable() {
@@ -165,7 +165,10 @@ public class DrawTrain {
             synchronized (this) {
                 lines = game.getLines();
                 sites = game.getSites();
-                trains = game.getTrains();
+                trains = new ArrayList<>();
+                for (int i = 0; i < lines.size(); ++i) {
+                    trains.add(lines.get(i).train);
+                }
                 tickCounter = game.getTickCounter();
             }
         }
