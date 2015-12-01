@@ -9,9 +9,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import edu.fudan.davidgao.anothermetro.core.GameEvent;
 import edu.fudan.davidgao.anothermetro.core.Line;
 import edu.fudan.davidgao.anothermetro.core.Site;
 import edu.fudan.davidgao.anothermetro.core.Game;
+import edu.fudan.davidgao.anothermetro.tools.Broadcaster;
 
 /**
  * Created by fs on 2015/11/26.
@@ -28,8 +30,8 @@ public class DrawLineHead {
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
     static final int COLOR_PER_VERTEX = 4;
-    static float[] lineCoords;
-    static float[] lineColors;
+    static final float[] lineCoords = new float[Config.MAX_LINES*8*COORDS_PER_VERTEX];
+    static float[] lineColors = new float[Config.MAX_LINES*8*COLOR_PER_VERTEX];
 
     private int vertexCount = 0;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
@@ -49,10 +51,6 @@ public class DrawLineHead {
                     "}";
     //End of GLSL
 
-    private ArrayList<VsLineHead> lineHeads;
-    private HashMap<Site, Integer> occupiedDirs;
-    private Game game;
-
     //Beginning of GLSL
     public static int loadShader(int type, String shaderCode){
 
@@ -69,7 +67,6 @@ public class DrawLineHead {
 
 
     public void draw() {
-        reload(); //get line information from BG and compute values of heads
 
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
@@ -94,8 +91,10 @@ public class DrawLineHead {
                 GLES20.GL_FLOAT, false,
                 colorStride, colorBuffer);
 
-        // Draw the triangle
-        GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
+        synchronized (lineCoords) {
+            // Draw the triangle
+            GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
+        }
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
@@ -154,62 +153,70 @@ public class DrawLineHead {
     }
     //End of GLSL
 
+    private ArrayList<VsLineHead> lineHeads;
+    private HashMap<Site, Integer> occupiedDirs;
+    private Game game;
+
+    private class LineChangeListener implements Runnable{
+
+        @Override
+        public void run() { //fetch line stats from BG
+            ArrayList<Line> temp_lines=game.getLines();
+            occupiedDirs.clear();
+            lineHeads.clear();
+
+            for (int i=0;i<temp_lines.size();i++){
+                Line line = temp_lines.get(i);
+                ArrayList<Site> sites = line.getSites();
+                Site start = sites.get(0), end = sites.get(sites.size()-1);
+                lineHeads.add(new VsLineHead(line, start, i, getDir(start)));
+                lineHeads.add(new VsLineHead(line, end, i, getDir(end)));
+            }
+
+            heads2GLline();
+        }
+        private int getDir(Site site){ //give an available direction of a site to draw a new head
+            Integer occupied = occupiedDirs.get(site);
+            if(occupied == null){
+                occupiedDirs.put(site, 1);
+                return 0;
+            }
+            else{
+                int mask = 1;
+                for(int i=0;i<8;i++, mask <<= 1){
+                    if((occupied & mask)==0){
+                        occupiedDirs.put(site, occupied|mask);
+                        return i;
+                    }
+                }
+                return 0;
+            }
+
+        }
+        private void heads2GLline(){
+            Iterator<VsLineHead> iter = lineHeads.iterator();
+            VsLineHead currentHead = iter.next();
+
+            synchronized (lineCoords) {
+                for (int i = 0; iter.hasNext(); i++, iter.next()) {
+                    for (int j = 0; j < 4; j++) {
+                        for (int k = 0; k < 4; k++) {
+                            lineColors[i * 16 + j * 4 + k] = Config.color_list[currentHead.color][k];
+                        }
+                        lineCoords[i * 12 + j * 3] = currentHead.pos[j].x;
+                        lineCoords[i * 12 + j * 3 + 1] = currentHead.pos[j].y;
+                        lineCoords[i * 12 + j * 3 + 2] = Config.Z_LINEHEAD;
+                    }
+                }
+                vertexCount = lineHeads.size() * 4;
+            }
+        }
+    }
+    private LineChangeListener LCListener = new LineChangeListener();
+
     private void init(){
         game=Game.getInstance();
-        lineCoords=new float[Config.MAX_LINES*24];
-        lineColors=new float[Config.MAX_LINES*32];
+        game.getCallbackBroadcaster(GameEvent.LINE_CHANGE).addListener(LCListener);
     }
-
-    //prepare data to draw heads
-    private void reload(){
-        ArrayList<Line> temp_lines=game.getLines();
-        occupiedDirs.clear();
-        lineHeads.clear();
-
-        for (int i=0;i<temp_lines.size();i++){
-            Line line = temp_lines.get(i);
-            ArrayList<Site> sites = line.getSites();
-            Site start = sites.get(0), end = sites.get(sites.size()-1);
-            lineHeads.add(new VsLineHead(line, start, i, getDir(start)));
-            lineHeads.add(new VsLineHead(line, end, i, getDir(end)));
-        }
-
-        heads2GLline();
-
-    }
-    private int getDir(Site site){ //give an available direction of a site to draw a new head
-        Integer occupied = occupiedDirs.get(site);
-        if(occupied == null){
-            occupiedDirs.put(site, 1);
-            return 0;
-        }
-        else{
-            int mask = 1;
-            for(int i=0;i<8;i++, mask <<= 1){
-                if((occupied & mask)==0){
-                    occupiedDirs.put(site, occupied|mask);
-                    return i;
-                }
-            }
-            return 0;
-        }
-
-    }
-    private void heads2GLline(){
-        Iterator<VsLineHead> iter = lineHeads.iterator();
-        VsLineHead currentHead = iter.next();
-        for(int i=0; iter.hasNext(); i++,iter.next()){
-            for(int j=0;j<4;j++) {
-                for (int k=0; k<4; k++) {
-                    lineColors[i*16 + j*4 + k] = Config.color_list[currentHead.color][k];
-                }
-                lineCoords[i*12 + j*3]=currentHead.pos[j].x;
-                lineCoords[i*12 + j*3 + 1]=currentHead.pos[j].y;
-                lineCoords[i*12 + j*3 + 2]=0.0f;
-            }
-        }
-        vertexCount = lineHeads.size()*4;
-    }
-
 
 }

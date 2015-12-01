@@ -17,6 +17,8 @@ public class Config {
 
     public static final float MAX_INF=1e20f;
     public static final float Z_SEGMENT=0.0f;
+    public static final float Z_LINEHEAD=0.1e-4f;
+    public static final float Z_BLUEPRINT=0.2e-4f;
     public static final double EPSI=1e-6;
     public static final int C2CC_list[]={0,7,6,5,4,3,2,1};
 
