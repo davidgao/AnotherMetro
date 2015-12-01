@@ -2,7 +2,7 @@ package edu.fudan.davidgao.anothermetro.core;
 
 import edu.fudan.davidgao.anothermetro.tools.Point;
 
-public class Site {
+public class Site implements PassengerState {
     public Site(Point<Integer> pos, SiteType type) {
         this.pos = pos;
         this.type = type;

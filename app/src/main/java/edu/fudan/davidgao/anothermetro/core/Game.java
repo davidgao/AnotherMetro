@@ -55,4 +55,9 @@ public abstract class Game {
     public abstract void extendLine(Line l, Site src, Site dest) throws GameException;
     public abstract boolean canAddLine(Site s1, Site s2);
     public abstract boolean canExtendLine(Line l, Site src, Site dest);
+
+    /* Passengers */
+    public abstract ArrayList<Passenger> getPassengers();
+    public abstract long getPassengerSpawnInterval();
+    public abstract void setPassengerSpawnInterval(long interval) throws GameException;
 }
