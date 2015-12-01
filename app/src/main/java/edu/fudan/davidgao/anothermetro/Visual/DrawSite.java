@@ -24,7 +24,7 @@ public class DrawSite {
 	
 	private int vertexCount = 0;
 	private float[] vertexCoords;
-	private static final int GTMDCoordsCount = 100000;
+	private static final int GTMDCoordsCount = 1000;
 	
 	private final String vertexShaderCode = 
 		"attribute vec4 vPosition;" + 
@@ -47,7 +47,7 @@ public class DrawSite {
 	
 	private Game gameMain;
 	private final int mProgram;
-	private static float color[] = { 1.0f, 1.0f, 1.0f, 1.0f };; /* Config.siteColor */
+	private static float color[] = { 0.5f, 0.5f, 0.5f, 1.0f };; /* Config.siteColor */
 	private static DrawSite instance = null;
 	public static DrawSite getInstance(){
 		return instance;
@@ -69,7 +69,7 @@ public class DrawSite {
 		GLES20.glAttachShader(mProgram, fragmentShader);
 		GLES20.glLinkProgram(mProgram);
 
-		Broadcaster b = gameMain.getCallbackBroadcaster(GameEvent.PASSENGER_CHANGE);
+		Broadcaster b = gameMain.getCallbackBroadcaster(GameEvent.SITE_SPAWN);
 		final Runnable drawSite = new Runnable() {
 			@Override
 			public synchronized void run(){
@@ -80,12 +80,13 @@ public class DrawSite {
 	}
 	
 	public void draw() {
+		//System.out.println("hhhh2");
 		//GTMDvertexCoords();
 		GLES20.glUseProgram(mProgram);
 		mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
 		GLES20.glEnableVertexAttribArray(mPositionHandle);
-		GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, 
-			GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
+		GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
+				GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
 		mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 		GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 		GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
@@ -153,24 +154,33 @@ public class DrawSite {
 		addVertex(x + r, y); addVertex(x, y + r); addVertex(x - r, y);
 		addVertex(x - r, y); addVertex(x, y - r); addVertex(x + r, y);
 	}
-		
+
 	private void GTMDvertexCoords() {
+		System.out.println("hihihi");
 		ArrayList<Site> sites = gameMain.getSites();
+		System.out.println("hahaha");
 		for (int i = 0; i < sites.size(); i ++) {
+			System.out.printf("size=%d i=%d\n", sites.size(), i);
 			Site site = sites.get(i);
 			int ix = site.pos.x;
 			int iy = site.pos.y;
 			double x = Config.BG2FGx(ix);
 			double y = Config.BG2FGy(iy);
+			System.out.printf("%d %d %f %f \n", ix, iy, x, y);
 			switch (site.type) {
 				case CIRCLE: addCircleSite(x, y); break;
 				case TRIANGLE: addTriangleSite(x, y); break;
 				case SQUARE: addSquareSite(x, y); break;
 				case UNIQUE1: addU1Site(x, y); break;
-				case UNIQUE2: addU2Site(x, y); break;
+				case UNIQUE2: addU2Site(x, y);
+					break;
 				//...
 				default: 
 			}
 		}
+		System.out.printf("hhh %d\n", vertexCount);
+		vertexBuffer.clear();
+		vertexBuffer.put(vertexCoords);
+		vertexBuffer.position(0);
 	}
 }

@@ -11,8 +11,11 @@ import android.view.View;
 
 import java.io.Console;
 
+import edu.fudan.davidgao.anothermetro.Visual.Config;
 import edu.fudan.davidgao.anothermetro.core.Game;
 import edu.fudan.davidgao.anothermetro.core.GameException;
+import edu.fudan.davidgao.anothermetro.core.MapDatum;
+import edu.fudan.davidgao.anothermetro.tools.Matrix2D;
 
 public class GameMain extends AppCompatActivity {
     /* Allow auto hide system UI */
@@ -31,6 +34,7 @@ public class GameMain extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
+            Matrix2D<MapDatum> map = new Matrix2D<>(Config.GRID_X, Config.GRID_Y);
             Game game = Game.create();
             game.start();
             game.run();

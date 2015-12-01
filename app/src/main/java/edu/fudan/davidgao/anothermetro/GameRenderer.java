@@ -14,12 +14,12 @@ import edu.fudan.davidgao.anothermetro.Visual.UpdateLineListener;
 
 public class GameRenderer implements GLSurfaceView.Renderer {
 
-    private DrawLine drawLine;
-    private DrawLineHead drawLineHead;
-    private DrawPassenger drawPassenger;
-    private DrawSite drawSite;
-    private DrawTrain drawTrain;
-    private UpdateLineListener updateLineListener;
+    //private DrawLine drawLine = new DrawLine();
+    //private DrawLineHead drawLineHead = new DrawLineHead();
+    //private DrawPassenger drawPassenger = new DrawPassenger();
+    private DrawSite drawSite = new DrawSite();
+    //private DrawTrain drawTrain = new DrawTrain();
+    //private UpdateLineListener updateLineListener = new UpdateLineListener();
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
@@ -30,12 +30,12 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 unused) {
         // Redraw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        drawLine.draw();
-        drawLineHead.draw();
-        drawPassenger.draw();
+        //drawLine.draw();
+        //drawLineHead.draw();
+        //drawPassenger.draw();
         drawSite.draw();
-        drawTrain.draw();
-        updateLineListener.draw();
+        //drawTrain.draw();
+        //updateLineListener.draw();
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {

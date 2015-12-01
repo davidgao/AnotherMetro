@@ -168,7 +168,7 @@ public class DrawLine {
         game=Game.getInstance();
         lineCoords=new float[Config.MAX_SEGMENTS*4*3];          // 4 for vertices (2 line segments), 3 for xyz-coordinates
         lineColors=new float[Config.MAX_SEGMENTS*4*4];          // 4 for vertices (2 line segments), 4 for rgba colors
-        Broadcaster b = game.getCallbackBroadcaster(GameEvent.LINE_CHANGE);
+        Broadcaster b = game.getCallbackBroadcaster(GameEvent.SITE_SPAWN);
         Runnable drawLine = new Runnable() {
             @Override
             public synchronized void run(){
@@ -444,8 +444,10 @@ public class DrawLine {
 
     //prepare every thing, get Sites and lines, convert site, line to VsSite, VsLine. pass Line , pass Site, send to GL
     private void prepare(){
+        System.out.println("GTMD!!!!");
         ArrayList<Site> temp_sites=game.getSites();
         ArrayList<Line> temp_lines=game.getLines();
+        temp_lines.add(new Line(temp_sites.get(0), temp_sites.get(1)));
         segments.clear();
         sites.clear();
         lines.clear();

@@ -31,7 +31,7 @@ public class GameView extends GLSurfaceView {
         setRenderer(renderer);
 
         // Only render when data is dirty
-        setRenderMode(RENDERMODE_WHEN_DIRTY);
+        setRenderMode(RENDERMODE_CONTINUOUSLY);
 
         singleton = this;
     }

@@ -7,8 +7,8 @@ import edu.fudan.davidgao.anothermetro.tools.Point;
  * Created by gqp on 2015/11/28.
  */
 public class Config {
-    public static int GRID_X=0;
-    public static int GRID_Y=0;
+    public static int GRID_X=400;
+    public static int GRID_Y=300;
     public static final float SITE_RADIUS=0.05f;
 
     public static final int MAX_LINES=8;
@@ -40,14 +40,14 @@ public class Config {
     }
     public static PointF BG2FGpoint(Point<Integer> point){
         PointF t=new PointF(0,0);
-        t.x=(float)(point.x/GRID_X*2.0-1.0);
-        t.y=(float)((GRID_Y-point.y)/GRID_Y*2.0-1.0);
+        t.x=(float)(1.0*point.x/GRID_X*2.0-1.0);
+        t.y=(float)((1.0*GRID_Y-point.y)/GRID_Y*2.0-1.0);
         return t;
     }
     public static float BG2FGx(Integer x){
-        return (float)(x/GRID_X*2.0-1.0);
+        return (float)(1.0f*x/GRID_X*2.0-1.0);
     }
     public static float BG2FGy(Integer y){
-        return (float)((GRID_Y-y)/GRID_Y*2.0-1.0);
+        return (float)((1.0f*GRID_Y-y)/GRID_Y*2.0-1.0);
     }
 }
