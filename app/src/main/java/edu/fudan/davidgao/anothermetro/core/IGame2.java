@@ -307,6 +307,14 @@ public class IGame2 extends Game { //TODO
         l.extend(src, dest);
         forceNotify(GameEvent.LINE_CHANGE);
     }
+    public boolean canAddLine(Site s1, Site s2) {
+        return true;
+    }
+    public boolean canExtendLine(Line l, Site src, Site dest) {
+        ArrayList<Site> s = l.getSites();
+        int index = s.indexOf(src);
+        return !(index > 0 && index < (s.size() - 1)) && !(s.contains(dest));
+    }
 
     /* Train Moving */
     private Runnable trainMoveRunnable = new Runnable() {

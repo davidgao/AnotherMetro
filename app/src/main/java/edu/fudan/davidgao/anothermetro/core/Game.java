@@ -53,4 +53,6 @@ public abstract class Game {
     public abstract ArrayList<Line> getLines();
     public abstract void addLine(Site s1, Site s2) throws GameException;
     public abstract void extendLine(Line l, Site src, Site dest) throws GameException;
+    public abstract boolean canAddLine(Site s1, Site s2);
+    public abstract boolean canExtendLine(Line l, Site src, Site dest);
 }
