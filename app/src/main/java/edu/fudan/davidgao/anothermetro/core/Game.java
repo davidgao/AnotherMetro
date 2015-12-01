@@ -2,23 +2,24 @@ package edu.fudan.davidgao.anothermetro.core;
 
 import java.util.ArrayList;
 
-import edu.fudan.davidgao.anothermetro.Site;
 import edu.fudan.davidgao.anothermetro.tools.*;
 
 public abstract class Game {
     /* Singleton */
     public static Game getInstance() {
-        return IGame.getInstance();
+        return IGame2.getInstance();
     }
 
     /* Game creation */
-    public static Game create(int maxGrowth, int baseGrowth) throws GameException {
-        return IGame.create(maxGrowth, baseGrowth);
+    public static Game create() throws GameException {
+        return IGame2.create();
     }
-    public static Game create(Matrix2D<MapDatum> map, int maxGrowth, int baseGrowth)
-            throws GameException {
-        return IGame.create(map, maxGrowth, baseGrowth);
+    public static Game create(Matrix2D<MapDatum> map) throws GameException {
+        return IGame2.create(map);
     }
+
+    /* Callback */
+    public abstract Broadcaster getCallbackBroadcaster(GameEvent event);
 
     /* Life cycle control */
     public abstract void start() throws GameException;
@@ -27,11 +28,12 @@ public abstract class Game {
     public abstract void kill() throws GameException;
     public abstract void destroy() throws GameException;
 
-    /* General information */
+    /* Game Data */
     public abstract GameState getState();
     public abstract Matrix2D<MapDatum> getMap();
     public abstract Rectangle<Integer> getRoi();
     public abstract Point<Integer> getSize();
+    public abstract ArrayList<Site> getSites();
 
     /* Tick timer */
     public abstract long getTickInterval();
@@ -41,8 +43,21 @@ public abstract class Game {
     /* Growth */
     public abstract long getGrowthInterval();
     public abstract void setGrowthInterval(long interval) throws GameException;
+    public abstract void setGrowth(int maxGrowth, int baseGrowth) throws GameException;
 
-    /* TODO */
-    public abstract ArrayList<Site> getSites();
-    public abstract void setSiteSpawnInterval(int interval) throws GameException;
+    /* Site Spawn */
+    public abstract long getSiteSpawnInterval();
+    public abstract void setSiteSpawnInterval(long interval) throws GameException;
+
+    /* Lines */
+    public abstract ArrayList<Line> getLines();
+    public abstract void addLine(Site s1, Site s2) throws GameException;
+    public abstract void extendLine(Line l, Site src, Site dest) throws GameException;
+    public abstract boolean canAddLine(Site s1, Site s2);
+    public abstract boolean canExtendLine(Line l, Site src, Site dest);
+
+    /* Passengers */
+    public abstract ArrayList<Passenger> getPassengers();
+    public abstract long getPassengerSpawnInterval();
+    public abstract void setPassengerSpawnInterval(long interval) throws GameException;
 }

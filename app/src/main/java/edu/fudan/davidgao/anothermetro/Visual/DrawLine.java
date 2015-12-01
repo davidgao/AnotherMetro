@@ -10,7 +10,9 @@ import java.util.ArrayList;
 
 import edu.fudan.davidgao.anothermetro.Line;
 import edu.fudan.davidgao.anothermetro.Site;
+import edu.fudan.davidgao.anothermetro.core;
 import edu.fudan.davidgao.anothermetro.core.Game;
+import edu.fudan.davidgao.anothermetro.tools.*;
 
 /**
  * Created by gqp on 2015/11/26.
@@ -54,6 +56,11 @@ public class DrawLine {
     private ArrayList<VsSite> sites;
     private ArrayList<VsSegment> segments;
     private Game game;
+    private static DrawLine instance = null;
+    public static DrawLine getInstance(){
+	return instance;
+    }
+
 
     //Beginning of GLSL
     public static int loadShader(int type, String shaderCode){
@@ -105,6 +112,7 @@ public class DrawLine {
     }
 
     public DrawLine() {
+	instance = this;
         init();
 
         // initialize vertex byte buffer for shape coordinates
@@ -158,8 +166,16 @@ public class DrawLine {
 
     private void init(){
         game=Game.getInstance();
-        lineCoords=new float[Config.MAX_SEGMENTS*4*3];
-        lineColors=new float[Config.MAX_SEGMENTS*4*4];
+        lineCoords=new float[Config.MAX_SEGMENTS*4*3];          // 4 for vertices (2 line segments), 3 for xyz-coordinates
+        lineColors=new float[Config.MAX_SEGMENTS*4*4];          // 4 for vertices (2 line segments), 4 for rgba colors
+	Broadcaster b = game.getCallbackBroadcaster(GameEvent.LINE_CHANGE);
+	Runnable drawLine = new Runnable() {
+		@Override
+		public void run(){
+			DrawLine.getInstance().draw();	
+		}
+	}
+	b.addListener(drawLine);
     }
 
     //find the VsSite with given site by position
@@ -174,12 +190,13 @@ public class DrawLine {
 
     //pass each line, separate each segment(part line between two sites)
     private void passLine(VsLine line){
-        for (int i=0;i<line.sites.size()-1;i++){
-            VsSegment temp_vssegment=new VsSegment(line.sites.get(i), line.sites.get(i+1), line);
-            VsSite temp_vssite = findVsSite(line.sites.get(i));
+	sites = line.getSites()
+        for (int i=0;i<sites.size()-1;i++){
+            VsSegment temp_vssegment=new VsSegment(sites.get(i), sites.get(i+1), line);
+            VsSite temp_vssite = findVsSite(sites.get(i));
             calcAngle(temp_vssegment);
             temp_vssite.add_out(temp_vssegment);
-            temp_vssite = findVsSite(line.sites.get(i+1));
+            temp_vssite = findVsSite(sites.get(i+1));
             temp_vssite.add_in(temp_vssegment);
             segments.add(temp_vssegment);
         }
@@ -414,14 +431,15 @@ public class DrawLine {
         for (int i=0;i<segments.size();i++){
             VsSegment temp=segments.get(i);
             ArrayList<PointF> line_dot = calcLine(getPosByAngle(temp.st, temp.st_angle), getPosByAngle(temp.ed, temp.ed_angle));
-            lineCoords[i*12]=line_dot.get(0).x;lineCoords[i*12+1]=line_dot.get(0).y;lineCoords[i*12+2]=0.0f;
-            lineCoords[i*12+3]=line_dot.get(1).x;lineCoords[i*12+4]=line_dot.get(1).y;lineCoords[i*12+5]=0.0f;
-            lineCoords[i*12+6]=line_dot.get(1).x;lineCoords[i*12+7]=line_dot.get(1).y;lineCoords[i*12+8]=0.0f;
-            lineCoords[i*12+9]=line_dot.get(2).x;lineCoords[i*12+10]=line_dot.get(2).y;lineCoords[i*12+11]=0.0f;
+            lineCoords[i*12]=line_dot.get(0).x;lineCoords[i*12+1]=line_dot.get(0).y;lineCoords[i*12+2]=Z_SEGMENT;
+            lineCoords[i*12+3]=line_dot.get(1).x;lineCoords[i*12+4]=line_dot.get(1).y;lineCoords[i*12+5]=Z_SEGMENT;
+            lineCoords[i*12+6]=line_dot.get(1).x;lineCoords[i*12+7]=line_dot.get(1).y;lineCoords[i*12+8]=Z_SEGMENT;
+            lineCoords[i*12+9]=line_dot.get(2).x;lineCoords[i*12+10]=line_dot.get(2).y;lineCoords[i*12+11]=Z_SEGMENT;
             for (int j=0;j<4;j++)
                 for (int k=0;k<4;k++)
                     lineColors[i*16+j*4+k]=Config.color_list[temp.line.color][k];
         }
+	vertexCount = segments.size()*4
     }
 
     //prepare every thing, get Sites and lines, convert site, line to VsSite, VsLine. pass Line , pass Site, send to GL

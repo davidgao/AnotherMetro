@@ -1,15 +1,19 @@
-package edu.fudan.davidgao.anothermetro;
+package edu.fudan.davidgao.anothermetro.core;
 
 import java.util.ArrayList;
 
 import edu.fudan.davidgao.anothermetro.core.GameException;
+import edu.fudan.davidgao.anothermetro.core.Site;
 
 public class Line {
-    public ArrayList<Site> sites = new ArrayList<>(2);
+    private final ArrayList<Site> sites = new ArrayList<>();
+    public final Train train;
+    private TrainState trainState;
 
     public Line(Site s1, Site s2) {
         sites.add(s1);
         sites.add(s2);
+        train = new Train(this);
     }
 
     public void extend(Site source, Site target) throws GameException {
@@ -18,5 +22,14 @@ public class Line {
         } else if (source == sites.get(sites.size() - 1)) {
             sites.add(target);
         } else throw new GameException("Illegal line extension.");
+    }
+
+    @SuppressWarnings("unchecked")
+    public ArrayList<Site> getSites() {
+        return (ArrayList<Site>)sites.clone();
+    }
+
+    void setTrainState(TrainState trainState) {
+        this.trainState = trainState;
     }
 }

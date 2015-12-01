@@ -13,19 +13,19 @@ public class Matrix2D<T> {
         this.size = new Point<>(x, y);
     }
 
-    /* Get (atomic) */
-    public T get(Point<Integer> pos) {
+    /* Get */
+    public synchronized T get(Point<Integer> pos) {
         return data[pos.x][pos.y];
     }
-    public T get(int x, int y) {
+    public synchronized T get(int x, int y) {
         return data[x][y];
     }
 
-    /* Set (atomic) */
-    public void set(Point<Integer> pos, T object) {
+    /* Set */
+    public synchronized void set(Point<Integer> pos, T object) {
         data[pos.x][pos.y] = object;
     }
-    public void set(int x, int y, T object) {
+    public synchronized void set(int x, int y, T object) {
         data[x][y] = object;
     }
 
