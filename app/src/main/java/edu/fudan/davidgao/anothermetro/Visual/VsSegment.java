@@ -28,6 +28,17 @@ public class VsSegment {
         st_a=0;ed_a=0;
     }
 
+/*
+ * [gq] (try to) add the following interfaces:
+ * VsTrainState getTrainState(float fraction, int direction)
+ * @fraction: (x - st) / (ed - st)
+ * @direction: whether the train is moving in reverse.  1 if false, -1 if true.
+ * Returns a VsTrainState instance, which contains
+ * 1. final Point<Float> coordinate
+ * 2. final int angle
+ * skq and bob can directly use the instance to draw a train and passengers.
+ */
+
     VsTrainState getTrainState(float fraction, int direction){
         ArrayList<PointF> line_dot = DrawLine.calcLine(DrawLine.getPosByAngle(line.sites.get(st), st_angle), DrawLine.getPosByAngle(line.sites.get(ed), ed_angle));
         double d12=distance(line_dot.get(0), line_dot.get(1)), d23=distance(line_dot.get(1), line_dot.get(2));
