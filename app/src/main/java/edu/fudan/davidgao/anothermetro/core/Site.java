@@ -4,7 +4,8 @@ import java.util.ArrayList;
 
 import edu.fudan.davidgao.anothermetro.tools.Point;
 
-public class Site implements PassengerState {
+public class Site extends PassengerState {
+    private final ArrayList<Passenger> passengers = new ArrayList<>();
     public Site(Point<Integer> pos, SiteType type) {
         this.pos = pos;
         this.type = type;
@@ -25,5 +26,14 @@ public class Site implements PassengerState {
         final int deltaX = pos.x - x;
         final int deltaY = pos.y - y;
         return Math.sqrt((double)((deltaX * deltaX)+(deltaY * deltaY)));
+    }
+
+    @SuppressWarnings("unchecked")
+    public ArrayList<Passenger> getPassengers() {
+        return (ArrayList<Passenger>)passengers.clone();
+    }
+
+    void addPassenger(Passenger passenger) {
+        passengers.add(passenger);
     }
 }

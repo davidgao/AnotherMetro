@@ -7,6 +7,7 @@ public class Passenger {
     public Passenger(SiteType type, PassengerState state) {
         this.type = type;
         this.state = state;
+        state.addPassenger(this);
     }
 
     public PassengerState getState() {
