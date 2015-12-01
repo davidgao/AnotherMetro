@@ -29,13 +29,12 @@ public class UpdateLineListener implements OnTouchListener {
 
     public PointF touchPos; //Current touch place which could be get by others
 
-    private boolean extending, adding, leftSite;
+    private boolean extending, adding;
     private long lastDownTime;
 
-    private Site touchedSite, startSite, lastSite;
-    private ArrayList<Site> planLine;
+    private Line planLine;
+    private Site touchedSite, startSite, endSite;
     private int planColor, nextColor;
-    private Line line_to_extend;
 
     private class Site_FGpoint{
         public Site site;
@@ -53,10 +52,9 @@ public class UpdateLineListener implements OnTouchListener {
         super();
         game = Game.getInstance();
         extending = adding = false;
-        planLine = new ArrayList<>();
 
-        lineCoords=new float[Config.MAX_SEGMENTS*12];
-        lineColors=new float[Config.MAX_SEGMENTS*16];
+        lineCoords=new float[12];
+        lineColors=new float[16];
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
@@ -126,98 +124,82 @@ public class UpdateLineListener implements OnTouchListener {
                      * inform BG that user is trying to modify an existed line
                      * pass line color(index) and site where change starts as arguments
                      */
-                    if(game.checkExtendLine(touchedLineHead.line, touchedLineHead.site)) {
-                        line_to_extend = touchedLineHead.line;
-                        planColor = touchedLineHead.color;
-                        lastSite = startSite = touchedLineHead.site;
-                        vertexCount = 4;
-                        extending = true;
-                        leftSite = true;
-                    }
+                    planColor = touchedLineHead.color;
+                    planLine = touchedLineHead.line;
+                    startSite = touchedLineHead.site;
+                    endSite = null;
+                    vertexCount = 4;
+                    extending = true;
                 } else if ((touchedSite = isSite(touchPos)) != null) {
                     /* user is touching a site
                      * inform BG that user is trying to add a new line
                      * pass the start site as argument
                      */
-                    if((planColor = game.checkNewLine(touchedSite)) >= 0) {
-                        line_to_extend = null;
-                        planColor = nextColor;
-                        lastSite = startSite = touchedSite;
-                        vertexCount = 4;
-                        adding = true;
-                        leftSite = false;
-                    }
+                    planColor = nextColor;
+                    startSite = touchedSite;
+                    endSite = null;
+                    vertexCount = 4;
+                    adding = true;
                 }
                 return true;
 
             case MotionEvent.ACTION_MOVE:
                 if (extending || adding){
                     if((touchedSite = isSite(touchPos))!=null){
-                        if(leftSite) {
-                            /* user has dragged to a site
-                             * inform BG that user dragged through a site when updating a line,
-                             * pass the site as argument
-                             */
-                            if(lastSite==touchedSite){
-                                planLine.remove(lastSite);
-                                lastSite = planLine.size()>0? planLine.get(planLine.size()-1):startSite;
-                                vertexCount -= 4;
-                            }
-                            else{
-                                if( isExtendValid(line_to_extend, startSite, planLine) ) {
-                                    planLine.add(touchedSite);
-                                    ArrayList<PointF> temp = DrawLine.calcLine(Config.BG2FGpoint(lastSite.pos), Config.BG2FGpoint(touchedSite.pos));
-                                    temp.add(temp.get(1));
-                                    lastSite = touchedSite;
-                                    for(int i=0;i<4;i++) {
-                                        lineColors[(vertexCount-i)*4 - 1] = 0.5f;
-                                        lineColors[(vertexCount-i)*4 - 2] = Config.color_list[planColor][2];
-                                        lineColors[(vertexCount-i)*4 - 3] = Config.color_list[planColor][1];
-                                        lineColors[(vertexCount-i)*4 - 4] = Config.color_list[planColor][0];
-                                        lineCoords[(vertexCount-i)*3 - 1] = 0;
-                                        lineCoords[(vertexCount-i)*3 - 2] = temp.get(i).y;
-                                        lineCoords[(vertexCount-i)*3 - 3] = temp.get(i).x;
-                                    }
-                                    vertexCount += 4;
+                        if(endSite==null){
+                            if( extending && game.canExtendLine(planLine, startSite, touchedSite) ) {
+                                endSite = touchedSite;
+                                ArrayList<PointF> temp = DrawLine.calcLine(Config.BG2FGpoint(startSite.pos), Config.BG2FGpoint(endSite.pos));
+                                temp.add(temp.get(1));
+                                for(int i=0;i<4;i++) {
+                                    lineColors[i*4 + 3] = 0.5f;
+                                    lineColors[i*4 + 2] = Config.color_list[planColor][2];
+                                    lineColors[i*4 + 1] = Config.color_list[planColor][1];
+                                    lineColors[i*4 + 0] = Config.color_list[planColor][0];
+                                    lineCoords[i*3 + 2] = 0;
+                                    lineCoords[i*3 + 1] = temp.get(i).y;
+                                    lineCoords[i*3 + 0] = temp.get(i).x;
                                 }
                             }
-
-                            leftSite=false;
+                            else if( adding && game.canAddLine(startSite, touchedSite) ) {
+                                endSite = touchedSite;
+                                ArrayList<PointF> temp = DrawLine.calcLine(Config.BG2FGpoint(startSite.pos), Config.BG2FGpoint(endSite.pos));
+                                temp.add(temp.get(1));
+                                for(int i=0;i<4;i++) {
+                                    lineColors[i*4 + 3] = 0.5f;
+                                    lineColors[i*4 + 2] = Config.color_list[nextColor][2];
+                                    lineColors[i*4 + 1] = Config.color_list[nextColor][1];
+                                    lineColors[i*4 + 0] = Config.color_list[nextColor][0];
+                                    lineCoords[i*3 + 2] = 0;
+                                    lineCoords[i*3 + 1] = temp.get(i).y;
+                                    lineCoords[i*3 + 0] = temp.get(i).x;
+                                }
+                            }
                         }
                     }
-                    else leftSite=true;
+                    else endSite=null;
                 }
                 return true;
 
             case MotionEvent.ACTION_UP:
-                if(adding && planLine.size()>0) {
-                    /* user has ended current drag action
-                     * inform BG that current line update event is end
-                     */
-                    try {
-                        line_to_extend = game.addLine(startSite, planLine.get(0));
-                        startSite = planLine.get(0);
-                        planLine.remove(0);
-                    }
-                    catch (GameException e){
+                if(endSite != null) {
+                    if(extending) {
+                        try {
+                            game.extendLine(planLine, startSite, endSite);
+                        } catch (GameException e) {
 
-                    }
-                }
-                if(adding || extending){
-                    adding = extending = false;
-
-                    try {
-                        while (planLine.size() > 0) {
-                            game.extendLine(line_to_extend, startSite, planLine.get(0));
-                            startSite = planLine.get(0);
-                            planLine.remove(0);
                         }
+                        extending = false;
                     }
-                    catch (GameException ex){
+                    else if(adding){
+                        try {
+                            game.addLine(startSite, endSite);
+                        } catch (GameException e) {
 
+                        }
+                        adding = false;
                     }
-
-                    planLine.clear();
+                    vertexCount = 0;
                 }
                 return true;
         }
@@ -341,16 +323,18 @@ public class UpdateLineListener implements OnTouchListener {
     public void draw() {
         if(!extending && !adding) return;
 
-        ArrayList<PointF> temp = DrawLine.calcLine(Config.BG2FGpoint(lastSite.pos), touchPos);
-        temp.add(temp.get(1));
-        for(int i=0;i<4;i++) {
-            lineColors[(vertexCount-i)*4 - 1] = Config.color_extra_line[3];
-            lineColors[(vertexCount-i)*4 - 2] = Config.color_extra_line[2];
-            lineColors[(vertexCount-i)*4 - 3] = Config.color_extra_line[1];
-            lineColors[(vertexCount-i)*4 - 4] = Config.color_extra_line[0];
-            lineCoords[(vertexCount-i)*3 - 1] = 0;
-            lineCoords[(vertexCount-i)*3 - 2] = temp.get(i).y;
-            lineCoords[(vertexCount-i)*3 - 3] = temp.get(i).x;
+        if(endSite==null) {
+            ArrayList<PointF> temp = DrawLine.calcLine(Config.BG2FGpoint(startSite.pos), touchPos);
+            temp.add(temp.get(1));
+            for (int i = 0; i < 4; i++) {
+                lineColors[i*4 + 0] = Config.color_extra_line[3];
+                lineColors[i*4 + 0] = Config.color_extra_line[2];
+                lineColors[i*4 + 0] = Config.color_extra_line[1];
+                lineColors[i*4 + 0] = Config.color_extra_line[0];
+                lineCoords[i*3 + 2] = 0;
+                lineCoords[i*3 + 1] = temp.get(i).y;
+                lineCoords[i*3 + 0] = temp.get(i).x;
+            }
         }
 
         // Add program to OpenGL ES environment
