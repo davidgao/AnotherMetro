@@ -10,7 +10,9 @@ import java.util.ArrayList;
 
 import edu.fudan.davidgao.anothermetro.Line;
 import edu.fudan.davidgao.anothermetro.Site;
+import edu.fudan.davidgao.anothermetro.core;
 import edu.fudan.davidgao.anothermetro.core.Game;
+import edu.fudan.davidgao.anothermetro.tools.*;
 
 /**
  * Created by gqp on 2015/11/26.
@@ -54,6 +56,11 @@ public class DrawLine {
     private ArrayList<VsSite> sites;
     private ArrayList<VsSegment> segments;
     private Game game;
+    private static DrawLine instance = null;
+    public static DrawLine getInstance(){
+	return instance;
+    }
+
 
     //Beginning of GLSL
     public static int loadShader(int type, String shaderCode){
@@ -105,6 +112,7 @@ public class DrawLine {
     }
 
     public DrawLine() {
+	instance = this;
         init();
 
         // initialize vertex byte buffer for shape coordinates
@@ -160,6 +168,14 @@ public class DrawLine {
         game=Game.getInstance();
         lineCoords=new float[Config.MAX_SEGMENTS*4*3];          // 4 for vertices (2 line segments), 3 for xyz-coordinates
         lineColors=new float[Config.MAX_SEGMENTS*4*4];          // 4 for vertices (2 line segments), 4 for rgba colors
+	Broadcaster b = game.getCallbackBroadcaster(GameEvent.LINE_CHANGE);
+	Runnable drawLine = new Runnable() {
+		@Override
+		public void run(){
+			DrawLine.getInstance().draw();	
+		}
+	}
+	b.addListener(drawLine);
     }
 
     //find the VsSite with given site by position
