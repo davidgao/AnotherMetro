@@ -10,7 +10,7 @@ import edu.fudan.davidgao.anothermetro.tools.*;
 public class IGame2 extends Game { //TODO
     /* Default parameters */
     // TODO: let tick interval (much) smaller, as skq is drawing train per tick.
-    private static final long defaultTickInterval = 1000; /* in ms */
+    private static final long defaultTickInterval = 200; /* in ms */
     private static final int defaultMaxGrowth = 25;
     private static final int defaultBaseGrowth = 10;
     private static final long defaultGrowthInterval = 30; /* in ticks */
@@ -285,6 +285,8 @@ public class IGame2 extends Game { //TODO
         if (spawned && tier > 2) {
             uniqueSites += 1;
         }
+        if (spawned) siteSpawnNotifier.run();
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
     private boolean spawnSite(SiteType type) {
         /* NOTE: Caller should always sync */
