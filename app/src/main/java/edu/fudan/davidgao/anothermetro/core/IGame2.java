@@ -35,6 +35,7 @@ public class IGame2 extends Game { //TODO
         initGrowth();
         initSiteSpawn();
         initTrainMove();
+        initPassengerSpawn();
     }
 
     /* Game creation */
@@ -390,6 +391,7 @@ public class IGame2 extends Game { //TODO
         }
     };
     private synchronized void spawnPassenger() {
+        System.out.println("Passenger spawn");
         final double uniqueRate = (double)uniqueSites / (double)sites.size();
         final int type;
         if (rand.nextDouble() < uniqueRate) {

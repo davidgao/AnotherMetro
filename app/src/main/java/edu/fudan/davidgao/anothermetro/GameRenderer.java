@@ -21,7 +21,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     private DrawLine drawLine;
     private DrawLineHead drawLineHead;
-    //private DrawPassenger drawPassenger = new DrawPassenger();
+    private DrawPassenger drawPassenger;
     private DrawSite drawSite;
     //private DrawTrain drawTrain = new DrawTrain();
     private UpdateLineListener updateLineListener;
@@ -33,6 +33,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         drawLine = new DrawLine();
         drawSite = new DrawSite();
         drawLineHead= new DrawLineHead();
+        drawPassenger = new DrawPassenger();
         updateLineListener = new UpdateLineListener();
         try {
             Game.getInstance().start();
@@ -50,7 +51,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         drawLine.draw();
         drawLineHead.draw();
-        //drawPassenger.draw();
+        drawPassenger.draw();
         drawSite.draw();
         //drawTrain.draw();
         updateLineListener.draw();

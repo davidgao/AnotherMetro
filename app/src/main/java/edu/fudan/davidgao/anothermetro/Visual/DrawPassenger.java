@@ -52,7 +52,7 @@ public class DrawPassenger {
 	
 	private Game gameMain;
 	private final int mProgram;
-	private static float color[] = { 1.0f, 1.0f, 1.0f, 1.0f };; /* Config.siteColor */
+	private static float color[] = { 0.2f, 0.2f, 0.2f, 1.0f };; /* Config.siteColor */
 	private static DrawPassenger instance = null;
 	public static DrawPassenger getInstance(){
 		return instance;
@@ -117,7 +117,7 @@ public class DrawPassenger {
 		vertexCoords[vertexCount ++] = (float) y;
 		vertexCoords[vertexCount ++] = pz;
 	}
-	
+
 	private void addCircle(double x, double y) {
 		addVertex(x + pr, y - phr); addVertex(x + pr, y + phr); addVertex(x, y);
 		addVertex(x + pr, y + phr); addVertex(x + phr, y + pr); addVertex(x, y);
@@ -200,6 +200,8 @@ public class DrawPassenger {
 		
 	private void GTMDvertexCoords() {
 		ArrayList<Site> sites = gameMain.getSites();
+		vertexCount = 0;
+		System.out.println("Draw passenger");
 		for (int i = 0; i < sites.size(); i ++) {
 			Site site = sites.get(i);
 			int ix = site.pos.x;
@@ -207,11 +209,12 @@ public class DrawPassenger {
 			double x = Config.BG2FGx(ix);
 			double y = Config.BG2FGy(iy);
 			ArrayList<Passenger> passengers = site.getPassengers();
-			int r = 0, c = 0;
+			int _r = 0, _c = 0;
 			for (int j = 0; j < passengers.size(); j ++) {
+				System.out.printf("%d %d %d %d\n", sites.size(), i, passengers.size(), j);
 				Passenger passenger = passengers.get(j);
-				double px = x - r + (pr + gap) * (2 * c + 1);
-				double py = y + r + (pr + gap) * (2 * r + 1);
+				double px = x - r + (pr + gap) * (2 * _c + 1);
+				double py = y + r + (pr + gap) * (2 * _r + 1);
 				switch (passenger.type) {
 					case CIRCLE: addCircle(px, py); break;
 					case TRIANGLE: addTriangle(px, py); break;
@@ -221,10 +224,10 @@ public class DrawPassenger {
 					//...
 					default: 
 				}
-				c ++;
-				if (c == col) {
-					r ++;
-					c = 0;
+				_c ++;
+				if (_c == col) {
+					_r ++;
+					_c = 0;
 				}
 			}
 		}
@@ -258,11 +261,11 @@ public class DrawPassenger {
 				angle = vsTrainState.angle;
 			}
 			ArrayList<Passenger> passengers = train.getPassengers();
-			int r = 0, c = 0;
+			int _r = 0, _c = 0;
 			for (int j = 0; j < passengers.size(); j ++) {
 				Passenger passenger = passengers.get(j);
-				double px = tx - 3 * (pr + gap) + (pr + gap) * (2 * c + 1);
-				double py = ty - 2 * (pr + gap) + (pr + gap) * (2 * r + 1);
+				double px = tx - 3 * (pr + gap) + (pr + gap) * (2 * _c + 1);
+				double py = ty - 2 * (pr + gap) + (pr + gap) * (2 * _r + 1);
 				switch (passenger.type) {
 					case CIRCLE: addCircle(px, py); break;
 					case TRIANGLE: addTriangle(px, py); break;
@@ -272,12 +275,14 @@ public class DrawPassenger {
 					//...
 					default: 
 				}
-				c ++;
-				if (c == 3) {
-					r ++;
-					c = 0;
+				_c ++;
+				if (_c == 3) {
+					_r ++;
+					_c = 0;
 				}
 			}
 		}
+		vertexBuffer.put(vertexCoords);
+		vertexBuffer.position(0);
 	}
 }
