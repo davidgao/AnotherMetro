@@ -306,6 +306,7 @@ public class IGame2 extends Game { //TODO
         return (ArrayList<Line>)lines.clone();
     }
     public void addLine(Site s1, Site s2) throws GameException {
+        if (s1 == s2) throw new GameException("Station conflict");
         lines.add(new Line(s1, s2));
         forceNotify(GameEvent.LINE_CHANGE);
         forceNotify(GameEvent.TRAIN_STATE_CHANGE);
@@ -315,7 +316,7 @@ public class IGame2 extends Game { //TODO
         forceNotify(GameEvent.LINE_CHANGE);
     }
     public boolean canAddLine(Site s1, Site s2) {
-        return true;
+        return (s1 != s2);
     }
     public boolean canExtendLine(Line l, Site src, Site dest) {
         ArrayList<Site> s = l.getSites();
@@ -340,7 +341,13 @@ public class IGame2 extends Game { //TODO
                 Site curr = ((StandbyTrainState) ts).site;
                 Site next = s.get(s.indexOf(curr) + ts.direction);
                 double dist = curr.dist(next.pos);
-                ts = new RunningTrainState(line, curr, next, ts.direction, now, now + (long)dist);
+                if (ts.direction == 1) {
+                    ts = new RunningTrainState(line, curr, next, 1,
+                            now, now + (long) dist);
+                } else {
+                    ts = new RunningTrainState(line, next, curr, -1,
+                            now, now + (long) dist);
+                }
                 line.train.setState(ts);
                 have_moved = true;
             } else if (ts instanceof RunningTrainState) {
