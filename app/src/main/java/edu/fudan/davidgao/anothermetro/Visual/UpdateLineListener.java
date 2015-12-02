@@ -190,7 +190,7 @@ public class UpdateLineListener implements OnTouchListener {
                     endSite = null;
                     vertexCount = 4;
                     extending = true;
-                } else if ((touchedSite = isSite(touchPos)) != null) {
+                } else if ((touchedSite = isSite(touchPos)) != null && nextColor < Config.AVAILABLE_LINES) {
                     planColor = nextColor;
                     startSite = touchedSite;
                     endSite = null;
@@ -212,7 +212,7 @@ public class UpdateLineListener implements OnTouchListener {
                                     lineColors[i*4 + 2] = Config.color_list[planColor][2];
                                     lineColors[i*4 + 1] = Config.color_list[planColor][1];
                                     lineColors[i*4 + 0] = Config.color_list[planColor][0];
-                                    lineCoords[i*3 + 2] = 0;
+                                    lineCoords[i*3 + 2] = Config.Z_BLUEPRINT;
                                     lineCoords[i*3 + 1] = temp.get(i).y;
                                     lineCoords[i*3 + 0] = temp.get(i).x;
                                 }
@@ -227,9 +227,9 @@ public class UpdateLineListener implements OnTouchListener {
                                 temp.add(temp.get(1));
                                 for(int i=0;i<4;i++) {
                                     lineColors[i*4 + 3] = 1.0f;
-                                    lineColors[i*4 + 2] = Config.color_list[nextColor][2];
-                                    lineColors[i*4 + 1] = Config.color_list[nextColor][1];
-                                    lineColors[i*4 + 0] = Config.color_list[nextColor][0];
+                                    lineColors[i*4 + 2] = Config.color_list[planColor][2];
+                                    lineColors[i*4 + 1] = Config.color_list[planColor][1];
+                                    lineColors[i*4 + 0] = Config.color_list[planColor][0];
                                     lineCoords[i*3 + 2] = Config.Z_BLUEPRINT;
                                     lineCoords[i*3 + 1] = temp.get(i).y;
                                     lineCoords[i*3 + 0] = temp.get(i).x;
@@ -359,9 +359,9 @@ public class UpdateLineListener implements OnTouchListener {
             ArrayList<PointF> temp = DrawLine.calcLine(Config.BG2FGpoint(startSite.pos), touchPos);
             temp.add(temp.get(1));
             for (int i = 0; i < 4; i++) {
-                lineColors[i*4 + 0] = Config.color_extra_line[3];
-                lineColors[i*4 + 0] = Config.color_extra_line[2];
-                lineColors[i*4 + 0] = Config.color_extra_line[1];
+                lineColors[i*4 + 3] = Config.color_extra_line[3];
+                lineColors[i*4 + 2] = Config.color_extra_line[2];
+                lineColors[i*4 + 1] = Config.color_extra_line[1];
                 lineColors[i*4 + 0] = Config.color_extra_line[0];
                 lineCoords[i*3 + 2] = Config.Z_BLUEPRINT;
                 lineCoords[i*3 + 1] = temp.get(i).y;

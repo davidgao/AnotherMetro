@@ -12,6 +12,7 @@ public class Config {
     public static final float SITE_RADIUS=0.05f;
 
     public static final int MAX_LINES=8;
+    public static final int AVAILABLE_LINES=8;
     public static final int MAX_SEGMENTS=200;
     public static final double LATENT_SITE_RADIUS=0.01;
 

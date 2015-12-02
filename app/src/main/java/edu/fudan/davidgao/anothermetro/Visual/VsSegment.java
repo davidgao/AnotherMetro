@@ -42,7 +42,7 @@ public class VsSegment {
  * 2. final int angle
  * skq and bob can directly use the instance to draw a train and passengers.
  */
-/*
+
     VsTrainState getTrainState(float fraction, int direction){
         ArrayList<PointF> line_dot = DrawLine.calcLine(DrawLine.getPosByAngle(st, st_angle), DrawLine.getPosByAngle(ed, ed_angle));
         // line_dot.get(0), line_dot.get(1), line_dot.get(2) to obtain three coordinates
@@ -68,7 +68,8 @@ public class VsSegment {
                 return new VsTrainState(new PointF(line_dot.get(1).x+(1.0f-fraction)*(line_dot.get(2).x-line_dot.get(1).x), line_dot.get(1).y+(1.0f-fraction)*(line_dot.get(2).y-line_dot.get(1).y)), ed_a);
             }
         }
-    }*/
+    }
+
 
     public VsTrainState getTrainState(double fraction, int direction)
     {

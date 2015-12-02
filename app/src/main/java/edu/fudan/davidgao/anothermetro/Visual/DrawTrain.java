@@ -201,7 +201,7 @@ public class DrawTrain {
                     synchronized (instance) {
                         refresh();
                     }
-                    Thread.sleep(500);
+                    Thread.sleep(16);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -257,7 +257,6 @@ public class DrawTrain {
         int len = VsTrains.size();
         for (int i = 0; i < len; ++ i)
         {
-            System.out.printf("x=%f y=%f\n", VsTrains.get(i).coordinate.x, VsTrains.get(i).coordinate.y);
             addTrain(VsTrains.get(i).coordinate.x,VsTrains.get(i).coordinate.y,VsTrains.get(i).angle,1.00f);
         }
         vertexBuffer.put(vertexCoords);
