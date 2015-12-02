@@ -249,8 +249,12 @@ public class DrawPassenger {
 			}
 			if (trainState instanceof RunningTrainState) {
 				RunningTrainState runningTrainState = (RunningTrainState)trainState;
-				VsLine vsLine = new VsLine(line);
-				VsSegment vsSegment = new VsSegment(runningTrainState.s1, runningTrainState.s2, vsLine);
+				VsSegment vsSegment;
+				if (trainState.direction==1) {
+					vsSegment = DrawLine.getInstance().findSegment(runningTrainState.s1, runningTrainState.s2, trainState.line);
+				}else{
+					vsSegment = DrawLine.getInstance().findSegment(runningTrainState.s2, runningTrainState.s1, trainState.line);
+				}
 				long depart = runningTrainState.departure;
 				long arrival = runningTrainState.arrival;
 				long currentTick = gameMain.getTickCounter();

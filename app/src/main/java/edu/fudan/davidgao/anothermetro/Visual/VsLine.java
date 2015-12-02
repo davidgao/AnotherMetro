@@ -12,8 +12,10 @@ public class VsLine {
     public ArrayList<Site> sites = new ArrayList<>(2);
     public static int color_ptr=0;
     public int color;
+    public Line line;
     public VsLine(Line line){
         sites=line.getSites();
+        this.line = line;
         color = color_ptr;
         color_ptr++;
     }
