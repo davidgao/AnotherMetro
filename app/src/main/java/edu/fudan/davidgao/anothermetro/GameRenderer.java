@@ -11,7 +11,7 @@ import edu.fudan.davidgao.anothermetro.Visual.DrawLine;
 import edu.fudan.davidgao.anothermetro.Visual.DrawLineHead;
 import edu.fudan.davidgao.anothermetro.Visual.DrawPassenger;
 import edu.fudan.davidgao.anothermetro.Visual.DrawSite;
-import edu.fudan.davidgao.anothermetro.Visual.DrawTrain;
+import edu.fudan.davidgao.anothermetro.Visual.TrainRenderer;
 import edu.fudan.davidgao.anothermetro.Visual.UpdateLineListener;
 import edu.fudan.davidgao.anothermetro.core.Game;
 import edu.fudan.davidgao.anothermetro.core.GameException;
@@ -23,7 +23,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private DrawLineHead drawLineHead;
     private DrawPassenger drawPassenger;
     private DrawSite drawSite;
-    private DrawTrain drawTrain;
+    private TrainRenderer drawTrain;
     private UpdateLineListener updateLineListener;
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -33,7 +33,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         drawLine = new DrawLine();
         drawSite = new DrawSite();
         drawLineHead= new DrawLineHead();
-        drawTrain = new DrawTrain();
+        drawTrain = new TrainRenderer();
         drawPassenger = new DrawPassenger();
         updateLineListener = new UpdateLineListener();
         try {
@@ -57,7 +57,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         drawLineHead.draw();
         drawPassenger.draw();
         drawSite.draw();
-        drawTrain.draw();
+        drawTrain.render();
         updateLineListener.draw();
     }
 
