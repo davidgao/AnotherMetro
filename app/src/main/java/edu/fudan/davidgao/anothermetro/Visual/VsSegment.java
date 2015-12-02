@@ -14,17 +14,22 @@ public class VsSegment {
     public Site st, ed;
     public int st_a, ed_a; //int 8 direct
     public double st_angle, ed_angle; //graphic
+    private ArrayList<PointF> line_dot;
 
     static double distance(PointF a, PointF b){
         return Math.sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));
     }
 
+    public void update_LineDot(){
+        line_dot = DrawLine.calcLine(DrawLine.getPosByAngle(st, st_angle), DrawLine.getPosByAngle(ed, ed_angle));
+    }
     public VsSegment(Site st, Site ed, VsLine line){
         this.st=st;
         this.ed=ed;
         this.line=line;
         st_angle=0;ed_angle=0;
         st_a=0;ed_a=0;
+        line_dot=null;
     }
 
 /*
@@ -48,25 +53,26 @@ public class VsSegment {
             mid_frac = d12/d13;
             if (fraction>mid_frac){
                 fraction = (float)((fraction- mid_frac)/(1.0 - mid_frac));
-                return new VsTrainState(new PointF(fraction*(line_dot.get(1).x+line_dot.get(2).x), fraction*(line_dot.get(1).y+line_dot.get(2).y)), Config.C2CC(ed_a));
+                return new VsTrainState(new PointF(line_dot.get(1).x+fraction*(line_dot.get(2).x-line_dot.get(1).x), line_dot.get(1).y+fraction*(line_dot.get(2).y-line_dot.get(1).y)), Config.C2CC(ed_a));
             }else{
                 fraction = (float)((fraction)/(mid_frac));
-                return new VsTrainState(new PointF(fraction*(line_dot.get(0).x+line_dot.get(1).x), fraction*(line_dot.get(0).y+line_dot.get(1).y)), st_a);
+                return new VsTrainState(new PointF(line_dot.get(0).x+fraction*(line_dot.get(1).x-line_dot.get(0).x), line_dot.get(0).y+fraction*(line_dot.get(1).y-line_dot.get(0).y)), st_a);
             }
         }else{
             mid_frac = d23/d13;
             if (fraction>mid_frac){
                 fraction = (float)((fraction- mid_frac)/(1.0 - mid_frac));
-                return new VsTrainState(new PointF((1.0f-fraction)*(line_dot.get(0).x+line_dot.get(1).x), (1.0f-fraction)*(line_dot.get(0).y+line_dot.get(1).y)), Config.C2CC(st_a));
+                return new VsTrainState(new PointF(line_dot.get(0).x+(1.0f-fraction)*(line_dot.get(1).x-line_dot.get(0).x), line_dot.get(0).y+(1.0f-fraction)*(line_dot.get(1).y-line_dot.get(0).y)), Config.C2CC(st_a));
             }else{
                 fraction = (float)((fraction)/(mid_frac));
-                return new VsTrainState(new PointF((1.0f-fraction)*(line_dot.get(1).x+line_dot.get(2).x), (1.0f-fraction)*(line_dot.get(1).y+line_dot.get(2).y)), ed_a);
+                return new VsTrainState(new PointF(line_dot.get(1).x+(1.0f-fraction)*(line_dot.get(2).x-line_dot.get(1).x), line_dot.get(1).y+(1.0f-fraction)*(line_dot.get(2).y-line_dot.get(1).y)), ed_a);
             }
         }
     }*/
+
     public VsTrainState getTrainState(double fraction, int direction)
     {
-        ArrayList<PointF> line = DrawLine.calcLine(DrawLine.getPosByAngle(st,st_angle), DrawLine.getPosByAngle(ed,ed_angle));
+        ArrayList<PointF> line = line_dot;
         VsTrainState vsTrainState = null;
         PointF A,B,C,AB,BC;
         int angle1,angle2;
@@ -79,7 +85,7 @@ public class VsSegment {
         } else {
             A = line.get(2);
             B = line.get(1);
-            C = line.get(0);
+            C = line.get(1);
             angle2 = Config.C2CC(ed_a);
             angle1 = st_a;
         }

@@ -208,6 +208,16 @@ public class DrawLine {
         }
     }
 
+    public VsSegment findSegment(Site st, Site ed, Line line){
+        for (int i=0;i<segments.size();i++){
+            VsSegment segment = segments.get(i);
+            if (segment.line.line==line&&segment.st==st&&segment.ed==ed){
+                return segment;
+            }
+        }
+        return null;
+    }
+
     //pass each site, dispatch the in angle and out angle for each segment
     private void passSite(ArrayList<VsSite> sites){
         for (int i=0;i<sites.size();i++){
@@ -215,6 +225,8 @@ public class DrawLine {
             temp.dispatch_in();
             temp.dispatch_out();
         }
+        for (int i=0;i<segments.size();i++)
+            segments.get(i).update_LineDot();
     }
 
     //return a point at given angle on a circle
