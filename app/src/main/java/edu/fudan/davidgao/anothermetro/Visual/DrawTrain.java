@@ -49,6 +49,11 @@ public class DrawTrain {
     private final int vertexStride = COORDS_PER_VERTEX * 4;
     private float[] vertexCoords;
     private int vertexCount = 0;
+    private static DrawTrain instance;
+
+    public static DrawTrain getInstance() {
+        return instance;
+    }
 
     float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
 
@@ -67,10 +72,11 @@ public class DrawTrain {
     private Game game;
 
     public DrawTrain() {
+        instance = this;
         game = Game.getInstance();
         vertexCoords = new float[3 * 4 * Config.MAX_SEGMENTS];
-        Broadcaster broadcaster = game.getCallbackBroadcaster(GameEvent.TICK);
-        broadcaster.addListener(TrainRefreshRunnable);
+        Broadcaster trainUpdateBroadcaster = game.getCallbackBroadcaster(GameEvent.TRAIN_STATE_CHANGE);
+        trainUpdateBroadcaster.addListener(trainUpdateRunnable);
 
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 //(number of coordinate values * 4 byte per float)
@@ -83,7 +89,7 @@ public class DrawTrain {
         // add the coordinates to the FloatBuffer
         vertexBuffer.put(vertexCoords);
         // set the buffer to read the first coordinate
-        vertexBuffer.position();
+        vertexBuffer.position(0);
 
         // prepare shader and OpenGL program
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
@@ -93,6 +99,13 @@ public class DrawTrain {
         GLES20.glAttachShader(mProgram, vertexShader); // add the vertex fragment shader to program
         GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
         GLES20.glLinkProgram(mProgram);
+
+        // Forcefully update the lines, sites and trains member so that they are initialized
+        trainUpdate();
+
+        // Startup a train drawing thread which repeatedly updates train vertex buffer
+        Thread thTrainDraw = new Thread(trainDrawingRunnable);
+        thTrainDraw.start();
     }
 
 
@@ -123,7 +136,7 @@ public class DrawTrain {
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 
-    private static  final double size =  0.05;
+    private static  final double size =  0.02;
 
 
     private void addVertex(double x, double y, double high) {
@@ -158,18 +171,39 @@ public class DrawTrain {
     private ArrayList<Line> lines = null;
     private ArrayList<Site> sites = null;
     private ArrayList<Train> trains = null;
-    private ArrayList<TrainState> trainStates;
     private long tickCounter;
-    private Runnable TrainRefreshRunnable = new Runnable() {
+    private Runnable trainUpdateRunnable = new Runnable() {
         public void run() {
-            synchronized (this) {
-                lines = game.getLines();
-                sites = game.getSites();
-                trains = new ArrayList<>();
-                for (int i = 0; i < lines.size(); ++i) {
-                    trains.add(lines.get(i).train);
+            trainUpdate();
+        }
+    };
+
+    private void trainUpdate() {
+        synchronized (instance) {
+            System.out.println("Train update");
+            lines = game.getLines();
+            sites = game.getSites();
+            trains = new ArrayList<>();
+            for (int i = 0; i < lines.size(); ++i) {
+                trains.add(lines.get(i).train);
+            }
+        }
+    }
+
+    /* This happens at every frame */
+    private Runnable trainDrawingRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                for (; ; ) {
+                    tickCounter = game.getTickCounter();
+                    synchronized (instance) {
+                        refresh();
+                    }
+                    Thread.sleep(500);
                 }
-                tickCounter = game.getTickCounter();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     };
@@ -190,6 +224,7 @@ public class DrawTrain {
             VsSegment vsSegment = new VsSegment(runningTrainState.s1, runningTrainState.s2, new VsLine(state.line));
             long timePeriod = runningTrainState.arrival - runningTrainState.departure;
             long timePassed = tickCounter - runningTrainState.departure;
+            System.out.printf("%d %d\n", timePeriod, timePassed);
             float fraction = (float)timePassed / (float) timePeriod;
             vsTrainState = vsSegment.getTrainState(fraction, state.direction);
         } else vsTrainState = null;
@@ -206,7 +241,8 @@ public class DrawTrain {
         return VsTrains;
     }
 
-    private void drawer(){
+    private void refresh(){
+        vertexCount = 0;
         ArrayList<VsTrainState> VsTrains;
         synchronized (this) {
                 VsTrains = transformTrainToVsTrain(trains);
@@ -214,7 +250,10 @@ public class DrawTrain {
         int len = VsTrains.size();
         for (int i = 0; i < len; ++ i)
         {
+            System.out.printf("x=%f y=%f\n", VsTrains.get(i).coordinate.x, VsTrains.get(i).coordinate.y);
             addTrain(VsTrains.get(i).coordinate.x,VsTrains.get(i).coordinate.y,VsTrains.get(i).angle,1.00f);
         }
+        vertexBuffer.put(vertexCoords);
+        vertexBuffer.position(0);
     }
 }

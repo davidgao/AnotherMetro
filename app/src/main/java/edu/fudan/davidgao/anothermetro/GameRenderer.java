@@ -23,7 +23,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private DrawLineHead drawLineHead;
     private DrawPassenger drawPassenger;
     private DrawSite drawSite;
-    //private DrawTrain drawTrain = new DrawTrain();
+    private DrawTrain drawTrain;
     private UpdateLineListener updateLineListener;
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -33,12 +33,16 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         drawLine = new DrawLine();
         drawSite = new DrawSite();
         drawLineHead= new DrawLineHead();
+        drawTrain = new DrawTrain();
         drawPassenger = new DrawPassenger();
         updateLineListener = new UpdateLineListener();
         try {
             Game.getInstance().start();
             Game.getInstance().run();
             ArrayList<Site> temp_sites =  Game.getInstance().getSites();
+            // Wait for backend to spawn all three sites
+            for (;temp_sites.size() < 3;)
+                ;
             Game.getInstance().addLine(temp_sites.get(0), temp_sites.get(1));
             GameView.getInstance().addUpdateLineListener(updateLineListener);
         } catch (GameException e){
@@ -53,7 +57,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         drawLineHead.draw();
         drawPassenger.draw();
         drawSite.draw();
-        //drawTrain.draw();
+        drawTrain.draw();
         updateLineListener.draw();
     }
 

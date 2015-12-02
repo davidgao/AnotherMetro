@@ -40,6 +40,7 @@ public class VsSegment {
 
     VsTrainState getTrainState(float fraction, int direction){
         ArrayList<PointF> line_dot = DrawLine.calcLine(DrawLine.getPosByAngle(st, st_angle), DrawLine.getPosByAngle(ed, ed_angle));
+        // line_dot.get(0), line_dot.get(1), line_dot.get(2) to obtain three coordinates
         double d12=distance(line_dot.get(0), line_dot.get(1)), d23=distance(line_dot.get(1), line_dot.get(2));
         double d13 =d12+d23;
         double mid_frac = 0;
