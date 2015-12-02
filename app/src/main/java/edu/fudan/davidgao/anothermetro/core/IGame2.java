@@ -9,6 +9,7 @@ import edu.fudan.davidgao.anothermetro.tools.*;
 
 public class IGame2 extends Game { //TODO
     /* Default parameters */
+    // TODO: let tick interval (much) smaller, as skq is drawing train per tick.
     private static final long defaultTickInterval = 1000; /* in ms */
     private static final int defaultMaxGrowth = 25;
     private static final int defaultBaseGrowth = 10;
@@ -35,12 +36,13 @@ public class IGame2 extends Game { //TODO
         initGrowth();
         initSiteSpawn();
         initTrainMove();
+        initPassengerSpawn();
     }
 
     /* Game creation */
     public static Game create() throws GameException {
         /* Create a all-land map */
-        Matrix2D<MapDatum> map = new Matrix2D<>(400, 300);
+        Matrix2D<MapDatum> map = new Matrix2D<>(40, 30);
         map.fill(MapDatum.LAND);
         /* and try to create */
         return create(map);
@@ -242,9 +244,7 @@ public class IGame2 extends Game { //TODO
     private SiteValidator siteValidator;
     private void startSiteSpawn() {
         spawnSite(SiteType.fromInt(0));
-        forceNotify(GameEvent.SITE_SPAWN);
         spawnSite(SiteType.fromInt(1));
-        forceNotify(GameEvent.SITE_SPAWN);
         spawnSite(SiteType.fromInt(2));
         forceNotify(GameEvent.SITE_SPAWN);
     }
@@ -356,7 +356,7 @@ public class IGame2 extends Game { //TODO
                 }
                 Site curr = ((RunningTrainState) ts).s2;
                 int dir = ts.direction;
-                if (dir == 1 && curr == s.get(s.size())) {
+                if (dir == 1 && curr == s.get(s.size()-1)) {
                     dir = -1;
                 }
                 if (dir == -1 && curr == s.get(0)) {
@@ -397,6 +397,7 @@ public class IGame2 extends Game { //TODO
         }
     };
     private synchronized void spawnPassenger() {
+        System.out.println("Passenger spawn");
         final double uniqueRate = (double)uniqueSites / (double)sites.size();
         final int type;
         if (rand.nextDouble() < uniqueRate) {

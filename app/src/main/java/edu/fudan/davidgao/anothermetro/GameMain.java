@@ -9,6 +9,14 @@ import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.io.Console;
+
+import edu.fudan.davidgao.anothermetro.Visual.Config;
+import edu.fudan.davidgao.anothermetro.core.Game;
+import edu.fudan.davidgao.anothermetro.core.GameException;
+import edu.fudan.davidgao.anothermetro.core.MapDatum;
+import edu.fudan.davidgao.anothermetro.tools.Matrix2D;
+
 public class GameMain extends AppCompatActivity {
     /* Allow auto hide system UI */
     private static final boolean AUTO_HIDE = true;
@@ -21,9 +29,16 @@ public class GameMain extends AppCompatActivity {
 
     private boolean mVisible;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            Matrix2D<MapDatum> map = new Matrix2D<>(Config.GRID_X, Config.GRID_Y);
+            Game game = Game.create();
+        }catch(GameException e) {
+            e.printStackTrace();
+        }
 
         gameView = new GameView(this);
 
