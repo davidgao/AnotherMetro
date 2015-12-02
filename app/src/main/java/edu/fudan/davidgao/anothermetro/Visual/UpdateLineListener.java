@@ -27,6 +27,7 @@ import edu.fudan.davidgao.anothermetro.core.Game;
 public class UpdateLineListener implements OnTouchListener {
 
     private Game game;
+    private DrawLineHead drawLineHead;
 
     public PointF touchPos; //Current touch place which could be get by others
 
@@ -35,6 +36,7 @@ public class UpdateLineListener implements OnTouchListener {
 
     private Line planLine;
     private Site touchedSite, startSite, endSite;
+    private VsLineHead touchedLineHead;
     private int planColor, nextColor;
 
     private class Site_FGpoint{
@@ -49,9 +51,10 @@ public class UpdateLineListener implements OnTouchListener {
     private final ArrayList<VsLineHead> lineHeads = new ArrayList<>();
     private HashMap<Site, Integer> occupiedDirs = new HashMap<>();
 
-    public UpdateLineListener(){
+    public UpdateLineListener(DrawLineHead drawLineHead){
         super();
         init();
+        this.drawLineHead = drawLineHead;
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
@@ -182,7 +185,6 @@ public class UpdateLineListener implements OnTouchListener {
                 if(event.getDownTime() <= lastDownTime + 500)return false; //avoid too frequent reaction
                 lastDownTime = event.getDownTime();
 
-                VsLineHead touchedLineHead;
                 if ((touchedLineHead = isLineHead(touchPos)) != null) {
                     planColor = touchedLineHead.color;
                     planLine = touchedLineHead.line;
@@ -190,6 +192,7 @@ public class UpdateLineListener implements OnTouchListener {
                     endSite = null;
                     vertexCount = 4;
                     extending = true;
+                    drawLineHead.hideLineHead(touchedLineHead);
                 } else if ((touchedSite = isSite(touchPos)) != null && nextColor < Config.AVAILABLE_LINES) {
                     planColor = nextColor;
                     startSite = touchedSite;
@@ -254,6 +257,7 @@ public class UpdateLineListener implements OnTouchListener {
 
                         }
                     }
+                    else drawLineHead.revealLineHead(touchedLineHead);
                     extending = false;
                     vertexCount = 0;
                 }
@@ -396,6 +400,7 @@ public class UpdateLineListener implements OnTouchListener {
                 GLES20.GL_FLOAT, false,
                 colorStride, colorBuffer);
 
+        GLES20.glLineWidth(Config.LINE_WIDTH);
         // Draw the triangle
         GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
 

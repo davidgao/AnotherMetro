@@ -91,6 +91,7 @@ public class DrawLineHead {
                 GLES20.GL_FLOAT, false,
                 colorStride, colorBuffer);
 
+        GLES20.glLineWidth(Config.LINE_WIDTH+1);
         synchronized (lineCoords) {
             // Draw the triangle
             GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
@@ -217,6 +218,14 @@ public class DrawLineHead {
         }
     }
     private LineChangeListener LCListener = new LineChangeListener();
+
+    public void hideLineHead(VsLineHead head){
+        lineHeads.remove(head);
+    }
+    public void revealLineHead(VsLineHead head){
+        lineHeads.add(head);
+    }
+
 
     private void init(){
         game=Game.getInstance();

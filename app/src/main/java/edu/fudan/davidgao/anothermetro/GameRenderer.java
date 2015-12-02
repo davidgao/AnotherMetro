@@ -35,7 +35,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         drawLineHead= new DrawLineHead();
         drawTrain = new TrainRenderer();
         drawPassenger = new DrawPassenger();
-        updateLineListener = new UpdateLineListener();
+        updateLineListener = new UpdateLineListener(drawLineHead);
         try {
             Game.getInstance().start();
             Game.getInstance().run();
