@@ -345,10 +345,10 @@ public class IGame2 extends Game { //TODO
                 double dist = curr.dist(next.pos);
                 if (ts.direction == 1) {
                     ts = new RunningTrainState(line, curr, next, 1,
-                            now, now + (long) dist);
+                            now, now + (long) dist * 5);
                 } else {
                     ts = new RunningTrainState(line, next, curr, -1,
-                            now, now + (long) dist);
+                            now, now + (long) dist * 5);
                 }
                 line.train.setState(ts);
                 have_moved = true;
@@ -356,8 +356,13 @@ public class IGame2 extends Game { //TODO
                 if (now < ((RunningTrainState) ts).arrival) {
                     continue;
                 }
-                Site curr = ((RunningTrainState) ts).s2;
                 int dir = ts.direction;
+                Site curr;
+                if (dir == 1) {
+                    curr = ((RunningTrainState) ts).s2;
+                } else {
+                    curr = ((RunningTrainState) ts).s1;
+                }
                 if (dir == 1 && curr == s.get(s.size()-1)) {
                     dir = -1;
                 }

@@ -228,11 +228,11 @@ public class TrainRenderer {
         {
             RunningTrainState runningTrainState = (RunningTrainState)state;
             VsSegment vsSegment;
-            if (state.direction==1) {
+            //if (state.direction==1) {
                 vsSegment = DrawLine.getInstance().findSegment(runningTrainState.s1, runningTrainState.s2, state.line);
-            }else{
-                vsSegment = DrawLine.getInstance().findSegment(runningTrainState.s2, runningTrainState.s1, state.line);
-            }
+            //}else{
+            //    vsSegment = DrawLine.getInstance().findSegment(runningTrainState.s2, runningTrainState.s1, state.line);
+            //}
             long timePeriod = runningTrainState.arrival - runningTrainState.departure;
             long timePassed = tickCounter - runningTrainState.departure;
             System.out.printf("%d %d\n", timePeriod, timePassed);
