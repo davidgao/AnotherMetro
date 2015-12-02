@@ -15,7 +15,7 @@ public class VsSegment {
     public int st_a, ed_a; //int 8 direct
     public double st_angle, ed_angle; //graphic
 
-    private static double distance(PointF a, PointF b){
+    static double distance(PointF a, PointF b){
         return Math.sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));
     }
 
@@ -37,7 +37,7 @@ public class VsSegment {
  * 2. final int angle
  * skq and bob can directly use the instance to draw a train and passengers.
  */
-
+/*
     VsTrainState getTrainState(float fraction, int direction){
         ArrayList<PointF> line_dot = DrawLine.calcLine(DrawLine.getPosByAngle(st, st_angle), DrawLine.getPosByAngle(ed, ed_angle));
         // line_dot.get(0), line_dot.get(1), line_dot.get(2) to obtain three coordinates
@@ -63,5 +63,40 @@ public class VsSegment {
                 return new VsTrainState(new PointF((1.0f-fraction)*(line_dot.get(1).x+line_dot.get(2).x), (1.0f-fraction)*(line_dot.get(1).y+line_dot.get(2).y)), ed_a);
             }
         }
+    }*/
+    public VsTrainState getTrainState(double fraction, int direction)
+    {
+        ArrayList<PointF> line = DrawLine.calcLine(DrawLine.getPosByAngle(st,st_angle), DrawLine.getPosByAngle(ed,ed_angle));
+        VsTrainState vsTrainState = null;
+        PointF A,B,C,AB,BC;
+        int angle1,angle2;
+        if (direction == 1) {
+            A = line.get(0);
+            B = line.get(1);
+            C = line.get(2);
+            angle1 = Config.C2CC(ed_a);
+            angle2 = st_a;
+        } else {
+            A = line.get(2);
+            B = line.get(1);
+            C = line.get(0);
+            angle2 = Config.C2CC(ed_a);
+            angle1 = st_a;
+        }
+        AB = new PointF(B.x-A.x,B.y-A.y);
+        BC = new PointF(C.x-B.x,C.y-B.y);
+
+        double dAB = VsSegment.distance(A, B);
+        double dBC = VsSegment.distance(B, C);
+        double distance = dAB + dBC;
+
+        double fractionMiddle = dAB / distance;
+        double fractionDelta = fraction - fractionMiddle;
+        if ( fractionDelta > 0) {
+            vsTrainState = new VsTrainState(new PointF(B.x+(float)fractionDelta * BC.x,B.y+ (float)fractionDelta * BC.y),angle1);
+        } else {
+            vsTrainState = new VsTrainState(new PointF(B.x+(float)fractionDelta * AB.x,B.y+ (float)fractionDelta * AB.y),angle2);
+        }
+        return vsTrainState;
     }
 }

@@ -1,5 +1,6 @@
 package edu.fudan.davidgao.anothermetro.Visual;
 
+import android.graphics.PointF;
 import android.opengl.GLES20;
 
 import java.nio.ByteBuffer;
@@ -208,6 +209,7 @@ public class DrawTrain {
         }
     };
 
+
     private VsTrainState transformTrainToVsTrain(Train train)
     {
         TrainState state = train.getState();
@@ -225,7 +227,7 @@ public class DrawTrain {
             long timePeriod = runningTrainState.arrival - runningTrainState.departure;
             long timePassed = tickCounter - runningTrainState.departure;
             System.out.printf("%d %d\n", timePeriod, timePassed);
-            float fraction = (float)timePassed / (float) timePeriod;
+            double fraction = (double)timePassed / (double) timePeriod;
             vsTrainState = vsSegment.getTrainState(fraction, state.direction);
         } else vsTrainState = null;
         return vsTrainState;
