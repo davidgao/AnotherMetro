@@ -175,7 +175,7 @@ public class DrawLineHead {
 
             heads2GLline();
         }
-        private int getDir(Site site){ //give an available direction of a site to draw a new head
+        private int getDir(Site site){ //give an available direction of a site to render a new head
             Integer occupied = occupiedDirs.get(site);
             if(occupied == null){
                 occupiedDirs.put(site, 1);

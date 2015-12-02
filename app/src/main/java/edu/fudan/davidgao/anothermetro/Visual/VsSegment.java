@@ -40,7 +40,7 @@ public class VsSegment {
  * Returns a VsTrainState instance, which contains
  * 1. final Point<Float> coordinate
  * 2. final int angle
- * skq and bob can directly use the instance to draw a train and passengers.
+ * skq and bob can directly use the instance to render a train and passengers.
  */
 
     VsTrainState getTrainState(float fraction, int direction){

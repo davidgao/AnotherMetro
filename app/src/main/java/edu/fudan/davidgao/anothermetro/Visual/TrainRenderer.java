@@ -1,6 +1,5 @@
 package edu.fudan.davidgao.anothermetro.Visual;
 
-import android.graphics.PointF;
 import android.opengl.GLES20;
 
 import java.nio.ByteBuffer;
@@ -21,8 +20,8 @@ import edu.fudan.davidgao.anothermetro.tools.Broadcaster;
 /**
  * Created by 凯强 on 2015/12/1.
  */
-public class DrawTrain {
-    private final String vertexShaderCode =
+public class TrainRenderer {
+    private static final String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
             "attribute vec4 vPosition;" +
@@ -33,7 +32,7 @@ public class DrawTrain {
             "  gl_Position = vPosition;" +
             "}";
     // TODO: later change color according to line
-    private final String fragmentShaderCode =
+    private static final String fragmentShaderCode =
             "precision mediump float;" +
             "uniform vec4 vColor;" +
             "void main() {" +
@@ -50,9 +49,9 @@ public class DrawTrain {
     private final int vertexStride = COORDS_PER_VERTEX * 4;
     private float[] vertexCoords;
     private int vertexCount = 0;
-    private static DrawTrain instance;
+    private static TrainRenderer instance;
 
-    public static DrawTrain getInstance() {
+    public static TrainRenderer getInstance() {
         return instance;
     }
 
@@ -72,8 +71,7 @@ public class DrawTrain {
 
     private Game game;
 
-    public DrawTrain() {
-        instance = this;
+    public TrainRenderer() {
         game = Game.getInstance();
         vertexCoords = new float[3 * 4 * Config.MAX_SEGMENTS];
         Broadcaster trainUpdateBroadcaster = game.getCallbackBroadcaster(GameEvent.TRAIN_STATE_CHANGE);
@@ -107,10 +105,11 @@ public class DrawTrain {
         // Startup a train drawing thread which repeatedly updates train vertex buffer
         Thread thTrainDraw = new Thread(trainDrawingRunnable);
         thTrainDraw.start();
+        instance = this;
     }
 
 
-    public void draw(){
+    public void render(){
 
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
@@ -122,7 +121,8 @@ public class DrawTrain {
         GLES20.glEnableVertexAttribArray(mPositionHandle);
 
         // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
+        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false,
+                vertexStride, vertexBuffer);
 
         // get handle to fragment shader's vColor member
         mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
@@ -140,33 +140,33 @@ public class DrawTrain {
     private static  final double size =  0.02;
 
 
-    private void addVertex(double x, double y, double high) {
+    private synchronized void addVertex(double x, double y, double high) {
         vertexCoords[vertexCount ++] = (float) x;
         vertexCoords[vertexCount ++] = (float) y;
         vertexCoords[vertexCount ++] = (float) high;
     }
 
-    private void addVertexPlusVectorWithAngle(double cx, double cy, double dx, double dy, double angle, double high)
+    private synchronized void addVertexPlusVectorWithAngle(double cx, double cy, double dx, double dy, double angle, double high)
     {
         double ndx = dx * Math.cos(angle) - dy * Math.sin(angle);
         double ndy = dx * Math.sin(angle) + dy * Math.cos(angle);
         addVertex(cx + ndx, cy + ndy, high);
     }
 
-    private void addTrain(double x, double y, double angle ,double high){
-        //Down Triangle
-        addVertexPlusVectorWithAngle(x,y,3*size,2*size,angle, high);
-        addVertexPlusVectorWithAngle(x,y,-3*size,-2*size,angle, high);
-        addVertexPlusVectorWithAngle(x,y,3*size,-2*size,angle, high);
+    private synchronized void addTrain(double x, double y, double rad ,double high){
+        // Lower Triangle
+        addVertexPlusVectorWithAngle(x, y, 3 * size, 2 * size, rad, high);
+        addVertexPlusVectorWithAngle(x, y, -3 * size, -2 * size, rad, high);
+        addVertexPlusVectorWithAngle(x, y, 3 * size, -2 * size, rad, high);
 
-        //Up Triangle
-        addVertexPlusVectorWithAngle(x, y, -3*size, -2*size, angle,high);
-        addVertexPlusVectorWithAngle(x, y, -3*size, 2*size, angle, high);
-        addVertexPlusVectorWithAngle(x, y, 3 * size, 2 * size, angle, high);
+        // Upper Triangle
+        addVertexPlusVectorWithAngle(x, y, -3 * size, -2 * size, rad,high);
+        addVertexPlusVectorWithAngle(x, y, -3 * size, 2 * size, rad, high);
+        addVertexPlusVectorWithAngle(x, y, 3 * size, 2 * size, rad, high);
     }
 
-    private void addTrain(double x, double y, int angle, double high){
-        addTrain(x,y,Math.PI/4 * angle, high);
+    private void addTrain(double x, double y, int deg, double high){
+        addTrain(x,y,Math.PI/4 * deg, high);
     }
 
     private ArrayList<Line> lines = null;
@@ -179,19 +179,20 @@ public class DrawTrain {
         }
     };
 
-    private void trainUpdate() {
-        synchronized (instance) {
-            System.out.println("Train update");
-            lines = game.getLines();
-            sites = game.getSites();
-            trains = new ArrayList<>();
-            for (int i = 0; i < lines.size(); ++i) {
-                trains.add(lines.get(i).train);
-            }
+    private synchronized void trainUpdate() {
+        System.out.println("Train update");
+        lines = game.getLines();
+        sites = game.getSites();
+        trains = new ArrayList<>();
+        for (int i = 0; i < lines.size(); ++i) {
+            trains.add(lines.get(i).train);
         }
     }
 
     /* This happens at every frame */
+    /* davidgao: FIXME
+     * Please do not use tight loops for drawing. Please use openGL's way to "always render".
+     */
     private Runnable trainDrawingRunnable = new Runnable() {
         @Override
         public void run() {
@@ -209,7 +210,10 @@ public class DrawTrain {
         }
     };
 
-
+    /* davidgao: FIXME
+     * This is a tool function, should be implemented as public VsTrainState(TrainState)
+     * or something.
+     */
     private VsTrainState transformTrainToVsTrain(Train train)
     {
         TrainState state = train.getState();
@@ -224,11 +228,11 @@ public class DrawTrain {
         {
             RunningTrainState runningTrainState = (RunningTrainState)state;
             VsSegment vsSegment;
-            if (state.direction==1) {
+            //if (state.direction==1) {
                 vsSegment = DrawLine.getInstance().findSegment(runningTrainState.s1, runningTrainState.s2, state.line);
-            }else{
-                vsSegment = DrawLine.getInstance().findSegment(runningTrainState.s2, runningTrainState.s1, state.line);
-            }
+            //}else{
+            //    vsSegment = DrawLine.getInstance().findSegment(runningTrainState.s2, runningTrainState.s1, state.line);
+            //}
             long timePeriod = runningTrainState.arrival - runningTrainState.departure;
             long timePassed = tickCounter - runningTrainState.departure;
             System.out.printf("%d %d\n", timePeriod, timePassed);
