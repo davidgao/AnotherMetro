@@ -10,7 +10,7 @@ import edu.fudan.davidgao.anothermetro.tools.*;
 public class IGame2 extends Game { //TODO
     /* Default parameters */
     // TODO: let tick interval (much) smaller, as skq is drawing train per tick.
-    private static final long defaultTickInterval = 1000; /* in ms */
+    private static final long defaultTickInterval = 200; /* in ms */
     private static final int defaultMaxGrowth = 25;
     private static final int defaultBaseGrowth = 10;
     private static final long defaultGrowthInterval = 30; /* in ticks */
@@ -261,6 +261,7 @@ public class IGame2 extends Game { //TODO
         return siteValidator.validate(x, y);
     }
     private void spawnSite() throws GameException {
+        System.out.println("spawnSite");
         /* NOTE: Caller should always sync */
         double[] rate;
         if (sites.size() >= maxSites) {
@@ -285,6 +286,8 @@ public class IGame2 extends Game { //TODO
         if (spawned && tier > 2) {
             uniqueSites += 1;
         }
+        if (spawned) siteSpawnNotifier.run();
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
     private boolean spawnSite(SiteType type) {
         /* NOTE: Caller should always sync */
@@ -293,9 +296,11 @@ public class IGame2 extends Game { //TODO
             final int y = rand.nextInt(roi.y2 - roi.y1) + roi.y1;
             if (siteValid(x, y)) {
                 sites.add(new Site(new Point<>(x, y), type));
+                System.out.printf("New site at %d %d\n", x, y);
                 return true;
             }
         }
+        System.out.println("spawnSite failed");
         return false;
     }
 
@@ -306,6 +311,7 @@ public class IGame2 extends Game { //TODO
         return (ArrayList<Line>)lines.clone();
     }
     public void addLine(Site s1, Site s2) throws GameException {
+        if (s1 == s2) throw new GameException("Station conflict");
         lines.add(new Line(s1, s2));
         forceNotify(GameEvent.LINE_CHANGE);
         forceNotify(GameEvent.TRAIN_STATE_CHANGE);
@@ -315,7 +321,7 @@ public class IGame2 extends Game { //TODO
         forceNotify(GameEvent.LINE_CHANGE);
     }
     public boolean canAddLine(Site s1, Site s2) {
-        return true;
+        return (s1 != s2);
     }
     public boolean canExtendLine(Line l, Site src, Site dest) {
         ArrayList<Site> s = l.getSites();
@@ -340,15 +346,26 @@ public class IGame2 extends Game { //TODO
                 Site curr = ((StandbyTrainState) ts).site;
                 Site next = s.get(s.indexOf(curr) + ts.direction);
                 double dist = curr.dist(next.pos);
-                ts = new RunningTrainState(line, curr, next, ts.direction, now, now + (long)dist);
+                if (ts.direction == 1) {
+                    ts = new RunningTrainState(line, curr, next, 1,
+                            now, now + (long) dist * 5);
+                } else {
+                    ts = new RunningTrainState(line, next, curr, -1,
+                            now, now + (long) dist * 5);
+                }
                 line.train.setState(ts);
                 have_moved = true;
             } else if (ts instanceof RunningTrainState) {
                 if (now < ((RunningTrainState) ts).arrival) {
                     continue;
                 }
-                Site curr = ((RunningTrainState) ts).s2;
                 int dir = ts.direction;
+                Site curr;
+                if (dir == 1) {
+                    curr = ((RunningTrainState) ts).s2;
+                } else {
+                    curr = ((RunningTrainState) ts).s1;
+                }
                 if (dir == 1 && curr == s.get(s.size()-1)) {
                     dir = -1;
                 }

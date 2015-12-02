@@ -121,7 +121,7 @@ public class UpdateLineListener implements OnTouchListener {
 
             nextColor = temp_lines.size();
         }
-        private int getDir(Site site){ //give an available direction of a site to draw a new head
+        private int getDir(Site site){ //give an available direction of a site to render a new head
             Integer occupied = occupiedDirs.get(site);
             if(occupied == null){
                 occupiedDirs.put(site, 1);
@@ -190,7 +190,8 @@ public class UpdateLineListener implements OnTouchListener {
                     endSite = null;
                     vertexCount = 4;
                     extending = true;
-                } else if ((touchedSite = isSite(touchPos)) != null && nextColor<Config.AVAILABLE_LINES) {
+                } else if ((touchedSite = isSite(touchPos)) != null && nextColor < Config.AVAILABLE_LINES) {
+
                     planColor = nextColor;
                     startSite = touchedSite;
                     endSite = null;

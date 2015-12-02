@@ -11,7 +11,7 @@ import edu.fudan.davidgao.anothermetro.Visual.DrawLine;
 import edu.fudan.davidgao.anothermetro.Visual.DrawLineHead;
 import edu.fudan.davidgao.anothermetro.Visual.DrawPassenger;
 import edu.fudan.davidgao.anothermetro.Visual.DrawSite;
-import edu.fudan.davidgao.anothermetro.Visual.DrawTrain;
+import edu.fudan.davidgao.anothermetro.Visual.TrainRenderer;
 import edu.fudan.davidgao.anothermetro.Visual.UpdateLineListener;
 import edu.fudan.davidgao.anothermetro.core.Game;
 import edu.fudan.davidgao.anothermetro.core.GameException;
@@ -23,26 +23,27 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private DrawLineHead drawLineHead;
     private DrawPassenger drawPassenger;
     private DrawSite drawSite;
-    private DrawTrain drawTrain;
+    private TrainRenderer drawTrain;
     private UpdateLineListener updateLineListener;
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
         // Set the background frame color
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        drawLine = new DrawLine();
-        drawSite = new DrawSite();
-        drawLineHead= new DrawLineHead();
-        drawTrain = new DrawTrain();
-        drawPassenger = new DrawPassenger();
-        updateLineListener = new UpdateLineListener();
         try {
             Game.getInstance().start();
             Game.getInstance().run();
+        } catch(GameException e) {
+            e.printStackTrace();
+        }
+        drawLine = new DrawLine();
+        drawSite = new DrawSite();
+        drawLineHead= new DrawLineHead();
+        drawTrain = new TrainRenderer();
+        drawPassenger = new DrawPassenger();
+        updateLineListener = new UpdateLineListener();
+        try {
             ArrayList<Site> temp_sites =  Game.getInstance().getSites();
-            // Wait for backend to spawn all three sites
-            for (;temp_sites.size() < 3;)
-                ;
             Game.getInstance().addLine(temp_sites.get(0), temp_sites.get(1));
             GameView.getInstance().addUpdateLineListener(updateLineListener);
         } catch (GameException e){
@@ -57,7 +58,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         drawLineHead.draw();
         drawPassenger.draw();
         drawSite.draw();
-        drawTrain.draw();
+        drawTrain.render();
         updateLineListener.draw();
     }
 

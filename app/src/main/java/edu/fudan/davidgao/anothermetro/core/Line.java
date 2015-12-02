@@ -16,6 +16,7 @@ public class Line {
     }
 
     public void extend(Site source, Site target) throws GameException {
+        if (sites.contains(target)) throw new GameException("Illegal line extension.");
         if (source == sites.get(0)) {
             sites.add(0, target);
         } else if (source == sites.get(sites.size() - 1)) {
