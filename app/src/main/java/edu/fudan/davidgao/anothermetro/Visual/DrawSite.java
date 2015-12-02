@@ -85,6 +85,8 @@ public class DrawSite {
 			}
 		};
 		b.addListener(drawSite);
+
+		GTMDvertexCoords();
 	}
 	
 	public void draw() {
