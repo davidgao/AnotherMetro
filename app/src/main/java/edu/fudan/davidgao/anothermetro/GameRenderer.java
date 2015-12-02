@@ -30,6 +30,12 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
         // Set the background frame color
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        try {
+            Game.getInstance().start();
+            Game.getInstance().run();
+        } catch(GameException e) {
+            e.printStackTrace();
+        }
         drawLine = new DrawLine();
         drawSite = new DrawSite();
         drawLineHead= new DrawLineHead();
@@ -37,12 +43,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         drawPassenger = new DrawPassenger();
         updateLineListener = new UpdateLineListener();
         try {
-            Game.getInstance().start();
-            Game.getInstance().run();
             ArrayList<Site> temp_sites =  Game.getInstance().getSites();
-            // Wait for backend to spawn all three sites
-            for (;temp_sites.size() < 3;)
-                ;
             Game.getInstance().addLine(temp_sites.get(0), temp_sites.get(1));
             GameView.getInstance().addUpdateLineListener(updateLineListener);
         } catch (GameException e){
