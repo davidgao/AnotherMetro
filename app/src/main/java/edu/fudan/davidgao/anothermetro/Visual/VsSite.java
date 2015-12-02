@@ -42,7 +42,7 @@ public class VsSite {
         for (int i=0;i<8;i++){
             double delta=2.0*Math.PI/8.0/dlist[i].size();
             for (int j=0;j<dlist[i].size();j++){
-                inList.get(dlist[i].get(j)).ed_angle=i*2.0*Math.PI/8.0+delta*j;
+                inList.get(dlist[i].get(j)).ed_angle=2.0*Math.PI - i*2.0*Math.PI/8.0+delta*j;
             }
         }
     }

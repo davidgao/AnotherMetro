@@ -231,9 +231,9 @@ public class DrawTrain {
             }
             long timePeriod = runningTrainState.arrival - runningTrainState.departure;
             long timePassed = tickCounter - runningTrainState.departure;
-            System.out.printf("%d %d\n", timePeriod, timePassed);
             double fraction = (double)timePassed / (double) timePeriod;
-            vsTrainState = vsSegment.getTrainState(fraction, state.direction);
+            vsTrainState = vsSegment.getTrainState((float)fraction, state.direction);
+            System.out.printf("HHHHH %d\n", vsTrainState.angle);
         } else vsTrainState = null;
         return vsTrainState;
     }
