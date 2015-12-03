@@ -16,7 +16,10 @@ public class Config {
     public static final int MAX_SEGMENTS=200;
     public static final double LATENT_SITE_RADIUS=0.01f;
 
+    public static final int LINE_WIDTH=3;
+
     public static final float MAX_INF=1e20f;
+    public static final float Z_SITE=1.0e-4f;
     public static final float Z_SEGMENT=0.0f;
     public static final float Z_LINEHEAD=0.1e-4f;
     public static final float Z_BLUEPRINT=0.2e-4f;
