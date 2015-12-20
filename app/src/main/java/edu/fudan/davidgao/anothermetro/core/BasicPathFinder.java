@@ -26,6 +26,8 @@ System.out.printf("Counts: %d %d\n", siteCount1, siteCount2);
     }
 
     private int getSiteCount(Site start, SiteType type) {
+        if (start.type == type) return 0;
+
         HashMap<Site, Boolean> visited = new HashMap<>();
         ArrayList<Site> queue = new ArrayList<>();
         int stepCount = 0, maxStepCount = game.sites.size();
