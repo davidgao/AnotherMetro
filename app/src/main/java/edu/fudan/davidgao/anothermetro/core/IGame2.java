@@ -17,6 +17,7 @@ public class IGame2 extends Game { //TODO
     private static final long defaultSiteSpawnInterval = 1000; /* in ticks */
     private static final long defaultPassengerSpawnInterval = 100; /* in ticks */
     private static final long defaultPassengerMoveInterval = 10; /* in ticks */
+    private static final double defaultTrainMoveInterval = 5.0; /* in ticks */
 
     /* Singleton */
     protected static IGame2 instance = null;
@@ -334,6 +335,14 @@ public class IGame2 extends Game { //TODO
     }
 
     /* Train Moving */
+    private double trainMoveInterval = defaultTrainMoveInterval;
+    public double getTrainMoveInterval() {
+        return trainMoveInterval;
+    }
+    public void setTrainMoveInterval(double interval) throws GameException {
+        assertState(GameState.NEW);
+        trainMoveInterval = interval;
+    }
     private Runnable trainMoveRunnable = new Runnable() {
         @Override
         public void run() {
@@ -390,10 +399,10 @@ public class IGame2 extends Game { //TODO
                 double dist = curr.dist(next.pos);
                 if (ts.direction == 1) {
                     ts = new RunningTrainState(line, curr, next, 1,
-                            now, now + (long) dist * 5);
+                            now, now + (long)(dist * trainMoveInterval));
                 } else {
                     ts = new RunningTrainState(line, next, curr, -1,
-                            now, now + (long) dist * 5);
+                            now, now + (long)(dist * trainMoveInterval));
                 }
                 line.train.setState(ts);
                 have_moved = true;
