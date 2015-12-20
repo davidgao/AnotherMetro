@@ -390,10 +390,10 @@ public class IGame2 extends Game { //TODO
                 double dist = curr.dist(next.pos);
                 if (ts.direction == 1) {
                     ts = new RunningTrainState(line, curr, next, 1,
-                            now, now + (long) dist * 20);
+                            now, now + (long) dist * 5);
                 } else {
                     ts = new RunningTrainState(line, next, curr, -1,
-                            now, now + (long) dist * 20);
+                            now, now + (long) dist * 5);
                 }
                 line.train.setState(ts);
                 have_moved = true;
