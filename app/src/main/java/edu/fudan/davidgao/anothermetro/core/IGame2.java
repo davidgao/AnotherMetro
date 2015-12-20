@@ -9,10 +9,10 @@ import edu.fudan.davidgao.anothermetro.tools.*;
 
 public class IGame2 extends Game { //TODO
     /* Default parameters */
-    // TODO: let tick interval (much) smaller, as skq is drawing train per tick.
     private static final long defaultTickInterval = 40; /* in ms */
     private static final int defaultMaxGrowth = 25;
     private static final int defaultBaseGrowth = 10;
+    private static final int defaultMaxPassengerPerSite = 15;
     private static final long defaultGrowthInterval = 1500; /* in ticks */
     private static final long defaultSiteSpawnInterval = 1000; /* in ticks */
     private static final long defaultPassengerSpawnInterval = 100; /* in ticks */
@@ -39,6 +39,7 @@ public class IGame2 extends Game { //TODO
         initSiteSpawn();
         initTrainMove();
         initPassengerSpawn();
+        gameOverNotifier = logic.getAlarm(GameEvent.GAME_OVER);
     }
 
     /* Game creation */
@@ -438,6 +439,7 @@ public class IGame2 extends Game { //TODO
     }
 
     /* Passenger */
+    long maxPassengerPerSite = defaultMaxPassengerPerSite;
     ArrayList<Passenger> passengers = new ArrayList<>();
     private long passengerMoveInterval = defaultPassengerMoveInterval;
     public long getPassengerMoveInterval() {
@@ -490,6 +492,9 @@ public class IGame2 extends Game { //TODO
         Passenger p = new Passenger(SiteType.fromInt(type), s);
         passengers.add(p);
         passengerChangeNotifier.run();
+        if (s.passengers.size() > maxPassengerPerSite) {
+            gameOverNotifier.run();
+        }
     }
     private Runnable passengerChangeNotifier;
 
@@ -507,7 +512,7 @@ public class IGame2 extends Game { //TODO
     }
 
 
-
+    private Runnable gameOverNotifier;
 
     private void forceNotify(GameEvent event) {
         logic.writeBack.getBroadcaster(event).run();

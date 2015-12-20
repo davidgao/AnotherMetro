@@ -1,7 +1,5 @@
 package edu.fudan.davidgao.anothermetro.core;
 
-import android.graphics.Path;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -21,7 +19,7 @@ class BasicPathFinder implements PathFinder {
 
         siteCount1 = getSiteCount(s, p.type);
         siteCount2 = getSiteCount(nextSite, p.type);
-System.out.printf("Counts: %d %d\n", siteCount1, siteCount2);
+
         return (siteCount2 < siteCount1);
     }
 

@@ -20,6 +20,7 @@ class GameLogic implements Runnable {
         addEvent(GameEvent.LINE_CHANGE);
         addEvent(GameEvent.TRAIN_STATE_CHANGE);
         addEvent(GameEvent.PASSENGER_CHANGE);
+        addEvent(GameEvent.GAME_OVER);
         action.addListener(getAlarm(GameEvent.TICK));
     }
 
