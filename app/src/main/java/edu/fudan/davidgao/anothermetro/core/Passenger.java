@@ -2,7 +2,7 @@ package edu.fudan.davidgao.anothermetro.core;
 
 public class Passenger {
     public final SiteType type;
-    private PassengerState state;
+    PassengerState state;
 
     public Passenger(SiteType type, PassengerState state) {
         this.type = type;

@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import edu.fudan.davidgao.anothermetro.tools.Point;
 
 public class Site extends PassengerState {
-    private final ArrayList<Passenger> passengers = new ArrayList<>();
+    final ArrayList<Passenger> passengers = new ArrayList<>();
+    final ArrayList<Line> lines = new ArrayList<>();
     public Site(Point<Integer> pos, SiteType type) {
         this.pos = pos;
         this.type = type;

@@ -6,7 +6,7 @@ import edu.fudan.davidgao.anothermetro.core.GameException;
 import edu.fudan.davidgao.anothermetro.core.Site;
 
 public class Line {
-    private final ArrayList<Site> sites = new ArrayList<>();
+    final ArrayList<Site> sites = new ArrayList<>();
     public final Train train;
 
     public Line(Site s1, Site s2) {
