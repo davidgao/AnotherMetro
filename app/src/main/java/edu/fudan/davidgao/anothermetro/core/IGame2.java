@@ -262,6 +262,7 @@ public class IGame2 extends Game { //TODO
         return siteValidator.validate(x, y);
     }
     private void spawnSite() throws GameException {
+        System.out.println("spawnSite");
         /* NOTE: Caller should always sync */
         double[] rate;
         if (sites.size() >= maxSites) {
@@ -295,9 +296,11 @@ public class IGame2 extends Game { //TODO
             final int y = rand.nextInt(roi.y2 - roi.y1) + roi.y1;
             if (siteValid(x, y)) {
                 sites.add(new Site(new Point<>(x, y), type));
+                System.out.printf("New site at %d %d\n", x, y);
                 return true;
             }
         }
+        System.out.println("spawnSite failed");
         return false;
     }
 
