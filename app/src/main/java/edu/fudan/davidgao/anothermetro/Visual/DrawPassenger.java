@@ -74,6 +74,7 @@ public class DrawPassenger {
 		GLES20.glLinkProgram(mProgram);
 
 		Broadcaster b = gameMain.getCallbackBroadcaster(GameEvent.PASSENGER_CHANGE);
+		Broadcaster bTick = gameMain.getCallbackBroadcaster(GameEvent.TICK);
 		Runnable drawPassenger = new Runnable() {
 			@Override
 			public synchronized void run(){
@@ -81,6 +82,7 @@ public class DrawPassenger {
 			}
 		};
 		b.addListener(drawPassenger);
+		bTick.addListener(drawPassenger);
 	}
 	
 	public void draw() {
