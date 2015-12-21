@@ -76,6 +76,9 @@ public class TrainRenderer {
         vertexCoords = new float[3 * 4 * Config.MAX_SEGMENTS];
         Broadcaster trainUpdateBroadcaster = game.getCallbackBroadcaster(GameEvent.TRAIN_STATE_CHANGE);
         trainUpdateBroadcaster.addListener(trainUpdateRunnable);
+        // Render the trains every tick
+        Broadcaster trainDrawingBroadcaster = game.getCallbackBroadcaster(GameEvent.TICK);
+        trainDrawingBroadcaster.addListener(trainDrawingRunnable);
 
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 //(number of coordinate values * 4 byte per float)
@@ -102,9 +105,6 @@ public class TrainRenderer {
         // Forcefully update the lines, sites and trains member so that they are initialized
         trainUpdate();
 
-        // Startup a train drawing thread which repeatedly updates train vertex buffer
-        Thread thTrainDraw = new Thread(trainDrawingRunnable);
-        thTrainDraw.start();
         instance = this;
     }
 
@@ -196,17 +196,8 @@ public class TrainRenderer {
     private Runnable trainDrawingRunnable = new Runnable() {
         @Override
         public void run() {
-            try {
-                for (; ; ) {
-                    tickCounter = game.getTickCounter();
-                    synchronized (instance) {
-                        refresh();
-                    }
-                    Thread.sleep(16);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            tickCounter = game.getTickCounter();
+            refresh();
         }
     };
 
