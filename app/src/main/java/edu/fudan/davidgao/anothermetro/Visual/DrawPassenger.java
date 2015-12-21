@@ -101,7 +101,7 @@ public class DrawPassenger {
 	private static final float z = 0.0f; /* Config.siteZ */
 	
 	private static final double pr = 0.01; /* Config.passengerRadius */
-	private static final double phr = r / 2.0; /* Config.passengerHalfRadius */
+	private static final double phr = pr / 2.0; /* Config.passengerHalfRadius */
 	private static final float pz = 0.0f; /* Config.passengerZ */
 	
 	public static double BG2FGx(int x){
