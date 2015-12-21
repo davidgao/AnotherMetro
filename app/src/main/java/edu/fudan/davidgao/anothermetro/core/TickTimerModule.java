@@ -16,7 +16,7 @@ class TickTimerModule implements GameModule {
         task = new RunnableTimerTask(logic);
         timer = new Timer();
         counter = new Counter();
-        logic.action.addListener(counter);
+        logic.writeBack.getBroadcaster(GameEvent.TICK).addListener(counter);
     }
 
     public void start() {
@@ -26,7 +26,6 @@ class TickTimerModule implements GameModule {
     public void run() {
         timer.schedule(task, interval, interval);
     }
-
     public void pause() {
         timer.cancel();
     }
@@ -34,11 +33,9 @@ class TickTimerModule implements GameModule {
     public long getCounter() {
         return counter.getCounter();
     }
-
     public void setCounter(long count) {
         counter.setCounter(count);
     }
-
     public void clearCounter() {
         counter.clearCounter();
     }

@@ -2,8 +2,6 @@ package edu.fudan.davidgao.anothermetro.core;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import edu.fudan.davidgao.anothermetro.tools.*;
 
@@ -29,15 +27,16 @@ class IGame2 extends Game { //TODO
     GameLogic logic;
 
     /* Modules */
-    TickTimerModule tickTimerModule = new TickTimerModule();
+    TickTimerModule tickTimer = new TickTimerModule();
 
     /* Private constructor */
     private IGame2(Matrix2D<MapDatum> map) {
         /* Copy map */
         this.map = map.copy();
-        /* Init the game */
-        initLogic();
-        tickTimerModule.init(logic);
+        /* Init logic*/
+        logic = new GameLogic();
+        /* Init modules */
+        tickTimer.init(logic);
         initGrowth();
         initSiteSpawn();
         initTrainMove();
@@ -119,13 +118,13 @@ class IGame2 extends Game { //TODO
         if (state == GameState.PAUSED) {
             state = GameState.RUNNING;
         } else throw new GameException("Cannot run game: Game is not paused.");
-        tickTimerModule.run();
+        tickTimer.run();
     }
     public synchronized void pause() throws GameException {
         if (state == GameState.RUNNING) {
             state = GameState.PAUSED;
         } else throw new GameException("Cannot pause game: Game is not running.");
-        tickTimerModule.pause();
+        tickTimer.pause();
     }
     public synchronized void kill() throws GameException {
         if (state == GameState.RUNNING) {
@@ -158,23 +157,22 @@ class IGame2 extends Game { //TODO
 
     /* Tick */
     public long getTickInterval() {
-        return tickTimerModule.interval;
+        return tickTimer.interval;
     }
     public void setTickInterval(long interval) throws GameException {
         assertState(GameState.NEW);
-        tickTimerModule.interval = interval;
+        tickTimer.interval = interval;
     }
-    private Counter tickCounter;
     public long getTickCounter() {
-        return tickTimerModule.getCounter();
+        return tickTimer.getCounter();
     }
     public void setTickCounter(long count) throws GameException {
         assertState(GameState.NEW);
-        tickTimerModule.setCounter(count);
+        tickTimer.setCounter(count);
     }
     public void clearTickCounter() throws GameException {
         assertState(GameState.NEW);
-        tickTimerModule.clearCounter();
+        tickTimer.clearCounter();
     }
 
     /* Growth */
@@ -354,7 +352,7 @@ class IGame2 extends Game { //TODO
     };
     private synchronized void trainMove() {
         boolean have_moved = false;
-        long now = tickTimerModule.getCounter();
+        long now = tickTimer.getCounter();
         for (Line line : lines){
             Train t = line.train;
             TrainState ts = t.getState();

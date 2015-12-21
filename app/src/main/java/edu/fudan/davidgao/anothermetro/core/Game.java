@@ -35,10 +35,12 @@ public abstract class Game {
     public abstract Point<Integer> getSize();
     public abstract ArrayList<Site> getSites();
 
-    /* Tick timer */
+    /* Tick */
     public abstract long getTickInterval();
     public abstract void setTickInterval(long interval) throws GameException;
     public abstract long getTickCounter();
+    public abstract void setTickCounter(long count) throws GameException;
+    public abstract void clearTickCounter() throws GameException;
 
     /* Growth */
     public abstract long getGrowthInterval();

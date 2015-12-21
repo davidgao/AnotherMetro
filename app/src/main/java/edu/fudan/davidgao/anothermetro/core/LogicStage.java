@@ -5,9 +5,9 @@ import java.util.EnumMap;
 import edu.fudan.davidgao.anothermetro.tools.*;
 
 class LogicStage implements Runnable {
-    private final EnumMap<GameEvent, Broadcaster> broadcasterMap = new EnumMap<>(GameEvent.class);
-    private final EnumMap<GameEvent, Runnable> alarmMap = new EnumMap<>(GameEvent.class);
-    private final Broadcaster mainBroadcaster = new Broadcaster();
+    protected final EnumMap<GameEvent, Broadcaster> broadcasterMap = new EnumMap<>(GameEvent.class);
+    protected final EnumMap<GameEvent, Runnable> alarmMap = new EnumMap<>(GameEvent.class);
+    protected final Broadcaster mainBroadcaster = new Broadcaster();
 
     LogicStage() {
         addEvent(GameEvent.TICK);
@@ -32,7 +32,7 @@ class LogicStage implements Runnable {
         return alarmMap.get(event);
     }
 
-    private synchronized void addEvent(GameEvent event) {
+    protected synchronized void addEvent(GameEvent event) {
         Broadcaster bc = new Broadcaster();
         SnoozeRunnable snooze = new SnoozeRunnable(bc);
         broadcasterMap.put(event, bc);
