@@ -53,16 +53,25 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     public void onDrawFrame(GL10 unused) {
         // Redraw background color
+        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, +3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+        updateLineListener.setMatrix(mMVPMatrix);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        drawLine.draw();
-        drawLineHead.draw();
-        drawPassenger.draw();
-        drawSite.draw();
-        drawTrain.render();
-        updateLineListener.draw();
+        drawLine.draw(mMVPMatrix);
+        drawLineHead.draw(mMVPMatrix);
+        drawPassenger.draw(mMVPMatrix);
+        drawSite.draw(mMVPMatrix);
+        drawTrain.render(mMVPMatrix);
+        updateLineListener.draw(mMVPMatrix);
     }
+
+    private final float[] mMVPMatrix = new float[16];
+    private final float[] mProjectionMatrix = new float[16];
+    private final float[] mViewMatrix = new float[16];
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
+        float ratio = (float) height / width;
+        Matrix.frustumM(mProjectionMatrix, 0, -1, 1, -ratio, ratio, 3, 7);
     }
 }

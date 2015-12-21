@@ -3,6 +3,7 @@ package edu.fudan.davidgao.anothermetro.Visual;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.opengl.GLES20;
+import android.opengl.Matrix;
 import android.view.View;
 import android.view.MotionEvent;
 import android.view.View.OnTouchListener;
@@ -164,6 +165,9 @@ public class UpdateLineListener implements OnTouchListener {
     private void init(){
         game = Game.getInstance();
         extending = adding = false;
+        // Initialize the list
+        LCListener.run();
+        SSListener.run();
 
         lineCoords=new float[12];
         lineColors=new float[16];
@@ -172,18 +176,50 @@ public class UpdateLineListener implements OnTouchListener {
         game.getCallbackBroadcaster(GameEvent.SITE_SPAWN).addListener(SSListener);
     }
 
+    private float[] mMVPMatrix = new float[16];
+
+    public void setMatrix(float[] mMVPMatrix) {
+        for (int i = 0; i < 16; i ++) this.mMVPMatrix[i] = mMVPMatrix[i];
+    }
     @Override
     public boolean onTouch(View v, MotionEvent event){
 
         /* convert v into GameView which contains its scale information, convert pixel coordinates into (-1, 1) range */
         GameView view = (GameView)v;
-        touchPos = UI2FGpoint(event.getX(), event.getY(), view.view_width, view.view_height);
+        touchPos = UI2FGpoint(view, event.getX(), event.getY());
+
+        float[] invertedMatrix = new float[16];
+        float[] normalizedInPoint = new float[4];
+        float[] outPoint = new float[4];
+
+        normalizedInPoint[0] = touchPos.x;
+        normalizedInPoint[1] = touchPos.y;
+        normalizedInPoint[2] = 0.0f;
+        normalizedInPoint[3] = 1.0f;
+
+        Matrix.invertM(invertedMatrix, 0, mMVPMatrix, 0);
+        Matrix.multiplyMV(outPoint, 0, invertedMatrix, 0, normalizedInPoint, 0);
+
+        System.out.print("(" + event.getX() + "," + event.getY() + ")" + ">>>");
+        System.out.print("(" + touchPos.x + "," + touchPos.y + ") >>> ");
+        System.out.print("(" + outPoint[0] + "," + outPoint[1] + ") >>> ");
+        System.out.println();
+        System.out.println("(" + game.getSites().get(0).pos.x + "," + game.getSites().get(0).pos.y + ","+game.getSites().get(0).type.index()+")");
+        System.out.println("(" + game.getSites().get(1).pos.x + "," + game.getSites().get(1).pos.y +","+game.getSites().get(1).type.index()+ ")");
+        System.out.println("("+game.getSites().get(2).pos.x+","+game.getSites().get(2).pos.y+","+game.getSites().get(2).type.index()+")");
+        System.out.println("(" + Config.BG2FGx(game.getSites().get(0).pos.x) + "," + Config.BG2FGy(game.getSites().get(0).pos.y) +","+game.getSites().get(0).type.index()+ ")");
+        System.out.println("("+Config.BG2FGx(game.getSites().get(1).pos.x)+","+Config.BG2FGy(game.getSites().get(1).pos.y)+","+game.getSites().get(1).type.index()+")");
+        System.out.println("("+Config.BG2FGx(game.getSites().get(2).pos.x) + "," + Config.BG2FGy(game.getSites().get(2).pos.y)+","+game.getSites().get(2).type.index()+")");
+        System.out.println(event.getAction());
+
+        //touchPos.x = outPoint[0];
+        //touchPos.y = outPoint[1];
 
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
 
-                if(event.getDownTime() <= lastDownTime + 500)return false; //avoid too frequent reaction
-                lastDownTime = event.getDownTime();
+                //if(event.getDownTime() <= lastDownTime + 500)return false; //avoid too frequent reaction
+                //lastDownTime = event.getDownTime();
 
                 if ((touchedLineHead = isLineHead(touchPos)) != null) {
                     planColor = touchedLineHead.color;
@@ -278,23 +314,30 @@ public class UpdateLineListener implements OnTouchListener {
         return false;
     }
 
-    private PointF UI2FGpoint(float x, float y, int width, int height) {
-        return new PointF(x/width*2-1,1-y/height*2);
+    private PointF UI2FGpoint(GameView view, float x, float y) {
+        if (view.view_width < view.view_height)
+            return new PointF(x/view.view_size*2-1,1-(y-view.view_offset)/view.view_size*2);
+        else
+            return new PointF((x-view.view_offset)/view.view_size*2-1,1-y/view.view_size*2);
     }
 
     private Site isSite(PointF touchPos){
+        System.out.println("isSite");
         synchronized (sites) {
             Site_FGpoint temp;
             for (int i=0;i<sites.size();i++) {
                 temp = sites.get(i);
+                System.out.println(i+","+temp.pos.x+","+temp.pos.y+"---"+touchPos.x+","+touchPos.y+"---"+distance(temp.pos,touchPos));
                 if (distance(temp.pos, touchPos) < Config.SITE_RADIUS) {
                     return temp.site;
                 }
             }
+            System.out.println("isSite:null");
             return null;
         }
     }
     public VsLineHead isLineHead(PointF touchPos){
+        System.out.println("isLineHead");
         synchronized (lineHeads) {
             VsLineHead currentHead;
             for (int i=0;i<lineHeads.size();i++) {
@@ -303,6 +346,7 @@ public class UpdateLineListener implements OnTouchListener {
                     return currentHead;
                 }
             }
+            System.out.println("isLineHead:null");
             return null;
         }
     }
@@ -315,7 +359,7 @@ public class UpdateLineListener implements OnTouchListener {
     private FloatBuffer vertexBuffer;
     private FloatBuffer colorBuffer;
     private final int mProgram;
-
+    private int mMVPMatrixHandle;
     private int mPositionHandle;
     private int mColorHandle;
 
@@ -330,9 +374,9 @@ public class UpdateLineListener implements OnTouchListener {
     private final int colorStride = COLOR_PER_VERTEX * 4; // 4 bytes per vertex
 
     private final String vertexShaderCode =
-            "attribute vec4 vPosition;" + "attribute vec4 vColor;" + "varying vec4 aColor;" +
+            "uniform mat4 uMVPMatrix;" +"attribute vec4 vPosition;" + "attribute vec4 vColor;" + "varying vec4 aColor;" +
                     "void main() {" +
-                    "  gl_Position = vPosition;" + "aColor = vColor;"+
+                    "  gl_Position = uMVPMatrix * vPosition;" + "aColor = vColor;"+
                     "}";
 
     private final String fragmentShaderCode =
@@ -357,7 +401,7 @@ public class UpdateLineListener implements OnTouchListener {
         return shader;
     }
 
-    public void draw() {
+    public void draw(float[] mvpMatrix) {
         if(!extending && !adding) return;
 
         if(endSite==null) {
@@ -408,6 +452,8 @@ public class UpdateLineListener implements OnTouchListener {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
         GLES20.glDisableVertexAttribArray(mColorHandle);
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
     }
 
     //End of GLSL

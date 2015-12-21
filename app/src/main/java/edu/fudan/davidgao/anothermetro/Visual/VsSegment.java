@@ -56,7 +56,7 @@ public class VsSegment {
         double d12=distance(line_dot.get(0), line_dot.get(1)), d23=distance(line_dot.get(1), line_dot.get(2));
         double d13 =d12+d23;
         double mid_frac = 0;
-        System.out.printf("SSSSS st=%d ed=%d\n", st_a, ed_a);
+        //System.out.printf("SSSSS st=%d ed=%d\n", st_a, ed_a);
         if (direction==1){
             mid_frac = d12/d13;
             if (fraction>mid_frac){

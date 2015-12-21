@@ -26,7 +26,7 @@ public class DrawLineHead {
 
     private int mPositionHandle;
     private int mColorHandle;
-
+    private int mMVPMatrixHandle;
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
     static final int COLOR_PER_VERTEX = 4;
@@ -38,9 +38,9 @@ public class DrawLineHead {
     private final int colorStride = COLOR_PER_VERTEX * 4; // 4 bytes per vertex
 
     private final String vertexShaderCode =
-            "attribute vec4 vPosition;" + "attribute vec4 vColor;" + "varying vec4 aColor;" +
+            "uniform mat4 uMVPMatrix;" + "attribute vec4 vPosition;" + "attribute vec4 vColor;" + "varying vec4 aColor;" +
                     "void main() {" +
-                    "  gl_Position = vPosition;" + "aColor = vColor;"+
+                    "  gl_Position = uMVPMatrix * vPosition;" + "aColor = vColor;"+
                     "}";
 
     private final String fragmentShaderCode =
@@ -66,7 +66,7 @@ public class DrawLineHead {
     }
 
 
-    public void draw() {
+    public void draw(float[] mvpMatrix) {
 
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
@@ -100,6 +100,8 @@ public class DrawLineHead {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
         GLES20.glDisableVertexAttribArray(mColorHandle);
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
     }
 
     public DrawLineHead() {

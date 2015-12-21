@@ -19,10 +19,12 @@ public class Config {
     public static final int LINE_WIDTH=3;
 
     public static final float MAX_INF=1e20f;
-    public static final float Z_SITE=1.0e-4f;
+    public static final float Z_SITE=-1.0e-4f;
     public static final float Z_SEGMENT=0.0f;
-    public static final float Z_LINEHEAD=0.1e-4f;
-    public static final float Z_BLUEPRINT=0.2e-4f;
+    public static final float Z_LINEHEAD=-0.1e-4f;
+    public static final float Z_BLUEPRINT=-0.2e-4f;
+    public static final float Z_TRAIN=-0.3e-4f;
+    public static final float Z_PASSENGER=-0.4e-4f;
     public static final double EPSI=1e-6;
     public static final int FLIP_list[]={4, 5, 6, 7, 0, 1, 2, 3};
     public static final int C2CC_list[]={0, 7, 6, 5, 4, 3, 2, 1};

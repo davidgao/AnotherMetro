@@ -24,12 +24,12 @@ public class TrainRenderer {
     private static final String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
-            "attribute vec4 vPosition;" +
+            "uniform mat4 uMVPMatrix;" +"attribute vec4 vPosition;" +
             "void main() {" +
             // the matrix must be included as a modifier of gl_Position
             // Note that the uMVPMatrix factor *must be first* in order
             // for the matrix multiplication product to be correct.
-            "  gl_Position = vPosition;" +
+            "  gl_Position = uMVPMatrix * vPosition;" +
             "}";
     // TODO: later change color according to line
     private static final String fragmentShaderCode =
@@ -41,7 +41,7 @@ public class TrainRenderer {
 
     private final FloatBuffer vertexBuffer;
     private final int mProgram;
-
+    private int mMVPMatrixHandle;
     private int mPositionHandle;
     private int mColorHandle;
     // number of coordinates per vertex in this array
@@ -109,7 +109,7 @@ public class TrainRenderer {
     }
 
 
-    public void render(){
+    public void render(float[] mvpMatrix){
 
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
@@ -135,6 +135,8 @@ public class TrainRenderer {
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
     }
 
     private static  final double size =  0.02;
@@ -180,7 +182,7 @@ public class TrainRenderer {
     };
 
     private synchronized void trainUpdate() {
-        System.out.println("Train update");
+        //System.out.println("Train update");
         lines = game.getLines();
         sites = game.getSites();
         trains = new ArrayList<>();
@@ -197,7 +199,7 @@ public class TrainRenderer {
         @Override
         public void run() {
             tickCounter = game.getTickCounter();
-            refresh();
+            if (trains != null) refresh();
         }
     };
 
@@ -228,7 +230,7 @@ public class TrainRenderer {
             long timePassed = tickCounter - runningTrainState.departure;
             double fraction = (double)timePassed / (double) timePeriod;
             vsTrainState = vsSegment.getTrainState((float)fraction, state.direction);
-            System.out.printf("HHHHH %d\n", vsTrainState.angle);
+            //System.out.printf("HHHHH %d\n", vsTrainState.angle);
         } else vsTrainState = null;
         return vsTrainState;
     }
@@ -252,7 +254,7 @@ public class TrainRenderer {
         int len = VsTrains.size();
         for (int i = 0; i < len; ++ i)
         {
-            addTrain(VsTrains.get(i).coordinate.x,VsTrains.get(i).coordinate.y,VsTrains.get(i).angle,1.00f);
+            addTrain(VsTrains.get(i).coordinate.x,VsTrains.get(i).coordinate.y,VsTrains.get(i).angle,Config.Z_TRAIN);
         }
         vertexBuffer.put(vertexCoords);
         vertexBuffer.position(0);
