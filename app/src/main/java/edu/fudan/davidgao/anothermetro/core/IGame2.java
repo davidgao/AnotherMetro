@@ -7,17 +7,17 @@ import java.util.TimerTask;
 
 import edu.fudan.davidgao.anothermetro.tools.*;
 
-public class IGame2 extends Game { //TODO
+class IGame2 extends Game { //TODO
     /* Default parameters */
-    private static final long defaultTickInterval = 40; /* in ms */
-    private static final int defaultMaxGrowth = 25;
-    private static final int defaultBaseGrowth = 10;
-    private static final int defaultMaxPassengerPerSite = 15;
-    private static final long defaultGrowthInterval = 1500; /* in ticks */
-    private static final long defaultSiteSpawnInterval = 1000; /* in ticks */
-    private static final long defaultPassengerSpawnInterval = 100; /* in ticks */
-    private static final long defaultPassengerMoveInterval = 10; /* in ticks */
-    private static final double defaultTrainMoveInterval = 5.0; /* in ticks */
+    protected static final long defaultTickInterval = 40; /* in ms */
+    protected static final int defaultMaxGrowth = 25;
+    protected static final int defaultBaseGrowth = 10;
+    protected static final int defaultMaxPassengerPerSite = 15;
+    protected static final long defaultGrowthInterval = 1500; /* in ticks */
+    protected static final long defaultSiteSpawnInterval = 1000; /* in ticks */
+    protected static final long defaultPassengerSpawnInterval = 100; /* in ticks */
+    protected static final long defaultPassengerMoveInterval = 10; /* in ticks */
+    protected static final double defaultTrainMoveInterval = 5.0; /* in ticks */
 
     /* Singleton */
     protected static IGame2 instance = null;
@@ -26,7 +26,10 @@ public class IGame2 extends Game { //TODO
     }
 
     /* Logic */
-    private GameLogic logic;
+    GameLogic logic;
+
+    /* Modules */
+    TickTimerModule tickTimerModule = new TickTimerModule();
 
     /* Private constructor */
     private IGame2(Matrix2D<MapDatum> map) {
@@ -34,7 +37,7 @@ public class IGame2 extends Game { //TODO
         this.map = map.copy();
         /* Init the game */
         initLogic();
-        initTick();
+        tickTimerModule.init(logic);
         initGrowth();
         initSiteSpawn();
         initTrainMove();
@@ -60,12 +63,6 @@ public class IGame2 extends Game { //TODO
     /* Initialization */
     private void initLogic() {
         logic = new GameLogic();
-    }
-    private void initTick() {
-        tickTimer = new Timer();
-        tickTask = new RunnableTimerTask(logic);
-        tickCounter = new Counter();
-        logic.action.addListener(tickCounter);
     }
     private void initGrowth() {
         try {
@@ -122,13 +119,13 @@ public class IGame2 extends Game { //TODO
         if (state == GameState.PAUSED) {
             state = GameState.RUNNING;
         } else throw new GameException("Cannot run game: Game is not paused.");
-        tickTimer.schedule(tickTask, tickInterval, tickInterval);
+        tickTimerModule.run();
     }
     public synchronized void pause() throws GameException {
         if (state == GameState.RUNNING) {
             state = GameState.PAUSED;
         } else throw new GameException("Cannot pause game: Game is not running.");
-        tickTimer.cancel();
+        tickTimerModule.pause();
     }
     public synchronized void kill() throws GameException {
         if (state == GameState.RUNNING) {
@@ -160,20 +157,25 @@ public class IGame2 extends Game { //TODO
     }
 
     /* Tick */
-    private long tickInterval = defaultTickInterval;
     public long getTickInterval() {
-        return tickInterval;
+        return tickTimerModule.interval;
     }
     public void setTickInterval(long interval) throws GameException {
         assertState(GameState.NEW);
-        tickInterval = interval;
+        tickTimerModule.interval = interval;
     }
     private Counter tickCounter;
     public long getTickCounter() {
-        return tickCounter.getCounter();
+        return tickTimerModule.getCounter();
     }
-    private TimerTask tickTask;
-    private Timer tickTimer;
+    public void setTickCounter(long count) throws GameException {
+        assertState(GameState.NEW);
+        tickTimerModule.setCounter(count);
+    }
+    public void clearTickCounter() throws GameException {
+        assertState(GameState.NEW);
+        tickTimerModule.clearCounter();
+    }
 
     /* Growth */
     private final Runnable growthRunnable = new Runnable() {
@@ -352,7 +354,7 @@ public class IGame2 extends Game { //TODO
     };
     private synchronized void trainMove() {
         boolean have_moved = false;
-        long now = getTickCounter();
+        long now = tickTimerModule.getCounter();
         for (Line line : lines){
             Train t = line.train;
             TrainState ts = t.getState();

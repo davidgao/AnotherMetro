@@ -8,6 +8,9 @@ public class Counter implements Runnable {
     public long getCounter() {
         return counter;
     }
+    public void setCounter(long count) {
+        counter = count;
+    }
     public void clearCounter() {
         counter = 0;
     }
