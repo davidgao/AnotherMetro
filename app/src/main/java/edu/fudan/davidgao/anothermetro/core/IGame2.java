@@ -381,7 +381,7 @@ class IGame2 extends Game { //TODO
                 }
                 if (((StandbyTrainState) ts).timeToStay > 0) continue;
                 /* Get on */
-                if (t.passengers.size() > 6) {
+                if (t.passengers.size() < 6) {
                     for (Passenger p : curr.passengers) {
                         if (pf.getOnTrain(p, curr, t)) {
                             curr.passengers.remove(p);
