@@ -15,7 +15,7 @@ public class TextObject {
         text = "default";
         x = 0f;
         y = 0f;
-        color = new float[] {1f, 1f, 1f, 1.0f};
+        color = new float[] {0.5f, 0.5f, 0.5f, 0.5f};
     }
 
     public TextObject(String txt, float xcoord, float ycoord)
@@ -23,6 +23,6 @@ public class TextObject {
         text = txt;
         x = xcoord;
         y = ycoord;
-        color = new float[] {1f, 1f, 1f, 1.0f};
+        color = new float[] {0.5f, 0.5f, 0.5f, 0.5f};
     }
 }

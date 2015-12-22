@@ -2,6 +2,8 @@ package edu.fudan.davidgao.anothermetro.Visual;
 
 import android.opengl.GLES20;
 
+import org.w3c.dom.Text;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -95,7 +97,6 @@ public class TextManager {
         setUniformscale(ssu);
         addText(text);
         PrepareDraw();
-
     }
     public static int loadShader(int type, String shaderCode){
 
