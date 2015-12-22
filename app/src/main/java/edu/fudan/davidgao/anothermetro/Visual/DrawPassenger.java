@@ -109,6 +109,7 @@ public class DrawPassenger {
 	private static final double pr = 0.01; /* Config.passengerRadius */
 	private static final double phr = pr / 2.0; /* Config.passengerHalfRadius */
 	private static final float pz = Config.Z_PASSENGER; /* Config.passengerZ */
+	private static final double ptf = 1.7; /* Config.passengerTriangleFactor */
 	
 	public static double BG2FGx(int x){
 		return (double)x / Config.GRID_X * 2.0 - 1.0;
@@ -137,7 +138,7 @@ public class DrawPassenger {
 	
 	private void addTriangle(double x, double y) {
 		double v3 = Math.sqrt(3.0) / 2.0;
-		addVertex(x + pr * v3, y - phr); addVertex(x - pr * v3, y - phr); addVertex(x, y + pr);
+		addVertex(x + pr * ptf * v3, y - phr * ptf); addVertex(x - pr * ptf * v3, y - phr * ptf); addVertex(x, y + pr * ptf);
 	}
 	
 	private void addSquare(double x, double y) {
@@ -244,7 +245,7 @@ public class DrawPassenger {
 			Train train = line.train;
 			TrainState trainState = train.getState();
 			double tx = 0, ty = 0;
-			int angle;
+			int angle = 0;
 			if (trainState instanceof StandbyTrainState) {
 				StandbyTrainState standbyTrainState = (StandbyTrainState)trainState;
 				int ix = standbyTrainState.site.pos.x;
@@ -270,12 +271,17 @@ public class DrawPassenger {
 				ty = vsTrainState.coordinate.y;
 				angle = vsTrainState.angle;
 			}
+			double theta = Math.PI / 4 * angle;
 			ArrayList<Passenger> passengers = train.getPassengers();
 			int _r = 0, _c = 0;
 			for (int j = 0; j < passengers.size(); j ++) {
 				Passenger passenger = passengers.get(j);
 				double px = tx - 3 * (pr + gap) + (pr + gap) * (2 * _c + 1);
 				double py = ty - 2 * (pr + gap) + (pr + gap) * (2 * _r + 1);
+				double qx = px - tx, qy = py - ty;
+				px = qx * Math.cos(theta) - qy * Math.sin(theta);
+				py = qx * Math.sin(theta) + qy * Math.cos(theta);
+				px += tx; py += ty;
 				switch (passenger.type) {
 					case CIRCLE: addCircle(px, py); break;
 					case TRIANGLE: addTriangle(px, py); break;

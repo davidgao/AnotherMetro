@@ -110,6 +110,7 @@ public class DrawSite {
 	private static final double r = 0.05; /* Config.siteRadius */
 	private static final double hr = r / 2.0; /* Config.siteHalfRadius */
 	private static final float z = Config.Z_SITE; /* Config.siteZ */
+	private static final double tf = 1.5; /* Config.triangleFactor */
 	
 	public static double BG2FGx(int x){
         return (double)x / Config.GRID_X * 2.0 - 1.0;
@@ -138,7 +139,7 @@ public class DrawSite {
 	
 	private void addTriangleSite(double x, double y) {
 		double v3 = Math.sqrt(3.0);
-		addVertex(x + r * v3/2.0, y - hr); addVertex(x - r * v3/2.0, y - hr); addVertex(x, y + r);
+		addVertex(x + r * tf * v3/2.0, y - hr * tf); addVertex(x - r * tf * v3/2.0, y - hr * tf); addVertex(x, y + r * tf);
 	}
 	
 	private void addSquareSite(double x, double y) {

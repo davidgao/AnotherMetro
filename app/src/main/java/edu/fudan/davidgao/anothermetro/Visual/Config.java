@@ -24,7 +24,7 @@ public class Config {
     public static final float Z_LINEHEAD = -0.1e-2f;
     public static final float Z_BLUEPRINT = -0.2e-2f;
     public static final float Z_TRAIN = -0.3e-2f;
-    public static final float Z_PASSENGER = -0.5e-2f;
+    public static final float Z_PASSENGER = -0.4e-2f;
     public static final double EPSI=1e-3;
     public static final int FLIP_list[]={4, 5, 6, 7, 0, 1, 2, 3};
     public static final int C2CC_list[]={0, 7, 6, 5, 4, 3, 2, 1};

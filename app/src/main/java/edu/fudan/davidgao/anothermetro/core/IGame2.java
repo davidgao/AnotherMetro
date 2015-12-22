@@ -14,7 +14,7 @@ public class IGame2 extends Game { //TODO
     private static final int defaultBaseGrowth = 10;
     private static final int defaultMaxPassengerPerSite = 15;
     private static final long defaultGrowthInterval = 1500; /* in ticks */
-    private static final long defaultSiteSpawnInterval = 1000; /* in ticks */
+    private static final long defaultSiteSpawnInterval = 100; /* in ticks */
     private static final long defaultPassengerSpawnInterval = 100; /* in ticks */
     private static final long defaultPassengerMoveInterval = 10; /* in ticks */
     private static final double defaultTrainMoveInterval = 5.0; /* in ticks */
