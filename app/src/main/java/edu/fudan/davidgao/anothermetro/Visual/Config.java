@@ -7,8 +7,8 @@ import edu.fudan.davidgao.anothermetro.tools.Point;
  * Created by gqp on 2015/11/28.
  */
 public class Config {
-    public static int GRID_X=40;
-    public static int GRID_Y=30;
+    public static int GRID_X=80;
+    public static int GRID_Y=80;
     public static final float SITE_RADIUS=0.05f;
 
     public static final int MAX_LINES=8;
