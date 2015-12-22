@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 
 import edu.fudan.davidgao.anothermetro.core.Game;
 import edu.fudan.davidgao.anothermetro.core.GameEvent;
+import edu.fudan.davidgao.anothermetro.core.GameException;
 import edu.fudan.davidgao.anothermetro.tools.Broadcaster;
 
 /**
@@ -40,12 +41,20 @@ public class GameMonitor {
 
     private void doGameOver() {
         AlertDialog.Builder builder = new AlertDialog.Builder(gameMain);
+
         builder.setTitle("Game over");
         builder.setMessage("Your score:" + Game.getInstance().getScore());
         builder.setCancelable(false);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                try {
+                    Game.getInstance().kill();
+                    Game.getInstance().destroy();
+                } catch (GameException e) {
+                    e.printStackTrace();
+                }
                 gameMain.finish();
             }
         });
