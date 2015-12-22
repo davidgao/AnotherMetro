@@ -66,11 +66,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         drawTrain.render(mMVPMatrix);
         drawPassenger.draw(mMVPMatrix);
         updateLineListener.draw(mMVPMatrix);
-<<<<<<< HEAD
         drawSite.draw(mMVPMatrix);
-=======
         textManager.Draw(mMVPMatrix);
->>>>>>> origin/develop
     }
 
     private final float[] mMVPMatrix = new float[16];
