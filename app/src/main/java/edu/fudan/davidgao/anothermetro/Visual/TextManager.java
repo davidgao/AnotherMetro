@@ -1,6 +1,9 @@
 package edu.fudan.davidgao.anothermetro.Visual;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
+import android.opengl.GLUtils;
 
 import org.w3c.dom.Text;
 
@@ -98,6 +101,7 @@ public class TextManager {
         addText(text);
         PrepareDraw();
     }
+
     public static int loadShader(int type, String shaderCode){
 
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
