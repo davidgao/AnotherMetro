@@ -9,17 +9,19 @@ import edu.fudan.davidgao.anothermetro.tools.*;
 
 public class IGame2 extends Game { //TODO
     /* Default parameters */
-    // TODO: let tick interval (much) smaller, as skq is drawing train per tick.
-    private static final long defaultTickInterval = 200; /* in ms */
+    private static final long defaultTickInterval = 40; /* in ms */
     private static final int defaultMaxGrowth = 25;
     private static final int defaultBaseGrowth = 10;
-    private static final long defaultGrowthInterval = 30; /* in ticks */
-    private static final long defaultSiteSpawnInterval = 20; /* in ticks */
-    private static final long defaultPassengerSpawnInterval = 5; /* in ticks */
+    private static final int defaultMaxPassengerPerSite = 15;
+    private static final long defaultGrowthInterval = 1500; /* in ticks */
+    private static final long defaultSiteSpawnInterval = 1000; /* in ticks */
+    private static final long defaultPassengerSpawnInterval = 100; /* in ticks */
+    private static final long defaultPassengerMoveInterval = 10; /* in ticks */
+    private static final double defaultTrainMoveInterval = 5.0; /* in ticks */
 
     /* Singleton */
-    protected static Game instance = null;
-    public static Game getInstance() {
+    protected static IGame2 instance = null;
+    public static IGame2 getInstance() {
         return instance;
     }
 
@@ -37,6 +39,7 @@ public class IGame2 extends Game { //TODO
         initSiteSpawn();
         initTrainMove();
         initPassengerSpawn();
+        gameOverNotifier = logic.getAlarm(GameEvent.GAME_OVER);
     }
 
     /* Game creation */
@@ -213,7 +216,7 @@ public class IGame2 extends Game { //TODO
     }
 
     /* Sites */
-    private ArrayList<Site> sites = new ArrayList<>();
+    ArrayList<Site> sites = new ArrayList<>();
     public ArrayList<Site> getSites() {
         return sites;
     }
@@ -261,7 +264,7 @@ public class IGame2 extends Game { //TODO
         return siteValidator.validate(x, y);
     }
     private void spawnSite() throws GameException {
-        System.out.println("spawnSite");
+        //System.out.println("spawnSite");
         /* NOTE: Caller should always sync */
         double[] rate;
         if (sites.size() >= maxSites) {
@@ -287,7 +290,6 @@ public class IGame2 extends Game { //TODO
             uniqueSites += 1;
         }
         if (spawned) siteSpawnNotifier.run();
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
     private boolean spawnSite(SiteType type) {
         /* NOTE: Caller should always sync */
@@ -296,11 +298,11 @@ public class IGame2 extends Game { //TODO
             final int y = rand.nextInt(roi.y2 - roi.y1) + roi.y1;
             if (siteValid(x, y)) {
                 sites.add(new Site(new Point<>(x, y), type));
-                System.out.printf("New site at %d %d\n", x, y);
+                //System.out.printf("New site at %d %d\n", x, y);
                 return true;
             }
         }
-        System.out.println("spawnSite failed");
+        //System.out.println("spawnSite failed");
         return false;
     }
 
@@ -312,12 +314,16 @@ public class IGame2 extends Game { //TODO
     }
     public void addLine(Site s1, Site s2) throws GameException {
         if (s1 == s2) throw new GameException("Station conflict");
-        lines.add(new Line(s1, s2));
+        Line newLine = new Line(s1, s2);
+        lines.add(newLine);
+        s1.lines.add(newLine);
+        s2.lines.add(newLine);
         forceNotify(GameEvent.LINE_CHANGE);
         forceNotify(GameEvent.TRAIN_STATE_CHANGE);
     }
     public void extendLine(Line l, Site src, Site dest) throws GameException {
         l.extend(src, dest);
+        dest.lines.add(l);
         forceNotify(GameEvent.LINE_CHANGE);
     }
     public boolean canAddLine(Site s1, Site s2) {
@@ -330,6 +336,14 @@ public class IGame2 extends Game { //TODO
     }
 
     /* Train Moving */
+    private double trainMoveInterval = defaultTrainMoveInterval;
+    public double getTrainMoveInterval() {
+        return trainMoveInterval;
+    }
+    public void setTrainMoveInterval(double interval) throws GameException {
+        assertState(GameState.NEW);
+        trainMoveInterval = interval;
+    }
     private Runnable trainMoveRunnable = new Runnable() {
         @Override
         public void run() {
@@ -340,18 +354,56 @@ public class IGame2 extends Game { //TODO
         boolean have_moved = false;
         long now = getTickCounter();
         for (Line line : lines){
-            TrainState ts = line.train.getState();
+            Train t = line.train;
+            TrainState ts = t.getState();
             ArrayList<Site> s = line.getSites();
             if (ts instanceof StandbyTrainState) {
                 Site curr = ((StandbyTrainState) ts).site;
+                /* Wait */
+                if (((StandbyTrainState) ts).timeToStay > 0) {
+                    ((StandbyTrainState) ts).timeToStay -= 1;
+                    continue;
+                }
+                /* Get off */
+                for (Passenger p : t.passengers) {
+                    if (p.type == curr.type) {
+                        t.passengers.remove(p);
+                        score += 1;
+                        ((StandbyTrainState) ts).timeToStay = passengerMoveInterval;
+                        passengerChangeNotifier.run();
+                        break;
+                    }
+                    if (! pf.getOnTrain(p, curr, t)) {
+                        t.passengers.remove(p);
+                        curr.passengers.add(p);
+                        p.state = curr;
+                        ((StandbyTrainState) ts).timeToStay = passengerMoveInterval;
+                        passengerChangeNotifier.run();
+                        break;
+                    }
+                }
+                if (((StandbyTrainState) ts).timeToStay > 0) continue;
+                /* Get on */
+                for (Passenger p : curr.passengers) {
+                    if (pf.getOnTrain(p, curr, t)) {
+                        curr.passengers.remove(p);
+                        t.passengers.add(p);
+                        p.state = t;
+                        ((StandbyTrainState) ts).timeToStay = passengerMoveInterval;
+                        passengerChangeNotifier.run();
+                        break;
+                    }
+                }
+                if (((StandbyTrainState) ts).timeToStay > 0) continue;
+                /* Start moving */
                 Site next = s.get(s.indexOf(curr) + ts.direction);
                 double dist = curr.dist(next.pos);
                 if (ts.direction == 1) {
                     ts = new RunningTrainState(line, curr, next, 1,
-                            now, now + (long) dist * 5);
+                            now, now + (long)(dist * trainMoveInterval));
                 } else {
                     ts = new RunningTrainState(line, next, curr, -1,
-                            now, now + (long) dist * 5);
+                            now, now + (long)(dist * trainMoveInterval));
                 }
                 line.train.setState(ts);
                 have_moved = true;
@@ -383,11 +435,20 @@ public class IGame2 extends Game { //TODO
     }
     private Runnable trainMoveNotifier;
     private void startTrainMove() {
-
+        pf = new BasicPathFinder();
     }
 
     /* Passenger */
+    long maxPassengerPerSite = defaultMaxPassengerPerSite;
     ArrayList<Passenger> passengers = new ArrayList<>();
+    private long passengerMoveInterval = defaultPassengerMoveInterval;
+    public long getPassengerMoveInterval() {
+        return passengerMoveInterval;
+    }
+    public void setPassengerMoveInterval(long interval) throws GameException {
+        assertState(GameState.NEW);
+        passengerMoveInterval = interval;
+    }
     @SuppressWarnings("unchecked")
     public ArrayList<Passenger> getPassengers() {
         return (ArrayList<Passenger>)passengers.clone();
@@ -407,7 +468,7 @@ public class IGame2 extends Game { //TODO
         }
     };
     private synchronized void spawnPassenger() {
-        System.out.println("Passenger spawn");
+        //System.out.println("Passenger spawn");
         final double uniqueRate = (double)uniqueSites / (double)sites.size();
         final int type;
         if (rand.nextDouble() < uniqueRate) {
@@ -424,12 +485,34 @@ public class IGame2 extends Game { //TODO
         }
         int index = rand.nextInt(sites.size());
         Site s = sites.get(index);
+        while (s.type == SiteType.fromInt(type)) {
+            index = rand.nextInt(sites.size());
+            s = sites.get(index);
+        }
         Passenger p = new Passenger(SiteType.fromInt(type), s);
         passengers.add(p);
         passengerChangeNotifier.run();
+        if (s.passengers.size() > maxPassengerPerSite) {
+            gameOverNotifier.run();
+        }
     }
     private Runnable passengerChangeNotifier;
 
+    /* Path Finding */
+    private PathFinder pf;
+
+    /* Score */
+    long score = 0;
+    public long getScore() {
+        return score;
+    }
+    public void setScore(long score) throws GameException {
+        assertState(GameState.NEW);
+        this.score = score;
+    }
+
+
+    private Runnable gameOverNotifier;
 
     private void forceNotify(GameEvent event) {
         logic.writeBack.getBroadcaster(event).run();

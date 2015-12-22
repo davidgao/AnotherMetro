@@ -14,17 +14,20 @@ public class Config {
     public static final int MAX_LINES=8;
     public static final int AVAILABLE_LINES=8;
     public static final int MAX_SEGMENTS=200;
-    public static final double LATENT_SITE_RADIUS=0.01;
+    public static final double LATENT_SITE_RADIUS=0.01f;
 
     public static final int LINE_WIDTH=3;
 
     public static final float MAX_INF=1e20f;
-    public static final float Z_SITE=1.0e-4f;
+    public static final float Z_SITE=-1.0e-4f;
     public static final float Z_SEGMENT=0.0f;
-    public static final float Z_LINEHEAD=0.1e-4f;
-    public static final float Z_BLUEPRINT=0.2e-4f;
+    public static final float Z_LINEHEAD=-0.1e-4f;
+    public static final float Z_BLUEPRINT=-0.2e-4f;
+    public static final float Z_TRAIN=-0.3e-4f;
+    public static final float Z_PASSENGER=-0.4e-4f;
     public static final double EPSI=1e-6;
-    public static final int C2CC_list[]={0,7,6,5,4,3,2,1};
+    public static final int FLIP_list[]={4, 5, 6, 7, 0, 1, 2, 3};
+    public static final int C2CC_list[]={0, 7, 6, 5, 4, 3, 2, 1};
 
     public static final float color_list[][] ={
             { 0.9f, 0.1f, 0.1f, 1.0f },
@@ -35,12 +38,15 @@ public class Config {
             { 0.8f, 0.1f, 0.8f, 1.0f },
             { 0.9f, 0.7f, 0.7f, 1.0f },
             { 0.7f, 0.7f, 0.9f, 1.0f }}; //TODO
-    public static final float color_extra_line[] = {0.4f, 0.4f, 0.4f, 1.0f};
+    public static final float color_extra_line[] = {0.2f, 0.2f, 0.2f, 1.0f};
 
     public Config(){
     }
     public static int C2CC(int t){
         return C2CC_list[t];
+    }
+    public static int FLIP(int t){
+        return FLIP_list[t];
     }
     public static PointF BG2FGpoint(Point<Integer> point){
         PointF t=new PointF(0,0);

@@ -33,10 +33,11 @@ public class DrawSite {
 			0.0f, 0.1f, 0.0f
 	};
 	
-	private final String vertexShaderCode = 
-		"attribute vec4 vPosition;" + 
+	private final String vertexShaderCode =
+		"uniform mat4 uMVPMatrix;" +
+		"attribute vec4 vPosition;" +
 		"void main() {" + 
-		"	gl_Position = vPosition;" + 
+		"	gl_Position = uMVPMatrix * vPosition;" +
 		"}";
 	private final String fragmentShaderCode = 
 		"precision mediump float;" + 
@@ -85,9 +86,13 @@ public class DrawSite {
 			}
 		};
 		b.addListener(drawSite);
+
+		GTMDvertexCoords();
 	}
-	
-	public void draw() {
+
+	private int mMVPMatrixHandle;
+
+	public void draw(float[] mvpMatrix) {
 		//GTMDvertexCoords();
 		GLES20.glUseProgram(mProgram);
 		mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
@@ -98,6 +103,8 @@ public class DrawSite {
 		GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 		GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
 		GLES20.glDisableVertexAttribArray(mPositionHandle);
+		mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+		GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 	}
 	
 	private static final double r = 0.05; /* Config.siteRadius */
@@ -167,7 +174,7 @@ public class DrawSite {
 		vertexCount = 0;
 		ArrayList<Site> sites = gameMain.getSites();
 		for (int i = 0; i < sites.size(); i ++) {
-			System.out.printf("size=%d i=%d\n", sites.size(), i);
+			//System.out.printf("size=%d i=%d\n", sites.size(), i);
 			Site site = sites.get(i);
 			int ix = site.pos.x;
 			int iy = site.pos.y;

@@ -24,12 +24,12 @@ public class TrainRenderer {
     private static final String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
-            "attribute vec4 vPosition;" +
+            "uniform mat4 uMVPMatrix;" +"attribute vec4 vPosition;" +
             "void main() {" +
             // the matrix must be included as a modifier of gl_Position
             // Note that the uMVPMatrix factor *must be first* in order
             // for the matrix multiplication product to be correct.
-            "  gl_Position = vPosition;" +
+            "  gl_Position = uMVPMatrix * vPosition;" +
             "}";
     // TODO: later change color according to line
     private static final String fragmentShaderCode =
@@ -41,7 +41,7 @@ public class TrainRenderer {
 
     private final FloatBuffer vertexBuffer;
     private final int mProgram;
-
+    private int mMVPMatrixHandle;
     private int mPositionHandle;
     private int mColorHandle;
     // number of coordinates per vertex in this array
@@ -76,6 +76,9 @@ public class TrainRenderer {
         vertexCoords = new float[3 * 4 * Config.MAX_SEGMENTS];
         Broadcaster trainUpdateBroadcaster = game.getCallbackBroadcaster(GameEvent.TRAIN_STATE_CHANGE);
         trainUpdateBroadcaster.addListener(trainUpdateRunnable);
+        // Render the trains every tick
+        Broadcaster trainDrawingBroadcaster = game.getCallbackBroadcaster(GameEvent.TICK);
+        trainDrawingBroadcaster.addListener(trainDrawingRunnable);
 
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 //(number of coordinate values * 4 byte per float)
@@ -102,14 +105,11 @@ public class TrainRenderer {
         // Forcefully update the lines, sites and trains member so that they are initialized
         trainUpdate();
 
-        // Startup a train drawing thread which repeatedly updates train vertex buffer
-        Thread thTrainDraw = new Thread(trainDrawingRunnable);
-        thTrainDraw.start();
         instance = this;
     }
 
 
-    public void render(){
+    public void render(float[] mvpMatrix){
 
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
@@ -135,6 +135,8 @@ public class TrainRenderer {
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
     }
 
     private static  final double size =  0.02;
@@ -180,7 +182,7 @@ public class TrainRenderer {
     };
 
     private synchronized void trainUpdate() {
-        System.out.println("Train update");
+        //System.out.println("Train update");
         lines = game.getLines();
         sites = game.getSites();
         trains = new ArrayList<>();
@@ -196,17 +198,8 @@ public class TrainRenderer {
     private Runnable trainDrawingRunnable = new Runnable() {
         @Override
         public void run() {
-            try {
-                for (; ; ) {
-                    tickCounter = game.getTickCounter();
-                    synchronized (instance) {
-                        refresh();
-                    }
-                    Thread.sleep(16);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            tickCounter = game.getTickCounter();
+            if (trains != null) refresh();
         }
     };
 
@@ -235,9 +228,9 @@ public class TrainRenderer {
             //}
             long timePeriod = runningTrainState.arrival - runningTrainState.departure;
             long timePassed = tickCounter - runningTrainState.departure;
-            System.out.printf("%d %d\n", timePeriod, timePassed);
             double fraction = (double)timePassed / (double) timePeriod;
-            vsTrainState = vsSegment.getTrainState(fraction, state.direction);
+            vsTrainState = vsSegment.getTrainState((float)fraction, state.direction);
+            //System.out.printf("HHHHH %d\n", vsTrainState.angle);
         } else vsTrainState = null;
         return vsTrainState;
     }
@@ -261,7 +254,7 @@ public class TrainRenderer {
         int len = VsTrains.size();
         for (int i = 0; i < len; ++ i)
         {
-            addTrain(VsTrains.get(i).coordinate.x,VsTrains.get(i).coordinate.y,VsTrains.get(i).angle,1.00f);
+            addTrain(VsTrains.get(i).coordinate.x,VsTrains.get(i).coordinate.y,VsTrains.get(i).angle,Config.Z_TRAIN);
         }
         vertexBuffer.put(vertexCoords);
         vertexBuffer.position(0);

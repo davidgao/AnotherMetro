@@ -60,5 +60,14 @@ public abstract class Game {
     public abstract ArrayList<Passenger> getPassengers();
     public abstract long getPassengerSpawnInterval();
     public abstract void setPassengerSpawnInterval(long interval) throws GameException;
+    public abstract long getPassengerMoveInterval();
+    public abstract void setPassengerMoveInterval(long interval) throws GameException;
 
+    /* Train */
+    public abstract double getTrainMoveInterval();
+    public abstract void setTrainMoveInterval(double interval) throws GameException;
+
+    /* Score */
+    public abstract long getScore();
+    public abstract void setScore(long score) throws GameException;
 }

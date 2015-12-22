@@ -28,7 +28,7 @@ public class DrawLine {
 
     private int mPositionHandle;
     private int mColorHandle;
-
+    private int mMVPMatrixHandle;
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
     static final int COLOR_PER_VERTEX = 4;
@@ -40,9 +40,9 @@ public class DrawLine {
     private final int colorStride = COLOR_PER_VERTEX * 4; // 4 bytes per vertex
 
     private final String vertexShaderCode =
-            "attribute vec4 vPosition;" + "attribute vec4 vColor;" + "varying vec4 aColor;" +
+            "uniform mat4 uMVPMatrix;" +"attribute vec4 vPosition;" + "attribute vec4 vColor;" + "varying vec4 aColor;" +
                     "void main() {" +
-                    "  gl_Position = vPosition;" + "aColor = vColor;"+
+                    "  gl_Position = uMVPMatrix * vPosition;" + "aColor = vColor;"+
                     "}";
 
     private final String fragmentShaderCode =
@@ -78,7 +78,7 @@ public class DrawLine {
     }
 
 
-    public void draw() {
+    public void draw(float[] mvpMatrix) {
         // prepare();
 
         // Add program to OpenGL ES environment
@@ -104,13 +104,15 @@ public class DrawLine {
                 GLES20.GL_FLOAT, false,
                 colorStride, colorBuffer);
 
-        GLES20.glLineWidth(9);
+        GLES20.glLineWidth(3);
         // Draw the triangle
         GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
         GLES20.glDisableVertexAttribArray(mColorHandle);
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
     }
 
     public DrawLine() {
@@ -190,7 +192,7 @@ public class DrawLine {
             if (Config.BG2FGpoint(site.pos).equals(temp.pos.x, temp.pos.y)&&temp.type==site.type)
                 return temp;
         }
-        System.out.println("bad ~~~~");
+        //System.out.println("bad ~~~~");
         return null;
     }
 
@@ -200,7 +202,9 @@ public class DrawLine {
         for (int i=0;i<sites.size()-1;i++){
             VsSegment temp_vssegment=new VsSegment(sites.get(i), sites.get(i+1), line);
             VsSite temp_vssite = findVsSite(sites.get(i));
+            temp_vssegment.update_LineDot();
             calcAngle(temp_vssegment);
+            temp_vssegment.force_update_LineDot();
             temp_vssite.add_out(temp_vssegment);
             temp_vssite = findVsSite(sites.get(i+1));
             temp_vssite.add_in(temp_vssegment);
@@ -301,14 +305,14 @@ public class DrawLine {
         cpointx[2] = (float)((1.0*ed.y-st.y+s*st.x)*s); cpointy[2]=(float)(1.0*ed.y); //S1
         cpointx[3]=(float)(1.0*ed.x); cpointy[3]=(float)(s*ed.x+st.y-s*st.x); //S2
         s=1.0f;
-        cpointx[4]=(float)((1.0*st.y-ed.y+s*ed.x)*s); cpointy[2]=(float)(1.0*st.y); //E1
-        cpointx[5]=(float)(1.0*st.x); cpointy[3]=(float)(s*st.x+ed.y-s*ed.x);  //E2
+        cpointx[4]=(float)((1.0*st.y-ed.y+s*ed.x)*s); cpointy[4]=(float)(1.0*st.y); //E1
+        cpointx[5]=(float)(1.0*st.x); cpointy[5]=(float)(s*st.x+ed.y-s*ed.x);  //E2
         s=-1.0f;
         cpointx[6]=(float)((1.0*st.y-ed.y+s*ed.x)*s); cpointy[6]=(float)(1.0*st.y); //E1
         cpointx[7]=(float)(1.0*st.x); cpointy[7]=(float)(s*st.x+ed.y-s*ed.x);  //E2
         float [] cresult=new float[8];
         for (int i=0;i<4;i++){
-            cresult[i]=distance(st.x, st.y, cpointx[i], cpointy[i])+distance(ed.x, ed.y, cpointx[i], cpointy[i]);
+            cresult[i] = distance(st.x, st.y, cpointx[i], cpointy[i])+distance(ed.x, ed.y, cpointx[i], cpointy[i]);
         }
         for (int i=4;i<8;i++) {
             cresult[i] = distance(ed.x, ed.y, cpointx[i], cpointy[i])+distance(st.x, st.y, cpointx[i], cpointy[i]);
@@ -316,8 +320,8 @@ public class DrawLine {
         int idx = minIndex(cresult);
         switch (idx){
             case 0:
-                if (ed.y<st.y) {
-                    vsSegment.st_a = 3;
+                if (ed.y<st.y+Config.EPSI) {
+                    vsSegment.st_a = 5;
                     vsSegment.ed_a = 0;
                 }else{
                     vsSegment.st_a = 1;
@@ -325,7 +329,7 @@ public class DrawLine {
                 }
                 break;
             case 1:
-                if (ed.x<st.x) {
+                if (ed.x<st.x+Config.EPSI) {
                     vsSegment.st_a = 5;
                     vsSegment.ed_a = 2;
                 }else{
@@ -334,7 +338,7 @@ public class DrawLine {
                 }
                 break;
             case 2:
-                if (ed.y<st.y) {
+                if (ed.y<st.y+Config.EPSI) {
                     vsSegment.st_a = 7;
                     vsSegment.ed_a = 4;
                 }else{
@@ -343,7 +347,7 @@ public class DrawLine {
                 }
                 break;
             case 3:
-                if (ed.x<st.x) {
+                if (ed.x<st.x+Config.EPSI) {
                     vsSegment.st_a = 3;
                     vsSegment.ed_a = 6;
                 }else{
@@ -352,7 +356,7 @@ public class DrawLine {
                 }
                 break;
             case 4:
-                if (st.y<ed.y) {
+                if (st.y+Config.EPSI<ed.y) {
                     vsSegment.st_a = 0;
                     vsSegment.ed_a = 5;
                 }else{
@@ -361,7 +365,7 @@ public class DrawLine {
                 }
                 break;
             case 5:
-                if (st.x<ed.x) {
+                if (st.x+Config.EPSI<ed.x) {
                     vsSegment.st_a = 2;
                     vsSegment.ed_a = 5;
                 }else{
@@ -370,7 +374,7 @@ public class DrawLine {
                 }
                 break;
             case 6:
-                if (st.y<ed.y) {
+                if (st.y+Config.EPSI<ed.y) {
                     vsSegment.st_a = 4;
                     vsSegment.ed_a = 7;
                 }else{
@@ -379,7 +383,7 @@ public class DrawLine {
                 }
                 break;
             case 7:
-                if (st.x<ed.x) {
+                if (st.x+Config.EPSI<ed.x) {
                     vsSegment.st_a = 6;
                     vsSegment.ed_a = 3;
                 }else{
@@ -403,7 +407,8 @@ public class DrawLine {
             return result;
         }
 
-        double k = (ed.y - st.y)/(ed.x-st.x);
+
+        double k = (1.0*ed.y - st.y)/(ed.x-st.x);
         if (Math.abs(Math.abs(k)-1)<Config.EPSI){
             if (Math.round(k)==1){
                 ArrayList<PointF> result=new ArrayList<>();
@@ -426,8 +431,8 @@ public class DrawLine {
         cpointx[2] = (float)((1.0*ed.y-st.y+s*st.x)*s); cpointy[2]=(float)(1.0*ed.y); //S1
         cpointx[3]=(float)(1.0*ed.x); cpointy[3]=(float)(s*ed.x+st.y-s*st.x); //S2
         s=1.0f;
-        cpointx[4]=(float)((1.0*st.y-ed.y+s*ed.x)*s); cpointy[2]=(float)(1.0*st.y); //E1
-        cpointx[5]=(float)(1.0*st.x); cpointy[3]=(float)(s*st.x+ed.y-s*ed.x);  //E2
+        cpointx[4]=(float)((1.0*st.y-ed.y+s*ed.x)*s); cpointy[4]=(float)(1.0*st.y); //E1
+        cpointx[5]=(float)(1.0*st.x); cpointy[5]=(float)(s*st.x+ed.y-s*ed.x);  //E2
         s=-1.0f;
         cpointx[6]=(float)((1.0*st.y-ed.y+s*ed.x)*s); cpointy[6]=(float)(1.0*st.y); //E1
         cpointx[7]=(float)(1.0*st.x); cpointy[7]=(float)(s*st.x+ed.y-s*ed.x);  //E2
@@ -448,7 +453,7 @@ public class DrawLine {
     private void segment2GLline(ArrayList<VsSegment> segments){
         for (int i=0;i<segments.size();i++){
             VsSegment temp=segments.get(i);
-            ArrayList<PointF> line_dot = calcLine(getPosByAngle(temp.st, temp.st_angle), getPosByAngle(temp.ed, temp.ed_angle));
+            ArrayList<PointF> line_dot = temp.getLine_dot();
             lineCoords[i*12]=line_dot.get(0).x;lineCoords[i*12+1]=line_dot.get(0).y;lineCoords[i*12+2]=Config.Z_SEGMENT;
             lineCoords[i*12+3]=line_dot.get(1).x;lineCoords[i*12+4]=line_dot.get(1).y;lineCoords[i*12+5]=Config.Z_SEGMENT;
             lineCoords[i*12+6]=line_dot.get(1).x;lineCoords[i*12+7]=line_dot.get(1).y;lineCoords[i*12+8]=Config.Z_SEGMENT;
@@ -466,10 +471,10 @@ public class DrawLine {
 
     //prepare every thing, get Sites and lines, convert site, line to VsSite, VsLine. pass Line , pass Site, send to GL
     private void prepare(){
-        System.out.println("GTMD!!!!");
+        //System.out.println("GTMD!!!!");
         ArrayList<Site> temp_sites=game.getSites();
         ArrayList<Line> temp_lines=game.getLines();
-        System.out.printf("Site Size = %d\n", temp_sites.size());
+        //System.out.printf("Site Size = %d\n", temp_sites.size());
         segments.clear();
         sites.clear();
         lines.clear();
@@ -478,7 +483,7 @@ public class DrawLine {
             sites.add(temp_vssite);
         }
         VsLine.color_ptr=0;
-        System.out.printf("Size = %d\n", temp_lines.size());
+        //System.out.printf("Size = %d\n", temp_lines.size());
         for (int i=0;i<temp_lines.size();i++){
             VsLine temp_vsline=new VsLine(temp_lines.get(i));
             lines.add(temp_vsline);

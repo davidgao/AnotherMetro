@@ -3,8 +3,8 @@ package edu.fudan.davidgao.anothermetro.core;
 import java.util.ArrayList;
 
 public class Train extends PassengerState {
-    private TrainState state;
-    private final ArrayList<Passenger> passengers = new ArrayList<>();
+    TrainState state;
+    final ArrayList<Passenger> passengers = new ArrayList<>();
 
     public Train(Line l) {
         state = new StandbyTrainState(l, l.getSites().get(0), 1);

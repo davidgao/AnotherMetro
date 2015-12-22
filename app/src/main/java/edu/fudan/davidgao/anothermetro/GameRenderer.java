@@ -30,6 +30,12 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
         // Set the background frame color
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        try {
+            Game.getInstance().start();
+            Game.getInstance().run();
+        } catch(GameException e) {
+            e.printStackTrace();
+        }
         drawLine = new DrawLine();
         drawSite = new DrawSite();
         drawLineHead= new DrawLineHead();
@@ -37,12 +43,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         drawPassenger = new DrawPassenger();
         updateLineListener = new UpdateLineListener(drawLineHead);
         try {
-            Game.getInstance().start();
-            Game.getInstance().run();
             ArrayList<Site> temp_sites =  Game.getInstance().getSites();
-            // Wait for backend to spawn all three sites
-            for (;temp_sites.size() < 3;)
-                ;
             Game.getInstance().addLine(temp_sites.get(0), temp_sites.get(1));
             GameView.getInstance().addUpdateLineListener(updateLineListener);
         } catch (GameException e){
@@ -52,16 +53,25 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     public void onDrawFrame(GL10 unused) {
         // Redraw background color
+        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, +3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+        updateLineListener.setMatrix(mMVPMatrix);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        drawLine.draw();
-        drawLineHead.draw();
-        drawPassenger.draw();
-        drawSite.draw();
-        drawTrain.render();
-        updateLineListener.draw();
+        drawLine.draw(mMVPMatrix);
+        drawLineHead.draw(mMVPMatrix);
+        drawPassenger.draw(mMVPMatrix);
+        drawSite.draw(mMVPMatrix);
+        drawTrain.render(mMVPMatrix);
+        updateLineListener.draw(mMVPMatrix);
     }
+
+    private final float[] mMVPMatrix = new float[16];
+    private final float[] mProjectionMatrix = new float[16];
+    private final float[] mViewMatrix = new float[16];
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
+        float ratio = (float) height / width;
+        Matrix.frustumM(mProjectionMatrix, 0, -1, 1, -ratio, ratio, 3, 7);
     }
 }
