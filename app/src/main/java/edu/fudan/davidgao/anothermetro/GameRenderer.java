@@ -1,7 +1,12 @@
 package edu.fudan.davidgao.anothermetro;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.*;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -25,6 +30,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private DrawSite drawSite;
     private TrainRenderer drawTrain;
     private UpdateLineListener updateLineListener;
+    private Context mContext;
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
@@ -51,6 +57,11 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    public GameRenderer(Context c){
+        mContext = c;
+        setupImage();
+    }
+
     public void onDrawFrame(GL10 unused) {
         // Redraw background color
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, +3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
@@ -73,5 +84,24 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         GLES20.glViewport(0, 0, width, height);
         float ratio = (float) height / width;
         Matrix.frustumM(mProjectionMatrix, 0, -1, 1, -ratio, ratio, 3, 7);
+    }
+
+    public void setupImage()
+    {
+
+        // Generate Textures, if more needed, alter these numbers.
+        int[] texturenames = new int[1];
+        GLES20.glGenTextures(1, texturenames, 0);
+
+        // Again for the text texture
+
+        int id = mContext.getResources().getIdentifier("drawable/font", null, mContext.getPackageName());
+        Bitmap bmp = BitmapFactory.decodeResource(mContext.getResources(), id);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texturenames[0]);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bmp, 0);
+        bmp.recycle();
     }
 }

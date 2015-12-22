@@ -1,6 +1,9 @@
 package edu.fudan.davidgao.anothermetro.Visual;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
+import android.opengl.GLUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -97,6 +100,7 @@ public class TextManager {
         PrepareDraw();
 
     }
+
     public static int loadShader(int type, String shaderCode){
 
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
