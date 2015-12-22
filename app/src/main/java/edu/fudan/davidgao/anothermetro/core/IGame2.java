@@ -60,9 +60,6 @@ class IGame2 extends Game { //TODO
     }
 
     /* Initialization */
-    private void initLogic() {
-        logic = new GameLogic();
-    }
     private void initGrowth() {
         try {
             setGrowth(defaultMaxGrowth, defaultBaseGrowth);
@@ -384,14 +381,16 @@ class IGame2 extends Game { //TODO
                 }
                 if (((StandbyTrainState) ts).timeToStay > 0) continue;
                 /* Get on */
-                for (Passenger p : curr.passengers) {
-                    if (pf.getOnTrain(p, curr, t)) {
-                        curr.passengers.remove(p);
-                        t.passengers.add(p);
-                        p.state = t;
-                        ((StandbyTrainState) ts).timeToStay = passengerMoveInterval;
-                        passengerChangeNotifier.run();
-                        break;
+                if (t.passengers.size() > 6) {
+                    for (Passenger p : curr.passengers) {
+                        if (pf.getOnTrain(p, curr, t)) {
+                            curr.passengers.remove(p);
+                            t.passengers.add(p);
+                            p.state = t;
+                            ((StandbyTrainState) ts).timeToStay = passengerMoveInterval;
+                            passengerChangeNotifier.run();
+                            break;
+                        }
                     }
                 }
                 if (((StandbyTrainState) ts).timeToStay > 0) continue;
