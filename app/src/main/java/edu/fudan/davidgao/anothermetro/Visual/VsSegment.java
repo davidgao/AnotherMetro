@@ -61,19 +61,19 @@ public class VsSegment {
             mid_frac = d12/d13;
             if (fraction>mid_frac){
                 fraction = (float)((fraction- mid_frac)/(1.0 - mid_frac));
-                return new VsTrainState(new PointF(line_dot.get(1).x+fraction*(line_dot.get(2).x-line_dot.get(1).x), line_dot.get(1).y+fraction*(line_dot.get(2).y-line_dot.get(1).y)),  Config.FLIP(ed_a));
+                return new VsTrainState(new PointF(line_dot.get(1).x+fraction*(line_dot.get(2).x-line_dot.get(1).x), line_dot.get(1).y+fraction*(line_dot.get(2).y-line_dot.get(1).y)),  Config.FLIP(ed_a), line.color);
             }else{
                 fraction = (float)((fraction)/(mid_frac));
-                return new VsTrainState(new PointF(line_dot.get(0).x+fraction*(line_dot.get(1).x-line_dot.get(0).x), line_dot.get(0).y+fraction*(line_dot.get(1).y-line_dot.get(0).y)), st_a);
+                return new VsTrainState(new PointF(line_dot.get(0).x+fraction*(line_dot.get(1).x-line_dot.get(0).x), line_dot.get(0).y+fraction*(line_dot.get(1).y-line_dot.get(0).y)), st_a,line.color);
             }
         }else{
             mid_frac = d23/d13;
             if (fraction>mid_frac){
                 fraction = (float)((fraction- mid_frac)/(1.0 - mid_frac));
-                return new VsTrainState(new PointF(line_dot.get(0).x+(1.0f-fraction)*(line_dot.get(1).x-line_dot.get(0).x), line_dot.get(0).y+(1.0f-fraction)*(line_dot.get(1).y-line_dot.get(0).y)), Config.FLIP(st_a));
+                return new VsTrainState(new PointF(line_dot.get(0).x+(1.0f-fraction)*(line_dot.get(1).x-line_dot.get(0).x), line_dot.get(0).y+(1.0f-fraction)*(line_dot.get(1).y-line_dot.get(0).y)), Config.FLIP(st_a),line.color);
             }else{
                 fraction = (float)((fraction)/(mid_frac));
-                return new VsTrainState(new PointF(line_dot.get(1).x+(1.0f-fraction)*(line_dot.get(2).x-line_dot.get(1).x), line_dot.get(1).y+(1.0f-fraction)*(line_dot.get(2).y-line_dot.get(1).y)), ed_a);
+                return new VsTrainState(new PointF(line_dot.get(1).x+(1.0f-fraction)*(line_dot.get(2).x-line_dot.get(1).x), line_dot.get(1).y+(1.0f-fraction)*(line_dot.get(2).y-line_dot.get(1).y)), ed_a,line.color);
             }
         }
     }
