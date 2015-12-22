@@ -196,38 +196,40 @@ public class DrawLineHead {
             }
 
         }
-        private void heads2GLline(){
-            VsLineHead currentHead;
 
-            synchronized (lineCoords) {
-                for (int i = 0; i<lineHeads.size(); i++) {
-                    currentHead = lineHeads.get(i);
-                    for (int j = 0; j < 4; j++) {
-                        for (int k = 0; k < 4; k++) {
-                            lineColors[i * 16 + j * 4 + k] = Config.color_list[currentHead.color][k];
-                        }
-                        lineCoords[i * 12 + j * 3] = currentHead.pos[j].x;
-                        lineCoords[i * 12 + j * 3 + 1] = currentHead.pos[j].y;
-                        lineCoords[i * 12 + j * 3 + 2] = Config.Z_LINEHEAD;
-                    }
-                }
-                vertexCount = lineHeads.size() * 4;
-            }
-            colorBuffer.put(lineColors);
-            colorBuffer.position(0);
-            vertexBuffer.put(lineCoords);
-            vertexBuffer.position(0);
-        }
     }
     private LineChangeListener LCListener = new LineChangeListener();
 
     public void hideLineHead(VsLineHead head){
         lineHeads.remove(head);
+        heads2GLline();
     }
     public void revealLineHead(VsLineHead head){
         lineHeads.add(head);
+        heads2GLline();
     }
+    private void heads2GLline(){
+        VsLineHead currentHead;
 
+        synchronized (lineCoords) {
+            for (int i = 0; i<lineHeads.size(); i++) {
+                currentHead = lineHeads.get(i);
+                for (int j = 0; j < 4; j++) {
+                    for (int k = 0; k < 4; k++) {
+                        lineColors[i * 16 + j * 4 + k] = Config.color_list[currentHead.color][k];
+                    }
+                    lineCoords[i * 12 + j * 3] = currentHead.pos[j].x;
+                    lineCoords[i * 12 + j * 3 + 1] = currentHead.pos[j].y;
+                    lineCoords[i * 12 + j * 3 + 2] = Config.Z_LINEHEAD;
+                }
+            }
+            vertexCount = lineHeads.size() * 4;
+        }
+        colorBuffer.put(lineColors);
+        colorBuffer.position(0);
+        vertexBuffer.put(lineCoords);
+        vertexBuffer.position(0);
+    }
 
     private void init(){
         game=Game.getInstance();
