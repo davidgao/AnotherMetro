@@ -277,13 +277,14 @@ public class DrawLine {
         double k = (ed.y - st.y)/(ed.x-st.x);
         if (Math.abs(Math.abs(k)-1)<Config.EPSI){
             if (Math.round(k)==1){
-                vsSegment.st_a = 7;
-                vsSegment.ed_a = 3;
-            }
-            if (Math.round(k)==-1){
                 vsSegment.st_a = 1;
                 vsSegment.ed_a = 5;
             }
+            if (Math.round(k)==-1){
+                vsSegment.st_a = 7;
+                vsSegment.ed_a = 3;
+            }
+            return;
         }
 
         if (st.y==ed.y){
