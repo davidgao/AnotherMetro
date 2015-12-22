@@ -103,11 +103,9 @@ public class DrawPassenger {
 		GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
 	}
-	
+
 	private static final double r = 0.05; /* Config.siteRadius */
-	private static final double hr = r / 2.0; /* Config.siteHalfRadius */
-	private static final float z = 0.0f; /* Config.siteZ */
-	
+
 	private static final double pr = 0.01; /* Config.passengerRadius */
 	private static final double phr = pr / 2.0; /* Config.passengerHalfRadius */
 	private static final float pz = Config.Z_PASSENGER; /* Config.passengerZ */

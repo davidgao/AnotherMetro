@@ -109,7 +109,7 @@ public class DrawSite {
 	
 	private static final double r = 0.05; /* Config.siteRadius */
 	private static final double hr = r / 2.0; /* Config.siteHalfRadius */
-	private static final float z = 0.0f; /* Config.siteZ */
+	private static final float z = Config.Z_SITE; /* Config.siteZ */
 	
 	public static double BG2FGx(int x){
         return (double)x / Config.GRID_X * 2.0 - 1.0;

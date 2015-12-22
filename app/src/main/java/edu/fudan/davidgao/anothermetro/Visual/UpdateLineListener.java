@@ -200,18 +200,6 @@ public class UpdateLineListener implements OnTouchListener {
         Matrix.invertM(invertedMatrix, 0, mMVPMatrix, 0);
         Matrix.multiplyMV(outPoint, 0, invertedMatrix, 0, normalizedInPoint, 0);
 
-        System.out.print("(" + event.getX() + "," + event.getY() + ")" + ">>>");
-        System.out.print("(" + touchPos.x + "," + touchPos.y + ") >>> ");
-        System.out.print("(" + outPoint[0] + "," + outPoint[1] + ") >>> ");
-        System.out.println();
-        System.out.println("(" + game.getSites().get(0).pos.x + "," + game.getSites().get(0).pos.y + ","+game.getSites().get(0).type.index()+")");
-        System.out.println("(" + game.getSites().get(1).pos.x + "," + game.getSites().get(1).pos.y +","+game.getSites().get(1).type.index()+ ")");
-        System.out.println("("+game.getSites().get(2).pos.x+","+game.getSites().get(2).pos.y+","+game.getSites().get(2).type.index()+")");
-        System.out.println("(" + Config.BG2FGx(game.getSites().get(0).pos.x) + "," + Config.BG2FGy(game.getSites().get(0).pos.y) +","+game.getSites().get(0).type.index()+ ")");
-        System.out.println("("+Config.BG2FGx(game.getSites().get(1).pos.x)+","+Config.BG2FGy(game.getSites().get(1).pos.y)+","+game.getSites().get(1).type.index()+")");
-        System.out.println("("+Config.BG2FGx(game.getSites().get(2).pos.x) + "," + Config.BG2FGy(game.getSites().get(2).pos.y)+","+game.getSites().get(2).type.index()+")");
-        System.out.println(event.getAction());
-
         //touchPos.x = outPoint[0];
         //touchPos.y = outPoint[1];
 
