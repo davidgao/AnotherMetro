@@ -13,8 +13,13 @@ public class IGame2 extends Game { //TODO
     private static final int defaultMaxGrowth = 25;
     private static final int defaultBaseGrowth = 10;
     private static final int defaultMaxPassengerPerSite = 15;
+<<<<<<< HEAD
     private static final long defaultGrowthInterval = 1500; /* in ticks */
     private static final long defaultSiteSpawnInterval = 100; /* in ticks */
+=======
+    private static final long defaultGrowthInterval = 500; /* in ticks */
+    private static final long defaultSiteSpawnInterval = 200; /* in ticks */
+>>>>>>> origin/develop
     private static final long defaultPassengerSpawnInterval = 100; /* in ticks */
     private static final long defaultPassengerMoveInterval = 10; /* in ticks */
     private static final double defaultTrainMoveInterval = 5.0; /* in ticks */
@@ -184,7 +189,9 @@ public class IGame2 extends Game { //TODO
     };
     private synchronized void grow() {
         try {
+            System.out.println("grow");
             roi = roiGenerator.nextRoi();
+            System.out.println(roi.x1+","+roi.y1+","+roi.x2+","+roi.y2);
             growthNotifier.run();
         }
         catch (AlgorithmException exception) {
@@ -298,11 +305,11 @@ public class IGame2 extends Game { //TODO
             final int y = rand.nextInt(roi.y2 - roi.y1) + roi.y1;
             if (siteValid(x, y)) {
                 sites.add(new Site(new Point<>(x, y), type));
-                //System.out.printf("New site at %d %d\n", x, y);
+                System.out.printf("New site at %d %d\n", x, y);
                 return true;
             }
         }
-        //System.out.println("spawnSite failed");
+        System.out.println("spawnSite failed");
         return false;
     }
 

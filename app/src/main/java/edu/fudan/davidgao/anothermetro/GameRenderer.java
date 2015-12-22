@@ -11,6 +11,8 @@ import edu.fudan.davidgao.anothermetro.Visual.DrawLine;
 import edu.fudan.davidgao.anothermetro.Visual.DrawLineHead;
 import edu.fudan.davidgao.anothermetro.Visual.DrawPassenger;
 import edu.fudan.davidgao.anothermetro.Visual.DrawSite;
+import edu.fudan.davidgao.anothermetro.Visual.TextManager;
+import edu.fudan.davidgao.anothermetro.Visual.TextObject;
 import edu.fudan.davidgao.anothermetro.Visual.TrainRenderer;
 import edu.fudan.davidgao.anothermetro.Visual.UpdateLineListener;
 import edu.fudan.davidgao.anothermetro.core.Game;
@@ -25,6 +27,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private DrawSite drawSite;
     private TrainRenderer drawTrain;
     private UpdateLineListener updateLineListener;
+    private TextManager textManager;
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
@@ -42,6 +45,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         drawTrain = new TrainRenderer();
         drawPassenger = new DrawPassenger();
         updateLineListener = new UpdateLineListener(drawLineHead);
+        textManager = new TextManager(new TextObject("Touched", -0.2f, 0.2f), 1f);
         try {
             ArrayList<Site> temp_sites =  Game.getInstance().getSites();
             Game.getInstance().addLine(temp_sites.get(0), temp_sites.get(1));
@@ -62,7 +66,11 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         drawTrain.render(mMVPMatrix);
         drawPassenger.draw(mMVPMatrix);
         updateLineListener.draw(mMVPMatrix);
+<<<<<<< HEAD
         drawSite.draw(mMVPMatrix);
+=======
+        textManager.Draw(mMVPMatrix);
+>>>>>>> origin/develop
     }
 
     private final float[] mMVPMatrix = new float[16];
