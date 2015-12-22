@@ -29,7 +29,7 @@ public class VsSegment {
     }
     public void update_LineDot(){
         if (line_dot==null)
-            line_dot = DrawLine.calcLine(DrawLine.getPosByAngle(st, st_angle), DrawLine.getPosByAngle(ed, ed_angle));
+            line_dot = DrawLine.calcLine(Config.BG2FGpoint(st.pos), Config.BG2FGpoint(ed.pos));
     }
     public VsSegment(Site st, Site ed, VsLine line){
         this.st=st;
