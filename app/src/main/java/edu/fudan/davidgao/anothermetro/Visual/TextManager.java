@@ -1,5 +1,6 @@
 package edu.fudan.davidgao.anothermetro.Visual;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;

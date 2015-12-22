@@ -296,10 +296,8 @@ public class IGame2 extends Game { //TODO
     private boolean spawnSite(SiteType type) {
         /* NOTE: Caller should always sync */
         for (int i = 0; i < siteSpawnTries; i += 1){
-            /* final int x = rand.nextInt(roi.x2 - roi.x1) + roi.x1; */
-            /* final int y = rand.nextInt(roi.y2 - roi.y1) + roi.y1; */
-            final int x = (i == 0) ? roi.x1 : roi.x2;
-            final int y = (i == 0) ? roi.y1 : roi.y2;
+            final int x = rand.nextInt(roi.x2 - roi.x1) + roi.x1;
+            final int y = rand.nextInt(roi.y2 - roi.y1) + roi.y1;
             if (siteValid(x, y)) {
                 sites.add(new Site(new Point<>(x, y), type));
                 System.out.printf("New site at %d %d\n", x, y);

@@ -33,7 +33,7 @@ public class GameView extends GLSurfaceView {
         setEGLContextClientVersion(2);
 
         // Create and set renderer
-        renderer = new GameRenderer(context);
+        renderer = new GameRenderer();
         setRenderer(renderer);
 
         // Only render when data is dirty
