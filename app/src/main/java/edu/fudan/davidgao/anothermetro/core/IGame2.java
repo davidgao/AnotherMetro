@@ -2,12 +2,10 @@ package edu.fudan.davidgao.anothermetro.core;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import edu.fudan.davidgao.anothermetro.tools.*;
 
-public class IGame2 extends Game { //TODO
+class IGame2 extends Game { //TODO
     /* Default parameters */
     private static final long defaultTickInterval = 40; /* in ms */
     private static final int defaultMaxGrowth = 25;
@@ -26,15 +24,19 @@ public class IGame2 extends Game { //TODO
     }
 
     /* Logic */
-    private GameLogic logic;
+    GameLogic logic;
+
+    /* Modules */
+    TickTimerModule tickTimer = new TickTimerModule();
 
     /* Private constructor */
     private IGame2(Matrix2D<MapDatum> map) {
         /* Copy map */
         this.map = map.copy();
-        /* Init the game */
-        initLogic();
-        initTick();
+        /* Init logic*/
+        logic = new GameLogic();
+        /* Init modules */
+        tickTimer.init(logic);
         initGrowth();
         initSiteSpawn();
         initTrainMove();
@@ -58,15 +60,6 @@ public class IGame2 extends Game { //TODO
     }
 
     /* Initialization */
-    private void initLogic() {
-        logic = new GameLogic();
-    }
-    private void initTick() {
-        tickTimer = new Timer();
-        tickTask = new RunnableTimerTask(logic);
-        tickCounter = new Counter();
-        logic.action.addListener(tickCounter);
-    }
     private void initGrowth() {
         try {
             setGrowth(defaultMaxGrowth, defaultBaseGrowth);
@@ -122,13 +115,13 @@ public class IGame2 extends Game { //TODO
         if (state == GameState.PAUSED) {
             state = GameState.RUNNING;
         } else throw new GameException("Cannot run game: Game is not paused.");
-        tickTimer.schedule(tickTask, tickInterval, tickInterval);
+        tickTimer.run();
     }
     public synchronized void pause() throws GameException {
         if (state == GameState.RUNNING) {
             state = GameState.PAUSED;
         } else throw new GameException("Cannot pause game: Game is not running.");
-        tickTimer.cancel();
+        tickTimer.pause();
     }
     public synchronized void kill() throws GameException {
         if (state == GameState.RUNNING) {
@@ -160,20 +153,24 @@ public class IGame2 extends Game { //TODO
     }
 
     /* Tick */
-    private long tickInterval = defaultTickInterval;
     public long getTickInterval() {
-        return tickInterval;
+        return tickTimer.interval;
     }
     public void setTickInterval(long interval) throws GameException {
         assertState(GameState.NEW);
-        tickInterval = interval;
+        tickTimer.interval = interval;
     }
-    private Counter tickCounter;
     public long getTickCounter() {
-        return tickCounter.getCounter();
+        return tickTimer.getCounter();
     }
-    private TimerTask tickTask;
-    private Timer tickTimer;
+    public void setTickCounter(long count) throws GameException {
+        assertState(GameState.NEW);
+        tickTimer.setCounter(count);
+    }
+    public void clearTickCounter() throws GameException {
+        assertState(GameState.NEW);
+        tickTimer.clearCounter();
+    }
 
     /* Growth */
     private final Runnable growthRunnable = new Runnable() {
@@ -354,7 +351,7 @@ public class IGame2 extends Game { //TODO
     };
     private synchronized void trainMove() {
         boolean have_moved = false;
-        long now = getTickCounter();
+        long now = tickTimer.getCounter();
         for (Line line : lines){
             Train t = line.train;
             TrainState ts = t.getState();
@@ -386,14 +383,16 @@ public class IGame2 extends Game { //TODO
                 }
                 if (((StandbyTrainState) ts).timeToStay > 0) continue;
                 /* Get on */
-                for (Passenger p : curr.passengers) {
-                    if (pf.getOnTrain(p, curr, t)) {
-                        curr.passengers.remove(p);
-                        t.passengers.add(p);
-                        p.state = t;
-                        ((StandbyTrainState) ts).timeToStay = passengerMoveInterval;
-                        passengerChangeNotifier.run();
-                        break;
+                if (t.passengers.size() > 6) {
+                    for (Passenger p : curr.passengers) {
+                        if (pf.getOnTrain(p, curr, t)) {
+                            curr.passengers.remove(p);
+                            t.passengers.add(p);
+                            p.state = t;
+                            ((StandbyTrainState) ts).timeToStay = passengerMoveInterval;
+                            passengerChangeNotifier.run();
+                            break;
+                        }
                     }
                 }
                 if (((StandbyTrainState) ts).timeToStay > 0) continue;

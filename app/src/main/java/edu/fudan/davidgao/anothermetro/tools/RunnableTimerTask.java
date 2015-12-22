@@ -8,10 +8,10 @@ public class RunnableTimerTask extends TimerTask {
         runnable.run();
     }
 
-    public RunnableTimerTask(Runnable runnable) throws NullPointerException{
+    public RunnableTimerTask(Runnable runnable) throws NullPointerException {
         if (runnable == null) throw new NullPointerException();
         this.runnable = runnable;
     }
 
-    private Runnable runnable;
+    protected Runnable runnable;
 }
