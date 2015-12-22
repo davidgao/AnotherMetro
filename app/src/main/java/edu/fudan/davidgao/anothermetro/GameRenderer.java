@@ -33,6 +33,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private TrainRenderer drawTrain;
     private UpdateLineListener updateLineListener;
     private Context mContext;
+    private TextManager textManager;
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
