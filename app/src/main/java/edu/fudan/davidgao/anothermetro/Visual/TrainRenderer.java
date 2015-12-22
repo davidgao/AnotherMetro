@@ -21,32 +21,31 @@ import edu.fudan.davidgao.anothermetro.tools.Broadcaster;
  * Created by 凯强 on 2015/12/1.
  */
 public class TrainRenderer {
-    private static final String vertexShaderCode =
-            // This matrix member variable provides a hook to manipulate
-            // the coordinates of the objects that use this vertex shader
-            "attribute vec4 vPosition;" +
-            "void main() {" +
-            // the matrix must be included as a modifier of gl_Position
-            // Note that the uMVPMatrix factor *must be first* in order
-            // for the matrix multiplication product to be correct.
-            "  gl_Position = vPosition;" +
-            "}";
-    // TODO: later change color according to line
-    private static final String fragmentShaderCode =
+
+    private final String vertexShaderCode =
+            "uniform mat4 uMVPMatrix;" +"attribute vec4 vPosition;" + "attribute vec4 vColor;" + "varying vec4 aColor;" +
+                    "void main() {" +
+                    "  gl_Position = uMVPMatrix * vPosition;" + "aColor = vColor;"+
+                    "}";
+
+    private final String fragmentShaderCode =
             "precision mediump float;" +
-            "uniform vec4 vColor;" +
-            "void main() {" +
-            "  gl_FragColor = vColor;" +
-            "}";
+                    "varying vec4 aColor;" +
+                    "void main() {" +
+                    "  gl_FragColor = aColor;" +
+                    "}";
 
     private final FloatBuffer vertexBuffer;
+    private FloatBuffer colorBuffer;
     private final int mProgram;
-
+    private int mMVPMatrixHandle;
     private int mPositionHandle;
     private int mColorHandle;
     // number of coordinates per vertex in this array
     private static final int COORDS_PER_VERTEX = 3;
     private final int vertexStride = COORDS_PER_VERTEX * 4;
+    static final int COLOR_PER_VERTEX = 4;
+    private final int colorStride = COLOR_PER_VERTEX * 4;
     private float[] vertexCoords;
     private int vertexCount = 0;
     private static TrainRenderer instance;
@@ -55,7 +54,9 @@ public class TrainRenderer {
         return instance;
     }
 
-    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
+    //float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
+    private float[] vertexColors;
+    private int colorCount = 0;
 
     public static int loadShader(int type, String shaderCode) {
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
@@ -73,9 +74,13 @@ public class TrainRenderer {
 
     public TrainRenderer() {
         game = Game.getInstance();
-        vertexCoords = new float[3 * 4 * Config.MAX_SEGMENTS];
+        vertexCoords = new float[3 * 4 *200000];
+        vertexColors=new float[200000*4*4];
         Broadcaster trainUpdateBroadcaster = game.getCallbackBroadcaster(GameEvent.TRAIN_STATE_CHANGE);
         trainUpdateBroadcaster.addListener(trainUpdateRunnable);
+        // Render the trains every tick
+        Broadcaster trainDrawingBroadcaster = game.getCallbackBroadcaster(GameEvent.TICK);
+        trainDrawingBroadcaster.addListener(trainDrawingRunnable);
 
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 //(number of coordinate values * 4 byte per float)
@@ -90,6 +95,20 @@ public class TrainRenderer {
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
 
+        // initialize vertex byte buffer for color
+        ByteBuffer cc = ByteBuffer.allocateDirect(
+                // (number of coordinate values * 4 bytes per float)
+                vertexColors.length * 4);
+        // use the device hardware's native byte order
+        cc.order(ByteOrder.nativeOrder());
+
+        // create a floating point buffer from the ByteBuffer
+        colorBuffer = cc.asFloatBuffer();
+        // add the color to the FloatBuffer
+        colorBuffer.put(vertexColors);
+        // set the buffer to read the first coordinate
+        colorBuffer.position(0);
+
         // prepare shader and OpenGL program
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
@@ -102,14 +121,11 @@ public class TrainRenderer {
         // Forcefully update the lines, sites and trains member so that they are initialized
         trainUpdate();
 
-        // Startup a train drawing thread which repeatedly updates train vertex buffer
-        Thread thTrainDraw = new Thread(trainDrawingRunnable);
-        thTrainDraw.start();
         instance = this;
     }
 
 
-    public void render(){
+    public void render(float[] mvpMatrix){
 
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
@@ -125,53 +141,70 @@ public class TrainRenderer {
                 vertexStride, vertexBuffer);
 
         // get handle to fragment shader's vColor member
-        mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+       // mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 
+        // get handle to fragment shader's vColor member
+        mColorHandle = GLES20.glGetAttribLocation(mProgram, "vColor");
+
+        GLES20.glEnableVertexAttribArray(mColorHandle);
+
+        GLES20.glVertexAttribPointer(mColorHandle, COLOR_PER_VERTEX,
+                GLES20.GL_FLOAT, false,
+                colorStride, colorBuffer);
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+        //GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 
         // Draw the train
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
+        GLES20.glDisableVertexAttribArray(mColorHandle);
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
     }
 
     private static  final double size =  0.02;
 
 
-    private synchronized void addVertex(double x, double y, double high) {
+    private synchronized void addVertex(double x, double y, double high, int c) {
         vertexCoords[vertexCount ++] = (float) x;
         vertexCoords[vertexCount ++] = (float) y;
         vertexCoords[vertexCount ++] = (float) high;
+        vertexColors[colorCount ++]=Config.color_list[c][0];
+        vertexColors[colorCount ++]=Config.color_list[c][1];
+        vertexColors[colorCount ++]=Config.color_list[c][2];
+        vertexColors[colorCount ++]=Config.color_list[c][3];
+        //System.out.println(c);
     }
 
-    private synchronized void addVertexPlusVectorWithAngle(double cx, double cy, double dx, double dy, double angle, double high)
+    private synchronized void addVertexPlusVectorWithAngle(double cx, double cy, double dx, double dy, double angle, double high, int c)
     {
         double ndx = dx * Math.cos(angle) - dy * Math.sin(angle);
         double ndy = dx * Math.sin(angle) + dy * Math.cos(angle);
-        addVertex(cx + ndx, cy + ndy, high);
+        addVertex(cx + ndx, cy + ndy, high, c);
     }
 
-    private synchronized void addTrain(double x, double y, double rad ,double high){
+    private synchronized void addTrain(double x, double y, double rad ,double high, int c){
         // Lower Triangle
-        addVertexPlusVectorWithAngle(x, y, 3 * size, 2 * size, rad, high);
-        addVertexPlusVectorWithAngle(x, y, -3 * size, -2 * size, rad, high);
-        addVertexPlusVectorWithAngle(x, y, 3 * size, -2 * size, rad, high);
+        addVertexPlusVectorWithAngle(x, y, 3 * size, 2 * size, rad, high, c);
+        addVertexPlusVectorWithAngle(x, y, -3 * size, -2 * size, rad, high, c);
+        addVertexPlusVectorWithAngle(x, y, 3 * size, -2 * size, rad, high, c);
 
         // Upper Triangle
-        addVertexPlusVectorWithAngle(x, y, -3 * size, -2 * size, rad,high);
-        addVertexPlusVectorWithAngle(x, y, -3 * size, 2 * size, rad, high);
-        addVertexPlusVectorWithAngle(x, y, 3 * size, 2 * size, rad, high);
+        addVertexPlusVectorWithAngle(x, y, -3 * size, -2 * size, rad,high, c);
+        addVertexPlusVectorWithAngle(x, y, -3 * size, 2 * size, rad, high, c);
+        addVertexPlusVectorWithAngle(x, y, 3 * size, 2 * size, rad, high, c);
     }
 
-    private void addTrain(double x, double y, int deg, double high){
-        addTrain(x,y,Math.PI/4 * deg, high);
+    private void addTrain(double x, double y, int deg, double high, int c){
+        addTrain(x,y,Math.PI/4 * deg, high, c);
     }
 
     private ArrayList<Line> lines = null;
     private ArrayList<Site> sites = null;
     private ArrayList<Train> trains = null;
+    private ArrayList<Integer> trainColors = null;
     private long tickCounter;
     private Runnable trainUpdateRunnable = new Runnable() {
         public void run() {
@@ -180,12 +213,14 @@ public class TrainRenderer {
     };
 
     private synchronized void trainUpdate() {
-        System.out.println("Train update");
+        //System.out.println("Train update");
         lines = game.getLines();
         sites = game.getSites();
         trains = new ArrayList<>();
+        trainColors = new ArrayList<>();
         for (int i = 0; i < lines.size(); ++i) {
             trains.add(lines.get(i).train);
+            trainColors.add(new Integer(i));
         }
     }
 
@@ -196,17 +231,8 @@ public class TrainRenderer {
     private Runnable trainDrawingRunnable = new Runnable() {
         @Override
         public void run() {
-            try {
-                for (; ; ) {
-                    tickCounter = game.getTickCounter();
-                    synchronized (instance) {
-                        refresh();
-                    }
-                    Thread.sleep(16);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            tickCounter = game.getTickCounter();
+            if (trains != null) refresh();
         }
     };
 
@@ -214,7 +240,7 @@ public class TrainRenderer {
      * This is a tool function, should be implemented as public VsTrainState(TrainState)
      * or something.
      */
-    private VsTrainState transformTrainToVsTrain(Train train)
+    private VsTrainState transformTrainToVsTrain(Train train, int color)
     {
         TrainState state = train.getState();
         VsTrainState vsTrainState;
@@ -223,7 +249,7 @@ public class TrainRenderer {
             StandbyTrainState standbyTrainState = (StandbyTrainState)state;
             Site site = standbyTrainState.site;
             VsSite vsSite = new VsSite(site);
-            vsTrainState = new VsTrainState(vsSite.pos, 0);
+            vsTrainState = new VsTrainState(vsSite.pos, 0,color);
         } else if (state instanceof RunningTrainState)
         {
             RunningTrainState runningTrainState = (RunningTrainState)state;
@@ -237,33 +263,37 @@ public class TrainRenderer {
             long timePassed = tickCounter - runningTrainState.departure;
             double fraction = (double)timePassed / (double) timePeriod;
             vsTrainState = vsSegment.getTrainState((float)fraction, state.direction);
-            System.out.printf("HHHHH %d\n", vsTrainState.angle);
+            vsTrainState.color = color;
+            //System.out.printf("HHHHH %d\n", vsTrainState.angle);
         } else vsTrainState = null;
         return vsTrainState;
     }
 
-    private ArrayList<VsTrainState> transformTrainToVsTrain(ArrayList<Train> trains) {
+    private ArrayList<VsTrainState> transformTrainToVsTrain(ArrayList<Train> trains,ArrayList<Integer> trainColors) {
         int len = trains.size();
         ArrayList<VsTrainState> VsTrains = new ArrayList<VsTrainState>();
         for (int i = 0; i < len; ++i) {
             Train train = trains.get(i);
-            VsTrains.add(transformTrainToVsTrain(train));
+            VsTrains.add(transformTrainToVsTrain(train, trainColors.get(i).intValue()));
         }
         return VsTrains;
     }
 
     private void refresh(){
         vertexCount = 0;
+        colorCount = 0;
         ArrayList<VsTrainState> VsTrains;
         synchronized (this) {
-                VsTrains = transformTrainToVsTrain(trains);
+                VsTrains = transformTrainToVsTrain(trains, trainColors);
         }
         int len = VsTrains.size();
         for (int i = 0; i < len; ++ i)
         {
-            addTrain(VsTrains.get(i).coordinate.x,VsTrains.get(i).coordinate.y,VsTrains.get(i).angle,1.00f);
+            addTrain(VsTrains.get(i).coordinate.x,VsTrains.get(i).coordinate.y,VsTrains.get(i).angle,Config.Z_TRAIN, VsTrains.get(i).color);
         }
         vertexBuffer.put(vertexCoords);
         vertexBuffer.position(0);
+        colorBuffer.put(vertexColors);
+        colorBuffer.position(0);
     }
 }

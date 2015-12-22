@@ -29,7 +29,7 @@ public class VsSegment {
     }
     public void update_LineDot(){
         if (line_dot==null)
-            line_dot = DrawLine.calcLine(DrawLine.getPosByAngle(st, st_angle), DrawLine.getPosByAngle(ed, ed_angle));
+            line_dot = DrawLine.calcLine(Config.BG2FGpoint(st.pos), Config.BG2FGpoint(ed.pos));
     }
     public VsSegment(Site st, Site ed, VsLine line){
         this.st=st;
@@ -56,24 +56,24 @@ public class VsSegment {
         double d12=distance(line_dot.get(0), line_dot.get(1)), d23=distance(line_dot.get(1), line_dot.get(2));
         double d13 =d12+d23;
         double mid_frac = 0;
-        System.out.printf("SSSSS st=%d ed=%d\n", st_a, ed_a);
+        //System.out.printf("SSSSS st=%d ed=%d\n", st_a, ed_a);
         if (direction==1){
             mid_frac = d12/d13;
             if (fraction>mid_frac){
                 fraction = (float)((fraction- mid_frac)/(1.0 - mid_frac));
-                return new VsTrainState(new PointF(line_dot.get(1).x+fraction*(line_dot.get(2).x-line_dot.get(1).x), line_dot.get(1).y+fraction*(line_dot.get(2).y-line_dot.get(1).y)),  Config.FLIP(ed_a));
+                return new VsTrainState(new PointF(line_dot.get(1).x+fraction*(line_dot.get(2).x-line_dot.get(1).x), line_dot.get(1).y+fraction*(line_dot.get(2).y-line_dot.get(1).y)),  Config.FLIP(ed_a), line.color);
             }else{
                 fraction = (float)((fraction)/(mid_frac));
-                return new VsTrainState(new PointF(line_dot.get(0).x+fraction*(line_dot.get(1).x-line_dot.get(0).x), line_dot.get(0).y+fraction*(line_dot.get(1).y-line_dot.get(0).y)), st_a);
+                return new VsTrainState(new PointF(line_dot.get(0).x+fraction*(line_dot.get(1).x-line_dot.get(0).x), line_dot.get(0).y+fraction*(line_dot.get(1).y-line_dot.get(0).y)), st_a,line.color);
             }
         }else{
             mid_frac = d23/d13;
             if (fraction>mid_frac){
                 fraction = (float)((fraction- mid_frac)/(1.0 - mid_frac));
-                return new VsTrainState(new PointF(line_dot.get(0).x+(1.0f-fraction)*(line_dot.get(1).x-line_dot.get(0).x), line_dot.get(0).y+(1.0f-fraction)*(line_dot.get(1).y-line_dot.get(0).y)), Config.FLIP(st_a));
+                return new VsTrainState(new PointF(line_dot.get(0).x+(1.0f-fraction)*(line_dot.get(1).x-line_dot.get(0).x), line_dot.get(0).y+(1.0f-fraction)*(line_dot.get(1).y-line_dot.get(0).y)), Config.FLIP(st_a),line.color);
             }else{
                 fraction = (float)((fraction)/(mid_frac));
-                return new VsTrainState(new PointF(line_dot.get(1).x+(1.0f-fraction)*(line_dot.get(2).x-line_dot.get(1).x), line_dot.get(1).y+(1.0f-fraction)*(line_dot.get(2).y-line_dot.get(1).y)), ed_a);
+                return new VsTrainState(new PointF(line_dot.get(1).x+(1.0f-fraction)*(line_dot.get(2).x-line_dot.get(1).x), line_dot.get(1).y+(1.0f-fraction)*(line_dot.get(2).y-line_dot.get(1).y)), ed_a,line.color);
             }
         }
     }

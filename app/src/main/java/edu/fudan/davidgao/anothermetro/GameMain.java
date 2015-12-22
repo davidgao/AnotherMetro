@@ -2,10 +2,10 @@ package edu.fudan.davidgao.anothermetro;
 
 import android.annotation.SuppressLint;
 import android.opengl.GLSurfaceView;
+import android.os.*;
+import android.os.Process;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -35,7 +35,7 @@ public class GameMain extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         try {
             Matrix2D<MapDatum> map = new Matrix2D<>(Config.GRID_X, Config.GRID_Y);
-            Game game = Game.create();
+            Game game = Game.create(map);
         }catch(GameException e) {
             e.printStackTrace();
         }
@@ -147,5 +147,11 @@ public class GameMain extends AppCompatActivity {
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    /* very brutal... */
+    protected void onDestroy() {
+        android.os.Process.killProcess(Process.myPid());
+        super.onDestroy();
     }
 }

@@ -28,7 +28,7 @@ public class DrawLine {
 
     private int mPositionHandle;
     private int mColorHandle;
-
+    private int mMVPMatrixHandle;
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
     static final int COLOR_PER_VERTEX = 4;
@@ -40,9 +40,9 @@ public class DrawLine {
     private final int colorStride = COLOR_PER_VERTEX * 4; // 4 bytes per vertex
 
     private final String vertexShaderCode =
-            "attribute vec4 vPosition;" + "attribute vec4 vColor;" + "varying vec4 aColor;" +
+            "uniform mat4 uMVPMatrix;" +"attribute vec4 vPosition;" + "attribute vec4 vColor;" + "varying vec4 aColor;" +
                     "void main() {" +
-                    "  gl_Position = vPosition;" + "aColor = vColor;"+
+                    "  gl_Position = uMVPMatrix * vPosition;" + "aColor = vColor;"+
                     "}";
 
     private final String fragmentShaderCode =
@@ -78,7 +78,7 @@ public class DrawLine {
     }
 
 
-    public void draw() {
+    public void draw(float[] mvpMatrix) {
         // prepare();
 
         // Add program to OpenGL ES environment
@@ -111,6 +111,8 @@ public class DrawLine {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
         GLES20.glDisableVertexAttribArray(mColorHandle);
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
     }
 
     public DrawLine() {
@@ -190,7 +192,7 @@ public class DrawLine {
             if (Config.BG2FGpoint(site.pos).equals(temp.pos.x, temp.pos.y)&&temp.type==site.type)
                 return temp;
         }
-        System.out.println("bad ~~~~");
+        //System.out.println("bad ~~~~");
         return null;
     }
 
@@ -275,13 +277,14 @@ public class DrawLine {
         double k = (ed.y - st.y)/(ed.x-st.x);
         if (Math.abs(Math.abs(k)-1)<Config.EPSI){
             if (Math.round(k)==1){
-                vsSegment.st_a = 7;
-                vsSegment.ed_a = 3;
-            }
-            if (Math.round(k)==-1){
                 vsSegment.st_a = 1;
                 vsSegment.ed_a = 5;
             }
+            if (Math.round(k)==-1){
+                vsSegment.st_a = 7;
+                vsSegment.ed_a = 3;
+            }
+            return;
         }
 
         if (st.y==ed.y){
@@ -469,10 +472,10 @@ public class DrawLine {
 
     //prepare every thing, get Sites and lines, convert site, line to VsSite, VsLine. pass Line , pass Site, send to GL
     private void prepare(){
-        System.out.println("GTMD!!!!");
+        //System.out.println("GTMD!!!!");
         ArrayList<Site> temp_sites=game.getSites();
         ArrayList<Line> temp_lines=game.getLines();
-        System.out.printf("Site Size = %d\n", temp_sites.size());
+        //System.out.printf("Site Size = %d\n", temp_sites.size());
         segments.clear();
         sites.clear();
         lines.clear();
@@ -481,7 +484,7 @@ public class DrawLine {
             sites.add(temp_vssite);
         }
         VsLine.color_ptr=0;
-        System.out.printf("Size = %d\n", temp_lines.size());
+        //System.out.printf("Size = %d\n", temp_lines.size());
         for (int i=0;i<temp_lines.size();i++){
             VsLine temp_vsline=new VsLine(temp_lines.get(i));
             lines.add(temp_vsline);

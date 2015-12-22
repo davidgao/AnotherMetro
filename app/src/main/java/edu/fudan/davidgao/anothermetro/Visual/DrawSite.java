@@ -33,10 +33,11 @@ public class DrawSite {
 			0.0f, 0.1f, 0.0f
 	};
 	
-	private final String vertexShaderCode = 
-		"attribute vec4 vPosition;" + 
+	private final String vertexShaderCode =
+		"uniform mat4 uMVPMatrix;" +
+		"attribute vec4 vPosition;" +
 		"void main() {" + 
-		"	gl_Position = vPosition;" + 
+		"	gl_Position = uMVPMatrix * vPosition;" +
 		"}";
 	private final String fragmentShaderCode = 
 		"precision mediump float;" + 
@@ -88,8 +89,10 @@ public class DrawSite {
 
 		GTMDvertexCoords();
 	}
-	
-	public void draw() {
+
+	private int mMVPMatrixHandle;
+
+	public void draw(float[] mvpMatrix) {
 		//GTMDvertexCoords();
 		GLES20.glUseProgram(mProgram);
 		mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
@@ -100,11 +103,14 @@ public class DrawSite {
 		GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 		GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
 		GLES20.glDisableVertexAttribArray(mPositionHandle);
+		mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+		GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 	}
 	
 	private static final double r = 0.05; /* Config.siteRadius */
 	private static final double hr = r / 2.0; /* Config.siteHalfRadius */
-	private static final float z = 0.0f; /* Config.siteZ */
+	private static final float z = Config.Z_SITE; /* Config.siteZ */
+	private static final double tf = 1.5; /* Config.triangleFactor */
 	
 	public static double BG2FGx(int x){
         return (double)x / Config.GRID_X * 2.0 - 1.0;
@@ -133,7 +139,7 @@ public class DrawSite {
 	
 	private void addTriangleSite(double x, double y) {
 		double v3 = Math.sqrt(3.0);
-		addVertex(x + r * v3/2.0, y - hr); addVertex(x - r * v3/2.0, y - hr); addVertex(x, y + r);
+		addVertex(x + r * tf * v3/2.0, y - hr * tf); addVertex(x - r * tf * v3/2.0, y - hr * tf); addVertex(x, y + r * tf);
 	}
 	
 	private void addSquareSite(double x, double y) {
@@ -169,7 +175,7 @@ public class DrawSite {
 		vertexCount = 0;
 		ArrayList<Site> sites = gameMain.getSites();
 		for (int i = 0; i < sites.size(); i ++) {
-			System.out.printf("size=%d i=%d\n", sites.size(), i);
+			//System.out.printf("size=%d i=%d\n", sites.size(), i);
 			Site site = sites.get(i);
 			int ix = site.pos.x;
 			int iy = site.pos.y;

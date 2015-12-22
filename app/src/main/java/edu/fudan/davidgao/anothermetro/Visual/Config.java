@@ -7,8 +7,8 @@ import edu.fudan.davidgao.anothermetro.tools.Point;
  * Created by gqp on 2015/11/28.
  */
 public class Config {
-    public static int GRID_X=40;
-    public static int GRID_Y=30;
+    public static int GRID_X=80;
+    public static int GRID_Y=80;
     public static final float SITE_RADIUS=0.05f;
 
     public static final int MAX_LINES=8;
@@ -19,11 +19,13 @@ public class Config {
     public static final int LINE_WIDTH=3;
 
     public static final float MAX_INF=1e20f;
-    public static final float Z_SITE=1.0e-4f;
-    public static final float Z_SEGMENT=0.0f;
-    public static final float Z_LINEHEAD=0.1e-4f;
-    public static final float Z_BLUEPRINT=0.2e-4f;
-    public static final double EPSI=1e-6;
+    public static final float Z_SEGMENT = 0.0f;
+    public static final float Z_SITE = -0.05e-2f;
+    public static final float Z_LINEHEAD = -0.1e-2f;
+    public static final float Z_BLUEPRINT = -0.2e-2f;
+    public static final float Z_TRAIN = -0.3e-2f;
+    public static final float Z_PASSENGER = -0.4e-2f;
+    public static final double EPSI=1e-3;
     public static final int FLIP_list[]={4, 5, 6, 7, 0, 1, 2, 3};
     public static final int C2CC_list[]={0, 7, 6, 5, 4, 3, 2, 1};
 

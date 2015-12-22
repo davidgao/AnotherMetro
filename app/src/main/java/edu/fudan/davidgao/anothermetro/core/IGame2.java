@@ -7,15 +7,15 @@ import edu.fudan.davidgao.anothermetro.tools.*;
 
 class IGame2 extends Game { //TODO
     /* Default parameters */
-    protected static final long defaultTickInterval = 40; /* in ms */
-    protected static final int defaultMaxGrowth = 25;
-    protected static final int defaultBaseGrowth = 10;
-    protected static final int defaultMaxPassengerPerSite = 15;
-    protected static final long defaultGrowthInterval = 1500; /* in ticks */
-    protected static final long defaultSiteSpawnInterval = 1000; /* in ticks */
-    protected static final long defaultPassengerSpawnInterval = 100; /* in ticks */
-    protected static final long defaultPassengerMoveInterval = 10; /* in ticks */
-    protected static final double defaultTrainMoveInterval = 5.0; /* in ticks */
+    static final long defaultTickInterval = 40; /* in ms */
+    static final int defaultMaxGrowth = 25;
+    static final int defaultBaseGrowth = 10;
+    static final int defaultMaxPassengerPerSite = 15;
+    static final long defaultGrowthInterval = 500; /* in ticks */
+    static final long defaultSiteSpawnInterval = 200; /* in ticks */
+    static final long defaultPassengerSpawnInterval = 100; /* in ticks */
+    static final long defaultPassengerMoveInterval = 10; /* in ticks */
+    static final double defaultTrainMoveInterval = 5.0; /* in ticks */
 
     /* Singleton */
     protected static IGame2 instance = null;
@@ -261,7 +261,6 @@ class IGame2 extends Game { //TODO
         return siteValidator.validate(x, y);
     }
     private void spawnSite() throws GameException {
-        System.out.println("spawnSite");
         /* NOTE: Caller should always sync */
         double[] rate;
         if (sites.size() >= maxSites) {
@@ -467,7 +466,6 @@ class IGame2 extends Game { //TODO
         }
     };
     private synchronized void spawnPassenger() {
-        System.out.println("Passenger spawn");
         final double uniqueRate = (double)uniqueSites / (double)sites.size();
         final int type;
         if (rand.nextDouble() < uniqueRate) {

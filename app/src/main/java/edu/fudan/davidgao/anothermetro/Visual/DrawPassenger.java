@@ -31,10 +31,11 @@ public class DrawPassenger {
 	private float[] vertexCoords;
 	private static final int GTMDCoordsCount = 200000;
 	
-	private final String vertexShaderCode = 
+	private final String vertexShaderCode =
+		"uniform mat4 uMVPMatrix;" +
 		"attribute vec4 vPosition;" + 
 		"void main() {" + 
-		"	gl_Position = vPosition;" + 
+		"	gl_Position = uMVPMatrix * vPosition;" +
 		"}";
 	private final String fragmentShaderCode = 
 		"precision mediump float;" + 
@@ -74,6 +75,7 @@ public class DrawPassenger {
 		GLES20.glLinkProgram(mProgram);
 
 		Broadcaster b = gameMain.getCallbackBroadcaster(GameEvent.PASSENGER_CHANGE);
+		Broadcaster bTick = gameMain.getCallbackBroadcaster(GameEvent.TICK);
 		Runnable drawPassenger = new Runnable() {
 			@Override
 			public synchronized void run(){
@@ -81,28 +83,33 @@ public class DrawPassenger {
 			}
 		};
 		b.addListener(drawPassenger);
+		bTick.addListener(drawPassenger);
 	}
-	
-	public void draw() {
+
+	private int mMVPMatrixHandle;
+
+	public void draw(float[] mvpMatrix) {
 		//GTMDvertexCoords();
 		GLES20.glUseProgram(mProgram);
 		mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
 		GLES20.glEnableVertexAttribArray(mPositionHandle);
-		GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, 
-			GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
+		GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
+				GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
 		mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 		GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 		GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
 		GLES20.glDisableVertexAttribArray(mPositionHandle);
+		mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+		GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+
 	}
-	
+
 	private static final double r = 0.05; /* Config.siteRadius */
-	private static final double hr = r / 2.0; /* Config.siteHalfRadius */
-	private static final float z = 0.0f; /* Config.siteZ */
-	
+
 	private static final double pr = 0.01; /* Config.passengerRadius */
-	private static final double phr = r / 2.0; /* Config.passengerHalfRadius */
-	private static final float pz = 0.0f; /* Config.passengerZ */
+	private static final double phr = pr / 2.0; /* Config.passengerHalfRadius */
+	private static final float pz = Config.Z_PASSENGER; /* Config.passengerZ */
+	private static final double ptf = 1.7; /* Config.passengerTriangleFactor */
 	
 	public static double BG2FGx(int x){
 		return (double)x / Config.GRID_X * 2.0 - 1.0;
@@ -130,8 +137,8 @@ public class DrawPassenger {
 	}
 	
 	private void addTriangle(double x, double y) {
-		double v3 = Math.sqrt(3.0);
-		addVertex(x + pr * v3, y - phr); addVertex(x - pr * v3, y - phr); addVertex(x, y + pr);
+		double v3 = Math.sqrt(3.0) / 2.0;
+		addVertex(x + pr * ptf * v3, y - phr * ptf); addVertex(x - pr * ptf * v3, y - phr * ptf); addVertex(x, y + pr * ptf);
 	}
 	
 	private void addSquare(double x, double y) {
@@ -201,7 +208,7 @@ public class DrawPassenger {
 	private void GTMDvertexCoords() {
 		ArrayList<Site> sites = gameMain.getSites();
 		vertexCount = 0;
-		System.out.println("Draw passenger");
+		//System.out.println("Draw passenger");
 		for (int i = 0; i < sites.size(); i ++) {
 			Site site = sites.get(i);
 			int ix = site.pos.x;
@@ -211,7 +218,7 @@ public class DrawPassenger {
 			ArrayList<Passenger> passengers = site.getPassengers();
 			int _r = 0, _c = 0;
 			for (int j = 0; j < passengers.size(); j ++) {
-				System.out.printf("%d %d %d %d\n", sites.size(), i, passengers.size(), j);
+				//System.out.printf("%d %d %d %d\n", sites.size(), i, passengers.size(), j);
 				Passenger passenger = passengers.get(j);
 				double px = x - r + (pr + gap) * (2 * _c + 1);
 				double py = y + r + (pr + gap) * (2 * _r + 1);
@@ -238,7 +245,7 @@ public class DrawPassenger {
 			Train train = line.train;
 			TrainState trainState = train.getState();
 			double tx = 0, ty = 0;
-			int angle;
+			int angle = 0;
 			if (trainState instanceof StandbyTrainState) {
 				StandbyTrainState standbyTrainState = (StandbyTrainState)trainState;
 				int ix = standbyTrainState.site.pos.x;
@@ -264,12 +271,17 @@ public class DrawPassenger {
 				ty = vsTrainState.coordinate.y;
 				angle = vsTrainState.angle;
 			}
+			double theta = Math.PI / 4 * angle;
 			ArrayList<Passenger> passengers = train.getPassengers();
 			int _r = 0, _c = 0;
 			for (int j = 0; j < passengers.size(); j ++) {
 				Passenger passenger = passengers.get(j);
 				double px = tx - 3 * (pr + gap) + (pr + gap) * (2 * _c + 1);
 				double py = ty - 2 * (pr + gap) + (pr + gap) * (2 * _r + 1);
+				double qx = px - tx, qy = py - ty;
+				px = qx * Math.cos(theta) - qy * Math.sin(theta);
+				py = qx * Math.sin(theta) + qy * Math.cos(theta);
+				px += tx; py += ty;
 				switch (passenger.type) {
 					case CIRCLE: addCircle(px, py); break;
 					case TRIANGLE: addTriangle(px, py); break;
