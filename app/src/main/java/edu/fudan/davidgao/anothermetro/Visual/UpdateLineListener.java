@@ -199,6 +199,7 @@ public class UpdateLineListener implements OnTouchListener {
 
         Matrix.invertM(invertedMatrix, 0, mMVPMatrix, 0);
         Matrix.multiplyMV(outPoint, 0, invertedMatrix, 0, normalizedInPoint, 0);
+        System.out.println(event.getX()+" "+event.getY()+" "+touchPos.x+" "+touchPos.y+" "+normalizedInPoint[0]+" "+normalizedInPoint[1]);
 
         //touchPos.x = outPoint[0];
         //touchPos.y = outPoint[1];
@@ -303,10 +304,13 @@ public class UpdateLineListener implements OnTouchListener {
     }
 
     private PointF UI2FGpoint(GameView view, float x, float y) {
-        if (view.view_width < view.view_height)
-            return new PointF(x/view.view_size*2-1,1-(y-view.view_offset)/view.view_size*2);
-        else
-            return new PointF((x-view.view_offset)/view.view_size*2-1,1-y/view.view_size*2);
+        if (view.view_width < view.view_height) {
+            System.out.println("UI2FGx:"+x+" "+y+" "+view.view_size+" "+view.view_offset+" "+(x/view.view_size*2-1)+" "+(1 - (y - view.view_offset) / view.view_size * 2));
+            return new PointF(x / view.view_size * 2 - 1, 1 - (y - view.view_offset) / view.view_size * 2);
+        } else {
+            System.out.println("UI2FGy:"+x+" "+y+" "+view.view_size+" "+view.view_offset+" "+(x/view.view_size*2-1)+" "+(1 - (y - view.view_offset) / view.view_size * 2));
+            return new PointF((x - view.view_offset) / view.view_size * 2 - 1, 1 - y / view.view_size * 2);
+        }
     }
 
     private Site isSite(PointF touchPos){

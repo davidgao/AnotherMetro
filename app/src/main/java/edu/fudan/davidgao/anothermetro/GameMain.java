@@ -1,13 +1,17 @@
 package edu.fudan.davidgao.anothermetro;
 
 import android.annotation.SuppressLint;
+import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.*;
 import android.os.Process;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 
 import java.io.Console;
 
@@ -28,6 +32,7 @@ public class GameMain extends AppCompatActivity {
     private GLSurfaceView gameView;
 
     private boolean mVisible;
+    private static int mWidthPixels, mHeightPixels;
 
 
     @Override
@@ -39,10 +44,54 @@ public class GameMain extends AppCompatActivity {
         }catch(GameException e) {
             e.printStackTrace();
         }
+        setRealDeviceSizeInPixels();
 
         gameView = new GameView(this);
 
         setContentView(gameView);
+    }
+
+    public static int getWidth()
+    {
+        return mWidthPixels;
+    }
+
+    public static int getHeight()
+    {
+        return mHeightPixels;
+    }
+
+
+    private void setRealDeviceSizeInPixels() {
+        WindowManager windowManager = getWindowManager();
+        Display display = windowManager.getDefaultDisplay();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        display.getMetrics(displayMetrics);
+
+
+        // since SDK_INT = 1;
+        mWidthPixels = displayMetrics.widthPixels;
+        mHeightPixels = displayMetrics.heightPixels;
+
+        // includes window decorations (statusbar bar/menu bar)
+        if (Build.VERSION.SDK_INT >= 14 && Build.VERSION.SDK_INT < 17) {
+            try {
+                mWidthPixels = (Integer) Display.class.getMethod("getRawWidth").invoke(display);
+                mHeightPixels = (Integer) Display.class.getMethod("getRawHeight").invoke(display);
+            } catch (Exception ignored) {
+            }
+        }
+
+        // includes window decorations (statusbar bar/menu bar)
+        if (Build.VERSION.SDK_INT >= 17) {
+            try {
+                Point realSize = new Point();
+                Display.class.getMethod("getRealSize", Point.class).invoke(display, realSize);
+                mWidthPixels = realSize.x;
+                mHeightPixels = realSize.y;
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @Override

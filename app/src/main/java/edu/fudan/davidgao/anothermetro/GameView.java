@@ -1,8 +1,12 @@
 package edu.fudan.davidgao.anothermetro;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
+import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.WindowManager;
 
 import java.lang.reflect.Method;
 
@@ -24,8 +28,8 @@ public class GameView extends GLSurfaceView {
 
     public GameView(Context context){
         super(context);
-        view_width = context.getResources().getDisplayMetrics().widthPixels;
-        view_height = 1920;
+        view_width = GameMain.getWidth();
+        view_height = GameMain.getHeight();
         view_size = Math.min(view_width, view_height);
         view_offset = (Math.max(view_width, view_height) - view_size) / 2f;
 
@@ -41,6 +45,7 @@ public class GameView extends GLSurfaceView {
 
         singleton = this;
     }
+
 
     public void addUpdateLineListener(UpdateLineListener listener){
         setOnTouchListener(listener);
