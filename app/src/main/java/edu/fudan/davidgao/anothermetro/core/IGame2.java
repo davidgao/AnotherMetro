@@ -7,15 +7,15 @@ import edu.fudan.davidgao.anothermetro.tools.*;
 
 class IGame2 extends Game { //TODO
     /* Default parameters */
-    private static final long defaultTickInterval = 40; /* in ms */
-    private static final int defaultMaxGrowth = 25;
-    private static final int defaultBaseGrowth = 10;
-    private static final int defaultMaxPassengerPerSite = 15;
-    private static final long defaultGrowthInterval = 500; /* in ticks */
-    private static final long defaultSiteSpawnInterval = 200; /* in ticks */
-    private static final long defaultPassengerSpawnInterval = 100; /* in ticks */
-    private static final long defaultPassengerMoveInterval = 10; /* in ticks */
-    private static final double defaultTrainMoveInterval = 5.0; /* in ticks */
+    static final long defaultTickInterval = 40; /* in ms */
+    static final int defaultMaxGrowth = 25;
+    static final int defaultBaseGrowth = 10;
+    static final int defaultMaxPassengerPerSite = 15;
+    static final long defaultGrowthInterval = 500; /* in ticks */
+    static final long defaultSiteSpawnInterval = 200; /* in ticks */
+    static final long defaultPassengerSpawnInterval = 100; /* in ticks */
+    static final long defaultPassengerMoveInterval = 10; /* in ticks */
+    static final double defaultTrainMoveInterval = 5.0; /* in ticks */
 
     /* Singleton */
     protected static IGame2 instance = null;
