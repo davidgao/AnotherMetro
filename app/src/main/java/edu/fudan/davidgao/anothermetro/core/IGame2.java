@@ -10,9 +10,9 @@ class IGame2 extends Game { //TODO
     static final long defaultTickInterval = 40; /* in ms */
     static final int defaultMaxGrowth = 25;
     static final int defaultBaseGrowth = 10;
-    static final int defaultMaxPassengerPerSite = 15;
+    static final int defaultMaxPassengerPerSite = 10;
     static final long defaultGrowthInterval = 500; /* in ticks */
-    static final long defaultSiteSpawnInterval = 200; /* in ticks */
+    static final long defaultSiteSpawnInterval = 500; /* in ticks */
     static final long defaultPassengerSpawnInterval = 100; /* in ticks */
     static final long defaultPassengerMoveInterval = 10; /* in ticks */
     static final double defaultTrainMoveInterval = 5.0; /* in ticks */
@@ -309,6 +309,7 @@ class IGame2 extends Game { //TODO
         return (ArrayList<Line>)lines.clone();
     }
     public void addLine(Site s1, Site s2) throws GameException {
+        if (lines.size() >= 7) throw new GameException("Too many lines");
         if (s1 == s2) throw new GameException("Station conflict");
         Line newLine = new Line(s1, s2);
         lines.add(newLine);
@@ -462,7 +463,9 @@ class IGame2 extends Game { //TODO
     private Runnable passengerSpawnRunnable = new Runnable() {
         @Override
         public void run() {
-            spawnPassenger();
+            for (int i = 0; i < sites.size() / 2; i++) {
+                spawnPassenger();
+            }
         }
     };
     private synchronized void spawnPassenger() {
@@ -491,6 +494,11 @@ class IGame2 extends Game { //TODO
         passengerChangeNotifier.run();
         if (s.passengers.size() > maxPassengerPerSite) {
             gameOverNotifier.run();
+            try {
+                kill();
+            } catch (GameException ex) {
+                /* Nothing */
+            }
         }
     }
     private Runnable passengerChangeNotifier;
