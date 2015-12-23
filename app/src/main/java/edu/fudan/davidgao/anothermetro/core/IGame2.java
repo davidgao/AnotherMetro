@@ -463,7 +463,7 @@ class IGame2 extends Game { //TODO
     private Runnable passengerSpawnRunnable = new Runnable() {
         @Override
         public void run() {
-            for (int i = 0; i < sites.size(); i++) {
+            for (int i = 0; i < sites.size() / 2; i++) {
                 spawnPassenger();
             }
         }
@@ -494,6 +494,11 @@ class IGame2 extends Game { //TODO
         passengerChangeNotifier.run();
         if (s.passengers.size() > maxPassengerPerSite) {
             gameOverNotifier.run();
+            try {
+                kill();
+            } catch (GameException ex) {
+                /* Nothing */
+            }
         }
     }
     private Runnable passengerChangeNotifier;
