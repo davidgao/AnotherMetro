@@ -27,9 +27,9 @@ public enum SiteType {
             case 2: return SiteType.SQUARE;
             case 3: return SiteType.UNIQUE1;
             case 4: return SiteType.UNIQUE2;
-            case 5: return SiteType.UNIQUE3;
-            case 6: return SiteType.UNIQUE4;
-            case 7: return SiteType.UNIQUE5;
+            case 5: return SiteType.CIRCLE;
+            case 6: return SiteType.CIRCLE;
+            case 7: return SiteType.TRIANGLE;
             default: return null; /* should never happen */
         }
     }

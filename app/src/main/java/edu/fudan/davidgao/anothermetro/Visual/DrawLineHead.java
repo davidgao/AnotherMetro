@@ -200,14 +200,6 @@ public class DrawLineHead {
     }
     private LineChangeListener LCListener = new LineChangeListener();
 
-    public void hideLineHead(VsLineHead head){
-        lineHeads.remove(head);
-        heads2GLline();
-    }
-    public void revealLineHead(VsLineHead head){
-        lineHeads.add(head);
-        heads2GLline();
-    }
     private void heads2GLline(){
         VsLineHead currentHead;
 

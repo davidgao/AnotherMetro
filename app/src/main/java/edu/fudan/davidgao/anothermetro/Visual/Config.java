@@ -14,9 +14,9 @@ public class Config {
     public static final int MAX_LINES=8;
     public static final int AVAILABLE_LINES=8;
     public static final int MAX_SEGMENTS=200;
-    public static final double LATENT_SITE_RADIUS=0.01f;
+    public static final double LATENT_SITE_RADIUS=0.03f;
 
-    public static final int LINE_WIDTH=3;
+    public static final int LINE_WIDTH=5;
 
     public static final float MAX_INF=1e20f;
     public static final float Z_SEGMENT = 0.0f;

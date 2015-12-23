@@ -104,7 +104,7 @@ public class DrawLine {
                 GLES20.GL_FLOAT, false,
                 colorStride, colorBuffer);
 
-        GLES20.glLineWidth(3);
+        GLES20.glLineWidth(Config.LINE_WIDTH);
         // Draw the triangle
         GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
 
@@ -204,7 +204,6 @@ public class DrawLine {
             VsSite temp_vssite = findVsSite(sites.get(i));
             temp_vssegment.update_LineDot();
             calcAngle(temp_vssegment);
-            temp_vssegment.force_update_LineDot();
             temp_vssite.add_out(temp_vssegment);
             temp_vssite = findVsSite(sites.get(i+1));
             temp_vssite.add_in(temp_vssegment);
@@ -230,7 +229,7 @@ public class DrawLine {
             temp.dispatch_out();
         }
         for (int i=0;i<segments.size();i++)
-            segments.get(i).update_LineDot();
+            segments.get(i).force_update_LineDot();
     }
 
     //return a point at given angle on a circle

@@ -216,7 +216,6 @@ public class UpdateLineListener implements OnTouchListener {
                     endSite = null;
                     vertexCount = 4;
                     extending = true;
-                    drawLineHead.hideLineHead(touchedLineHead);
                 } else if ((touchedSite = isSite(touchPos)) != null && nextColor < Config.AVAILABLE_LINES) {
 
                     planColor = nextColor;
@@ -282,7 +281,6 @@ public class UpdateLineListener implements OnTouchListener {
 
                         }
                     }
-                    else drawLineHead.revealLineHead(touchedLineHead);
                     extending = false;
                     vertexCount = 0;
                 }
